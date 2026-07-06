@@ -109,6 +109,8 @@ bash scripts/deploy-dashboard.sh
 
 The script installs Atlas, writes `dashboard.basic_auth.username` and `dashboard.basic_auth.password_hash`, starts `atlas dashboard --host "$ATLAS_HOST" --port "$ATLAS_PORT" --no-open`, and prints the dashboard URL plus credentials. Logs are written to `$ATLAS_HOME/logs/dashboard.log`.
 
+If another Atlas dashboard is already using the same port, the helper replaces it and verifies that the new server is reachable before printing success. When binding to `0.0.0.0`, it prints every detected machine IP so you can use the address that is reachable from your network, such as a VPN or Tailscale `100.x` address. Set `ATLAS_PUBLIC_HOST=your.public.ip.or.hostname` to print one canonical URL.
+
 For manual deployments:
 
 ```bash

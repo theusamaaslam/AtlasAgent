@@ -73,14 +73,12 @@ atlas config set     # Set individual config values
 atlas setup          # Or run the full setup wizard to configure everything at once
 ```
 
-:::tip Fastest path: Atlas Gateway
-One subscription covers 300+ models plus the [Tool Gateway](/user-guide/features/tool-gateway) (web search, image generation, TTS, cloud browser). Skip the per-tool key juggling:
+:::tip Fastest path: guided setup
+Use the setup wizard after installation to choose your provider, configure API keys, and enable the tools you want:
 
 ```bash
-atlas setup --portal
+atlas setup
 ```
-
-That logs you in, sets Nous as your provider, and turns on the Tool Gateway in one command.
 :::
 
 ---
