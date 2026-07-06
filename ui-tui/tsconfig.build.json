@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@atlas/ink": ["src/types/atlas-ink.d.ts"]
+    }
+  }
+}

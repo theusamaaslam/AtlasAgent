@@ -1,0 +1,168 @@
+# nix/desktop.nix — Atlas Desktop (Electron) app build + wrapper
+#
+# `atlasAgent` is the fully-built `.#default` package — it ships the
+# `atlas` binary with the venv, runtime PATH, bundled skills/plugins, etc.
+# already wired up.  We point the desktop at it via the existing
+# `ATLAS_DESKTOP_ATLAS` override env var, so the desktop's resolver
+# uses our fully wrapped binary at step 4 ("existing Atlas CLI").
+# No reimplementation of the agent resolution in this wrapper.
+{
+  pkgs,
+  lib,
+  stdenv,
+  makeWrapper,
+  atlasNpmLib,
+  electron,
+  atlasAgent,
+  ...
+}:
+let
+  npm = atlasNpmLib.mkNpmPassthru {
+    folder = "apps/desktop";
+    attr = "desktop";
+    pname = "atlas-desktop";
+  };
+
+  packageJson = builtins.fromJSON (builtins.readFile (npm.src + "/apps/desktop/package.json"));
+  version = packageJson.version;
+
+  # Build the renderer (dist/ + electron/ + package.json).
+  renderer = pkgs.buildNpmPackage (
+    npm
+    // {
+      pname = "atlas-desktop-renderer";
+      inherit version;
+      doCheck = true;
+
+      buildPhase = ''
+        runHook preBuild
+
+        # write-build-stamp.cjs replacement.  Packaged Electron reads this
+        # at first-launch to pin the install.ps1 git ref; informational in
+        # nix builds (the backend comes from the derivation directly).
+        mkdir -p apps/desktop/build
+        echo '{"schemaVersion":1,"commit":"nix","branch":"nix","dirty":false,"source":"nix"}' > apps/desktop/build/install-stamp.json
+
+        # patch shebangs in node_modules/.bin so npm exec can find the
+        # nix-store equivalents of /usr/bin/env (which doesn't exist in the sandbox)
+        patchShebangs .
+
+        pushd apps/desktop
+          # stage node-pty native binaries into build/native-deps for the final nix output
+          npm rebuild node-pty --build-from-source
+          node scripts/stage-native-deps.cjs
+          
+          npm exec tsc -b
+          npm exec vite build
+
+          # simple-git is the electron main's external runtime dep.  It is not
+          # bundled into main.cjs; instead the stage-native-deps.cjs call above
+          # copies its closure to apps/desktop/build/native-deps/vendor/node_modules/,
+          # which installPhase ships into $out/native-deps/ — the same path the
+          # packaged app uses.  electron/git-review-ops.cjs resolves it from
+          # process.resourcesPath when the hoisted require() isn't reachable
+          # (see issue #52735).  node-pty's prebuilt is staged the same way;
+          # electron is provided by the runtime.  preload.cjs stays separate —
+          # Electron loads it via __dirname, not require().
+        popd
+
+        runHook postBuild
+      '';
+
+      checkPhase = ''
+        runHook preCheck
+
+        pushd apps/desktop
+
+          npm run postbuild
+
+          # validate staged node-pty native binary is present
+          STAGED_PTY_NODE="./build/native-deps/node-pty/build/Release/pty.node"
+          
+          if [ ! -f "$STAGED_PTY_NODE" ]; then
+            echo "FATAL: Missing staged node-pty native binary at $STAGED_PTY_NODE"
+            echo "node-pty must be compiled natively"
+            exit 1
+          fi
+          
+        popd
+
+        runHook postCheck
+      '';
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out
+        # vite writes to apps/desktop/dist/ (we cd'd there in buildPhase).
+        # apps/desktop/build was created before the cd.  electron/ is source.
+        cp -rn apps/desktop/dist $out/
+        cp -rn apps/desktop/electron $out/
+
+        # flatten native-deps and install-stamp.json to the root level, exactly like
+        # electron-builder's extraResources does ("from": "build/native-deps", "to": "native-deps")
+        # so main.cjs can find it at process.resourcesPath + '/native-deps/node-pty'
+        cp -rn apps/desktop/build/native-deps $out/
+        cp -n apps/desktop/build/install-stamp.json $out/
+
+        cp -n apps/desktop/package.json $out/
+        runHook postInstall
+      '';
+    }
+  );
+in
+
+# Electron wrapper: nixpkgs' electron binary pointed at the renderer dir.
+stdenv.mkDerivation {
+  pname = "atlas-desktop";
+  inherit version;
+
+  dontUnpack = true;
+  dontBuild = true;
+
+  nativeBuildInputs = [ makeWrapper ];
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/share/atlas-desktop $out/bin
+    cp -r ${renderer}/* $out/share/atlas-desktop/
+
+    # Standard nixpkgs pattern for electron-builder apps: patch process.resourcesPath
+    # to point to the app's directory. In Nix, unpackaged electron defaults this
+    # to the electron distribution's resources path, breaking extraResources lookups.
+    substituteInPlace $out/share/atlas-desktop/electron/main.cjs \
+      --replace-fail "process.resourcesPath" "'$out/share/atlas-desktop'"
+
+    # git-review-ops.cjs has the same process.resourcesPath fallback for its
+    # staged simple-git dep (native-deps/vendor/node_modules/), so it needs the same
+    # rewrite — otherwise the require() fallback resolves against the electron
+    # dist's resources path and fails to load simple-git (issue #52735).
+    substituteInPlace $out/share/atlas-desktop/electron/git-review-ops.cjs \
+      --replace-fail "process.resourcesPath" "'$out/share/atlas-desktop'"
+
+    # Wrap the nixpkgs electron binary to launch our app.  Set
+    # ATLAS_DESKTOP_ATLAS to the absolute path of the nix-built `atlas`
+    # binary so the desktop's resolver step 4 ("existing Atlas CLI on
+    # PATH") uses our fully wrapped binary — venv with all deps,
+    # bundled skills/plugins, runtime PATH (ripgrep/git/ffmpeg/etc).
+    # No reimplementation of the agent resolver in the wrapper.
+    makeWrapper ${lib.getExe electron} $out/bin/atlas-desktop \
+      --add-flags "$out/share/atlas-desktop" \
+      --set ATLAS_DESKTOP_ATLAS "${lib.getExe atlasAgent}" \
+      --set ELECTRON_IS_DEV 0
+
+    runHook postInstall
+  '';
+
+  passthru = {
+    inherit (renderer.passthru) packageJsonPath;
+  };
+
+  meta = with lib; {
+    description = "Native Electron desktop shell for Atlas Agent";
+    homepage = "https://github.com/UsamaAslam/atlas-agent";
+    license = licenses.mit;
+    platforms = platforms.unix;
+    mainProgram = "atlas-desktop";
+  };
+}
