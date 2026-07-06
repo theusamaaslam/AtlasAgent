@@ -6,10 +6,12 @@
 # Uses uv for desktop/server installs and Python's stdlib venv + pip on Termux.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh | bash
+#   git clone https://github.com/theusamaaslam/AtlasAgent.git
+#   cd AtlasAgent
+#   bash scripts/install.sh
 #
 # Or with options:
-#   curl -fsSL ... | bash -s -- --no-venv --skip-setup
+#   bash scripts/install.sh --no-venv --skip-setup
 #
 # ============================================================================
 
@@ -45,7 +47,6 @@ BOLD='\033[1m'
 # Configuration
 REPO_URL_SSH="${ATLAS_AGENT_REPO_SSH:-git@github.com:theusamaaslam/AtlasAgent.git}"
 REPO_URL_HTTPS="${ATLAS_AGENT_REPO_HTTPS:-https://github.com/theusamaaslam/AtlasAgent.git}"
-INSTALL_SCRIPT_BASE_URL="${ATLAS_INSTALL_SCRIPT_BASE_URL:-https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts}"
 ATLAS_HOME="${ATLAS_HOME:-$HOME/.atlas}"
 # INSTALL_DIR is resolved AFTER arg parsing and OS detection so we can pick an
 # FHS-style layout for root installs.  Track whether the user gave us an
@@ -528,7 +529,9 @@ detect_os() {
             OS="windows"
             DISTRO="windows"
             log_error "Windows detected. Please use the PowerShell installer:"
-            log_info "  iex (irm ${INSTALL_SCRIPT_BASE_URL%/}/install.ps1)"
+            log_info "  git clone https://github.com/theusamaaslam/AtlasAgent.git"
+            log_info "  cd AtlasAgent"
+            log_info "  powershell -ExecutionPolicy Bypass -File .\\scripts\\install.ps1"
             exit 1
             ;;
         *)

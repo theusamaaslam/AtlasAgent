@@ -49,7 +49,9 @@ development environment on the same layout the CLI, updater, lazy dependency
 installer, gateway, and docs assume.
 
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 cd "${ATLAS_HOME:-$HOME/.atlas}/atlas-agent"
 
 # Add dev/test extras on top of the standard install.

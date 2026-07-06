@@ -47,22 +47,24 @@ Pick the row that matches your goal:
 ---
 
 ## 1. Install Atlas Agent
-### With the Atlas Desktop installer on macOS or Windows (recommended)
-To easily install the command-line and desktop applications, [download the Atlas Desktop installer](https://atlas-agent.nousresearch.com/) from our website and run it.
+### From the AtlasAgent repository
 
-### Without Atlas Desktop:
-For a command-line only install without Atlas Desktop, run:
+Clone the repository, then run the installer script from the local checkout.
 
 #### Linux / macOS / WSL2 / Android (Termux)
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 ```
 
 #### Windows (native)
 
 Run in powershell:
 ```powershell
-iex (irm https://atlas-agent.nousresearch.com/install.ps1) 
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
 
 :::tip Android / Termux

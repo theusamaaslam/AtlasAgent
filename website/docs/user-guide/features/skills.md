@@ -24,7 +24,9 @@ By default every profile is seeded with the bundled skill catalog, and each `atl
 **At install time** (applies to the default `~/.atlas` profile):
 
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash -s -- --no-skills
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh --no-skills
 ```
 
 **At profile-create time** (named profiles):

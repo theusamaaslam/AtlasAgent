@@ -18,9 +18,9 @@ Pick whichever install fits you. The **desktop app** is the easiest — no termi
 
 The simplest path: a one-click installer with a guided, point-and-click setup. No terminal needed.
 
-### 1. Download and install
+### 1. Install Atlas
 
-[Download the Atlas Desktop installer](https://atlas-agent.nousresearch.com/) for macOS or Windows, then open it. On first launch it finishes setting itself up (usually under a minute).
+Clone the AtlasAgent repository and run the local installer for your platform.
 
 ### 2. Connect Atlas Gateway
 
@@ -49,16 +49,20 @@ Prefer the terminal?
 On macOS/Linux/WSL2/Android, run
 
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 ```
 
 On Windows, run
 
 ```powershell
-iex (irm https://atlas-agent.nousresearch.com/install.ps1)
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
 
-Prefer to review first? Download [`install.sh`](https://atlas-agent.nousresearch.com/install.sh), inspect it, then run it.
+Prefer to review first? Open `scripts/install.sh` or `scripts/install.ps1` in the cloned repository before running it.
 
 After it finishes, reload your shell:
 

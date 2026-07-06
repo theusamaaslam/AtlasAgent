@@ -52,7 +52,9 @@ People use Atlas for software development, research, system administration, data
 
 ```bash
 # Install
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 
 # Interactive chat (default)
 atlas

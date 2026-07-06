@@ -48,10 +48,12 @@ That does not stop Atlas from working well as a phone-native CLI agent — it ju
 
 ## Option 1: One-line installer
 
-Atlas now ships a Termux-aware installer path:
+Atlas ships a Termux-aware installer path in this repository:
 
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 ```
 
 On Termux, the installer automatically:

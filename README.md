@@ -30,25 +30,30 @@ Use any compatible model provider you want — OpenRouter, OpenAI, your own endp
 
 ## Quick Install
 
-### One-line source installer
+### Source installer
 
-The install scripts live in this repo and clone the Atlas source checkout into a managed environment:
+Clone the repository first, then run the installer script from the local checkout:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1)
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
 
-Forked or private deployments can keep the same scripts and point them at a different repository:
+Forked or private deployments use the same local scripts from their own clone:
 
 ```bash
-ATLAS_AGENT_REPO_HTTPS=https://github.com/your-org/atlas-agent.git \
-  curl -fsSL https://raw.githubusercontent.com/your-org/atlas-agent/main/scripts/install.sh | bash
+git clone https://github.com/your-org/atlas-agent.git
+cd atlas-agent
+bash scripts/install.sh
 ```
 
 ### Linux, macOS, WSL2, Termux
@@ -87,7 +92,9 @@ atlas              # start chatting!
 Use the deploy helper when you want a machine-accessible dashboard on port `9119` with password authentication configured up front:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/deploy-dashboard.sh
 ```
 
 Recommended explicit production form:
@@ -97,7 +104,7 @@ ATLAS_HOST=0.0.0.0 \
 ATLAS_PORT=9119 \
 ATLAS_DASHBOARD_USER=admin \
 ATLAS_DASHBOARD_PASSWORD='replace-with-a-long-random-password' \
-curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
+bash scripts/deploy-dashboard.sh
 ```
 
 The script installs Atlas, writes `dashboard.basic_auth.username` and `dashboard.basic_auth.password_hash`, starts `atlas dashboard --host "$ATLAS_HOST" --port "$ATLAS_PORT" --no-open`, and prints the dashboard URL plus credentials. Logs are written to `$ATLAS_HOME/logs/dashboard.log`.

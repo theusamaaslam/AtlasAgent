@@ -14,22 +14,24 @@ platform-gated features are supported), see **[Platform Support](./platform-supp
 :::
 
 ## Quick Install
-### With the Atlas Desktop installer on macOS or Windows (recommended)
-To easily install the command-line and desktop applications, [download the Atlas Desktop installer](https://atlas-agent.nousresearch.com/) from our website and run it.
+### From the AtlasAgent repository
 
-### Without Atlas Desktop:
-For a command-line only install without Atlas Desktop, run:
+The standard installation path is to clone this repository, then run the installer script from the local checkout. This keeps every install script inspectable and versioned with the code you are installing.
 
 #### Linux / macOS / WSL2 / Android (Termux)
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 ```
 
 #### Windows (native)
 
 Run in powershell:
 ```powershell
-iex (irm https://atlas-agent.nousresearch.com/install.ps1) 
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
 
 If you want to install & run Atlas Desktop after a command-line only install, simply run
@@ -48,7 +50,7 @@ Where the installer puts things depends on whether you're installing as a normal
 | Installer                              | Code lives at                  | `atlas` binary                         | Data directory                       |
 | -------------------------------------- | ------------------------------ | --------------------------------------- | ------------------------------------ |
 | Per-user (git installer)               | `~/.atlas/atlas-agent/`      | `~/.local/bin/atlas` (symlink)         | `~/.atlas/`                         |
-| Root-mode (`sudo curl … \| sudo bash`) | `/usr/local/lib/atlas-agent/` | `/usr/local/bin/atlas`                 | `/root/.atlas/` (or `$ATLAS_HOME`) |
+| Root-mode (`sudo bash scripts/install.sh`) | `/usr/local/lib/atlas-agent/` | `/usr/local/bin/atlas`                 | `/root/.atlas/` (or `$ATLAS_HOME`) |
 
 The root-mode **FHS layout** (`/usr/local/lib/…`, `/usr/local/bin/atlas`) matches where other system-wide developer tools land on Linux. It's useful for shared-machine deployments where one system install should serve every user. Per-user config (auth, skills, sessions) still lives under each user's `~/.atlas/` or explicit `ATLAS_HOME`.
 
@@ -123,12 +125,14 @@ Running Atlas as a dedicated unprivileged user (e.g. a `atlas` systemd service a
 
 2. **As the unprivileged service user**, run the regular installer. It will detect the missing sudo, skip `--with-deps`, and install Chromium into the user's local Playwright cache:
    ```bash
-   curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+   git clone https://github.com/theusamaaslam/AtlasAgent.git
+   cd AtlasAgent
+   bash scripts/install.sh
    ```
 
    If you want to skip the Playwright step entirely — for example because you're running headless and don't need browser automation — pass `--skip-browser`:
    ```bash
-   curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash -s -- --skip-browser
+   bash scripts/install.sh --skip-browser
    ```
 
 3. **Make `atlas` available to the service user's shells.** The installer writes the launcher to `~/.local/bin/atlas`. System service accounts often have a minimal PATH that doesn't include `~/.local/bin`. Either add it to the user's environment, or symlink the launcher into a system location:

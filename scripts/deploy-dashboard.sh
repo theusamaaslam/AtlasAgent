@@ -2,7 +2,9 @@
 # Production dashboard deploy helper for Atlas Agent.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
+#   git clone https://github.com/theusamaaslam/AtlasAgent.git
+#   cd AtlasAgent
+#   bash scripts/deploy-dashboard.sh
 #
 # Optional environment:
 #   ATLAS_HOST=0.0.0.0
@@ -11,14 +13,15 @@
 #   ATLAS_DASHBOARD_PASSWORD='change-me'
 #   ATLAS_INSTALL_DIR=/opt/atlas-agent
 #   ATLAS_HOME=/opt/atlas
-#   ATLAS_INSTALL_SCRIPT_URL=https://.../scripts/install.sh
+#   ATLAS_INSTALL_SCRIPT=/path/to/install.sh
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ATLAS_HOST="${ATLAS_HOST:-0.0.0.0}"
 ATLAS_PORT="${ATLAS_PORT:-9119}"
 ATLAS_DASHBOARD_USER="${ATLAS_DASHBOARD_USER:-atlas}"
-ATLAS_INSTALL_SCRIPT_URL="${ATLAS_INSTALL_SCRIPT_URL:-https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh}"
+ATLAS_INSTALL_SCRIPT="${ATLAS_INSTALL_SCRIPT:-$SCRIPT_DIR/install.sh}"
 ATLAS_HOME="${ATLAS_HOME:-$HOME/.atlas}"
 
 if [ -n "${ATLAS_INSTALL_DIR:-}" ]; then
@@ -44,17 +47,14 @@ PY
   fi
 fi
 
-tmp_install="$(mktemp)"
-cleanup() {
-  rm -f "$tmp_install"
-}
-trap cleanup EXIT
-
-echo "Downloading Atlas installer..."
-curl -fsSL "$ATLAS_INSTALL_SCRIPT_URL" -o "$tmp_install"
+if [ ! -f "$ATLAS_INSTALL_SCRIPT" ]; then
+  echo "Atlas installer not found at $ATLAS_INSTALL_SCRIPT" >&2
+  echo "Run this deploy helper from a cloned AtlasAgent repository, or set ATLAS_INSTALL_SCRIPT." >&2
+  exit 1
+fi
 
 echo "Installing Atlas into $INSTALL_DIR..."
-bash "$tmp_install" \
+bash "$ATLAS_INSTALL_SCRIPT" \
   --skip-setup \
   --non-interactive \
   --dir "$INSTALL_DIR" \

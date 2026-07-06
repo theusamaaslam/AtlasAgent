@@ -5,10 +5,12 @@
 # Uses uv for fast Python provisioning and package management.
 #
 # Usage:
-#   iex (irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1)
+#   git clone https://github.com/theusamaaslam/AtlasAgent.git
+#   cd AtlasAgent
+#   powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 #
-# Or download and run with options:
-#   .\install.ps1 -NoVenv -SkipSetup
+# Or run with options:
+#   powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -NoVenv -SkipSetup
 #
 # ============================================================================
 
@@ -139,7 +141,6 @@ foreach ($tmpVar in @('TEMP', 'TMP')) {
 $RepoUrlSsh = if ($env:ATLAS_AGENT_REPO_SSH) { $env:ATLAS_AGENT_REPO_SSH } else { "git@github.com:theusamaaslam/AtlasAgent.git" }
 $RepoUrlHttps = if ($env:ATLAS_AGENT_REPO_HTTPS) { $env:ATLAS_AGENT_REPO_HTTPS } else { "https://github.com/theusamaaslam/AtlasAgent.git" }
 $RepoArchiveBase = $RepoUrlHttps -replace '\.git$', ''
-$InstallScriptBaseUrl = if ($env:ATLAS_INSTALL_SCRIPT_BASE_URL) { $env:ATLAS_INSTALL_SCRIPT_BASE_URL.TrimEnd('/') } else { "https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts" }
 $PythonVersion = "3.11"
 # Minor versions the installer accepts when the requested $PythonVersion isn't
 # available, in preference order.  uv discovers both uv-managed and system
@@ -3524,8 +3525,9 @@ try {
     Write-Host ""
     Write-Err "Installation failed: $_"
     Write-Host ""
-    Write-Info "If the error is unclear, try downloading and running the script directly:"
-    Write-Host "  Invoke-WebRequest -Uri '$InstallScriptBaseUrl/install.ps1' -OutFile install.ps1" -ForegroundColor Yellow
-    Write-Host "  .\install.ps1" -ForegroundColor Yellow
+    Write-Info "If the error is unclear, run the local installer from a fresh clone:"
+    Write-Host "  git clone https://github.com/theusamaaslam/AtlasAgent.git" -ForegroundColor Yellow
+    Write-Host "  cd AtlasAgent" -ForegroundColor Yellow
+    Write-Host "  powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1" -ForegroundColor Yellow
     Write-Host ""
 }

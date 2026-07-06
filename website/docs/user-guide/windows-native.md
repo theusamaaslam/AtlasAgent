@@ -9,7 +9,7 @@ sidebar_position: 3
 
 Atlas runs natively on Windows 10 and Windows 11 — no WSL, no Cygwin, no Docker. This page is the deep dive: what works natively, what's WSL-only, what the installer actually does, and the Windows-specific knobs you might need to touch.
 
-If you just want to install, the one-liner on the [landing page](/) or [Installation page](../getting-started/installation#windows-native-powershell) is all you need. Come back here when something surprises you.
+If you just want to install, clone the repository and run the local PowerShell installer as shown below. Come back here when something surprises you.
 
 :::tip Want WSL instead?
 If you prefer a real POSIX environment (for the dashboard's embedded terminal, `fork` semantics, Linux-style file watchers, etc.), see the **[Windows (WSL2) Guide](./windows-wsl-quickstart.md)**. Both coexist cleanly: native data lives under `%LOCALAPPDATA%\atlas`, WSL data lives under `~/.atlas`.
@@ -20,7 +20,9 @@ If you prefer a real POSIX environment (for the dashboard's embedded terminal, `
 Open **PowerShell** (or Windows Terminal) and run:
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1)
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 ```
 
 No admin rights required. The installer goes to `%LOCALAPPDATA%\atlas\` and adds `atlas` to your **User PATH** — open a new terminal after it finishes.
@@ -28,7 +30,7 @@ No admin rights required. The installer goes to `%LOCALAPPDATA%\atlas\` and adds
 **Installer options** (requires the scriptblock form to pass parameters):
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1))) -NoVenv -SkipSetup -Branch main
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -NoVenv -SkipSetup -Branch main
 ```
 
 | Parameter | Default | Purpose |
@@ -41,7 +43,7 @@ No admin rights required. The installer goes to `%LOCALAPPDATA%\atlas\` and adds
 | `-AtlasHome` | `%LOCALAPPDATA%\atlas` | Override data directory |
 | `-InstallDir` | `%LOCALAPPDATA%\atlas\atlas-agent` | Override code location |
 
-The installer auto-retries flaky git fetches and strips BOM from any downloaded `install.ps1` payload, so a UTF-8 BOM picked up during HTTP transit no longer breaks the `[scriptblock]::Create((irm ...))` form.
+The installer auto-retries flaky git fetches and runs directly from the repository's `scripts/install.ps1` file.
 
 ### Desktop installer (alternative)
 
