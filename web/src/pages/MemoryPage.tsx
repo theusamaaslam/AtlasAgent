@@ -1,0 +1,446 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Brain,
+  Copy,
+  ExternalLink,
+  FolderOpen,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { api } from "@/lib/api";
+import type {
+  MemoryGraphNode,
+  MemoryGraphResponse,
+  MemorySearchResult,
+  MemoryVaultStatus,
+} from "@/lib/api";
+import { cn } from "@/lib/utils";
+
+const KIND_STYLES: Record<string, { fill: string; stroke: string }> = {
+  creator: { fill: "#8f95dc", stroke: "#6e74c9" },
+  memory: { fill: "#5ee7b8", stroke: "#24b985" },
+  user: { fill: "#8dd7ff", stroke: "#4fb6ee" },
+  session: { fill: "#ffd36f", stroke: "#e4a82b" },
+  interaction: { fill: "#ffffff", stroke: "#c7c9e8" },
+  topic: { fill: "#ff8a70", stroke: "#df654f" },
+};
+
+function formatSyncTime(value?: number | null): string {
+  if (!value) return "Never";
+  return new Date(value * 1000).toLocaleString();
+}
+
+function statEntries(status: MemoryVaultStatus | null): Array<[string, number]> {
+  return Object.entries(status?.stats ?? {}).sort(([a], [b]) => a.localeCompare(b));
+}
+
+function GraphPreview({
+  graph,
+  selected,
+  onSelect,
+}: {
+  graph: MemoryGraphResponse | null;
+  selected: string | null;
+  onSelect: (node: MemoryGraphNode) => void;
+}) {
+  const nodes = useMemo(() => (graph?.nodes ?? []).slice(0, 140), [graph]);
+  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+  const layout = useMemo(() => {
+    const centerX = 420;
+    const centerY = 250;
+    const radius = 185;
+    return nodes.map((node, index) => {
+      const angle = (Math.PI * 2 * index) / Math.max(nodes.length, 1);
+      const kindOffset =
+        node.kind === "creator" ? 0 : node.kind === "topic" ? 42 : node.kind === "interaction" ? 18 : -18;
+      return {
+        node,
+        x: centerX + Math.cos(angle) * (radius + kindOffset),
+        y: centerY + Math.sin(angle) * (radius + kindOffset),
+      };
+    });
+  }, [nodes]);
+  const position = useMemo(
+    () => new Map(layout.map((item) => [item.node.id, item])),
+    [layout],
+  );
+  const edges = useMemo(
+    () =>
+      (graph?.edges ?? [])
+        .filter((edge) => byId.has(edge.source) && byId.has(edge.target))
+        .slice(0, 260),
+    [byId, graph],
+  );
+
+  if (!nodes.length) {
+    return (
+      <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">
+        Sync the vault to draw the graph.
+      </div>
+    );
+  }
+
+  return (
+    <svg
+      role="img"
+      aria-label="Memory graph"
+      viewBox="0 0 840 500"
+      className="h-[420px] w-full max-w-full"
+    >
+      <defs>
+        <radialGradient id="memoryGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#eef0fb" stopOpacity="0.35" />
+        </radialGradient>
+      </defs>
+      <rect width="840" height="500" rx="22" fill="url(#memoryGlow)" />
+      {edges.map((edge, index) => {
+        const a = position.get(edge.source);
+        const b = position.get(edge.target);
+        if (!a || !b) return null;
+        return (
+          <line
+            key={`${edge.source}-${edge.target}-${index}`}
+            x1={a.x}
+            y1={a.y}
+            x2={b.x}
+            y2={b.y}
+            stroke="#b5b9e8"
+            strokeOpacity="0.38"
+            strokeWidth="1"
+          />
+        );
+      })}
+      {layout.map(({ node, x, y }) => {
+        const style = KIND_STYLES[node.kind] ?? KIND_STYLES.interaction;
+        const active = selected === node.id;
+        const size = node.kind === "creator" ? 15 : node.kind === "topic" ? 10 : 8;
+        return (
+          <g
+            key={node.id}
+            className="cursor-pointer"
+            onClick={() => onSelect(node)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") onSelect(node);
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={node.title}
+          >
+            <circle
+              cx={x}
+              cy={y}
+              r={active ? size + 5 : size}
+              fill={style.fill}
+              stroke={style.stroke}
+              strokeWidth={active ? 4 : 2}
+              opacity={node.kind === "interaction" ? 0.78 : 0.96}
+            />
+            {(active || node.kind === "creator") && (
+              <text
+                x={x + 14}
+                y={y + 5}
+                fill="#252238"
+                fontSize="13"
+                fontFamily="ui-sans-serif, system-ui"
+              >
+                {node.title.slice(0, 34)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function ResultRow({ result }: { result: MemorySearchResult }) {
+  return (
+    <div className="min-w-0 rounded-xl border border-border bg-white/70 px-4 py-3 shadow-sm">
+      <div className="flex min-w-0 items-center gap-2">
+        <Badge tone="secondary">{result.kind}</Badge>
+        <div className="min-w-0 truncate text-sm font-semibold text-foreground">
+          {result.title}
+        </div>
+      </div>
+      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+        {result.snippet}
+      </p>
+      <div className="mt-2 flex min-w-0 flex-wrap gap-2 text-[11px] text-muted-foreground">
+        {result.session_id && <span className="font-mono">{result.session_id.slice(0, 12)}</span>}
+        {result.topics.slice(0, 5).map((topic) => (
+          <span key={topic}>#{topic}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function MemoryPage() {
+  const { toast, showToast } = useToast();
+  const [status, setStatus] = useState<MemoryVaultStatus | null>(null);
+  const [graph, setGraph] = useState<MemoryGraphResponse | null>(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<MemorySearchResult[]>([]);
+  const [selectedNode, setSelectedNode] = useState<MemoryGraphNode | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [searching, setSearching] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [statusRes, graphRes] = await Promise.all([
+        api.getMemoryVault(),
+        api.getMemoryGraph(),
+      ]);
+      setGraph(graphRes);
+      setStatus({
+        ...statusRes,
+        dirty: graphRes.dirty,
+        exists: graphRes.exists,
+        last_sync: graphRes.last_sync,
+        stats: graphRes.stats,
+      });
+      setSelectedNode(graphRes.nodes.find((node) => node.kind === "creator") ?? graphRes.nodes[0] ?? null);
+    } catch (error) {
+      showToast(`Memory load failed: ${error}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const sync = async () => {
+    setSyncing(true);
+    try {
+      const graphRes = await api.syncMemoryVault();
+      setGraph(graphRes);
+      setStatus({
+        ok: graphRes.ok,
+        vault_path: graphRes.vault_path,
+        exists: true,
+        dirty: false,
+        last_sync: graphRes.last_sync,
+        stats: graphRes.stats,
+      });
+      setSelectedNode(graphRes.nodes.find((node) => node.kind === "creator") ?? graphRes.nodes[0] ?? null);
+      showToast("Memory vault synced", "success");
+    } catch (error) {
+      showToast(`Sync failed: ${error}`, "error");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const runSearch = async () => {
+    const clean = query.trim();
+    if (!clean) {
+      setResults([]);
+      return;
+    }
+    setSearching(true);
+    try {
+      const res = await api.searchMemory(clean, 30);
+      setResults(res.results);
+    } catch (error) {
+      showToast(`Search failed: ${error}`, "error");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const copyPath = async () => {
+    if (!status?.vault_path) return;
+    await navigator.clipboard.writeText(status.vault_path);
+    showToast("Vault path copied", "success");
+  };
+
+  const openVault = async () => {
+    try {
+      await api.openMemoryVault();
+      showToast("Vault opened", "success");
+    } catch (error) {
+      showToast(`Open failed: ${error}`, "error");
+    }
+  };
+
+  return (
+    <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 lg:px-8">
+      <Toast toast={toast} />
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <div className="min-w-0">
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Brain className="h-6 w-6 text-primary" />
+                Memory
+              </CardTitle>
+              <div className="mt-2 flex min-w-0 flex-wrap gap-2 text-xs text-muted-foreground">
+                <Badge tone={status?.dirty ? "warning" : "success"}>
+                  {status?.dirty ? "sync needed" : "current"}
+                </Badge>
+                <span>{formatSyncTime(status?.last_sync)}</span>
+                <span className="min-w-0 truncate font-mono">{status?.vault_path}</span>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button
+                size="sm"
+                ghost
+                prefix={<Copy className="h-3.5 w-3.5" />}
+                onClick={() => void copyPath()}
+                disabled={!status?.vault_path}
+              >
+                Copy
+              </Button>
+              <Button
+                size="sm"
+                ghost
+                prefix={<FolderOpen className="h-3.5 w-3.5" />}
+                onClick={() => void openVault()}
+              >
+                Open
+              </Button>
+              <Button
+                size="sm"
+                prefix={syncing ? <Spinner className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                onClick={() => void sync()}
+                disabled={syncing}
+              >
+                Sync
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex h-[420px] items-center justify-center">
+                <Spinner />
+              </div>
+            ) : (
+              <GraphPreview
+                graph={graph}
+                selected={selectedNode?.id ?? null}
+                onSelect={setSelectedNode}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Vault</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3">
+              {statEntries(status).map(([key, value]) => (
+                <div key={key} className="rounded-xl border border-border bg-white/70 p-3">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {key}
+                  </div>
+                  <div className="mt-1 text-2xl font-semibold text-primary">
+                    {value}
+                  </div>
+                </div>
+              ))}
+              {!statEntries(status).length && (
+                <div className="col-span-2 text-sm text-muted-foreground">
+                  No vault statistics yet.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="min-w-0">
+            <CardHeader>
+              <CardTitle>Selected</CardTitle>
+            </CardHeader>
+            <CardContent className="min-w-0">
+              {selectedNode ? (
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Badge tone="secondary">{selectedNode.kind}</Badge>
+                    <div className="min-w-0 truncate font-semibold">
+                      {selectedNode.title}
+                    </div>
+                  </div>
+                  <p className="mt-3 line-clamp-6 text-sm text-muted-foreground">
+                    {selectedNode.snippet || selectedNode.path}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+                    {selectedNode.topics.slice(0, 8).map((topic) => (
+                      <span key={topic}>#{topic}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">No node selected.</div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Search</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") void runSearch();
+                }}
+                placeholder="Search memory, sessions, topics"
+              />
+              <Button
+                size="icon"
+                aria-label="Search memory"
+                onClick={() => void runSearch()}
+                disabled={searching}
+              >
+                {searching ? <Spinner className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+              </Button>
+            </div>
+            <Button
+              ghost
+              size="sm"
+              className="justify-start"
+              prefix={<ExternalLink className="h-3.5 w-3.5" />}
+              onClick={() => void openVault()}
+            >
+              Open Obsidian vault folder
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="min-w-0">
+          <CardContent className={cn("grid gap-3 py-4", results.length > 1 && "md:grid-cols-2")}>
+            {results.length ? (
+              results.map((result, index) => (
+                <ResultRow key={`${result.path}-${index}`} result={result} />
+              ))
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No matches.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+    </main>
+  );
+}

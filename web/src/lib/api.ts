@@ -68,6 +68,7 @@ const PROFILE_SCOPED_PREFIXES = [
   "/api/status",
   "/api/gateway",
   "/api/analytics",
+  "/api/memory",
   "/api/skills",
   "/api/tools/toolsets",
   "/api/config",
@@ -1052,6 +1053,18 @@ export const api = {
 
   // ── Admin: Memory provider ──────────────────────────────────────────
   getMemory: () => fetchJSON<MemoryStatus>("/api/memory"),
+  getMemoryVault: () => fetchJSON<MemoryVaultStatus>("/api/memory/vault"),
+  getMemoryGraph: () => fetchJSON<MemoryGraphResponse>("/api/memory/graph"),
+  searchMemory: (query: string, limit = 20) =>
+    fetchJSON<MemorySearchResponse>(
+      `/api/memory/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    ),
+  syncMemoryVault: () =>
+    fetchJSON<MemoryGraphResponse>("/api/memory/vault/sync", { method: "POST" }),
+  openMemoryVault: () =>
+    fetchJSON<{ ok: boolean; vault_path: string }>("/api/memory/vault/open", {
+      method: "POST",
+    }),
   setMemoryProvider: (provider: string) =>
     fetchJSON<{ ok: boolean; active: string }>("/api/memory/provider", {
       method: "PUT",
@@ -1513,6 +1526,57 @@ export interface MemoryStatus {
   active: string;
   providers: MemoryProviderInfo[];
   builtin_files: { memory: number; user: number };
+}
+
+export interface MemoryVaultStatus {
+  ok: boolean;
+  vault_path: string;
+  exists: boolean;
+  dirty: boolean;
+  last_sync?: number | null;
+  stats: Record<string, number>;
+}
+
+export interface MemoryGraphNode {
+  id: string;
+  kind: string;
+  title: string;
+  path: string;
+  source?: string;
+  timestamp?: number | null;
+  session_id?: string | null;
+  role?: string | null;
+  topics: string[];
+  links: string[];
+  snippet?: string;
+}
+
+export interface MemoryGraphEdge {
+  source: string;
+  target: string;
+}
+
+export interface MemoryGraphResponse extends MemoryVaultStatus {
+  nodes: MemoryGraphNode[];
+  edges: MemoryGraphEdge[];
+}
+
+export interface MemorySearchResult {
+  kind: string;
+  title: string;
+  snippet: string;
+  path: string;
+  source?: string;
+  timestamp?: number | null;
+  session_id?: string | null;
+  role?: string | null;
+  topics: string[];
+}
+
+export interface MemorySearchResponse {
+  ok: boolean;
+  query: string;
+  results: MemorySearchResult[];
 }
 
 export interface HookEntry {

@@ -12502,6 +12502,7 @@ def cmd_memory(args):
         print("  Saved to config.yaml\n")
     elif sub == "reset":
         from atlas_constants import get_atlas_home, display_atlas_home
+        from agent.memory_vault import mark_memory_vault_dirty
 
         mem_dir = get_atlas_home() / "memories"
         target = getattr(args, "target", "all")
@@ -12541,10 +12542,61 @@ def cmd_memory(args):
             (mem_dir / f).unlink()
             print(f"  ✓ Deleted {f} ({desc})")
 
+        mark_memory_vault_dirty()
         print(
             f"\n  Memory reset complete. New sessions will start with a blank slate."
         )
         print(f"  Files were in: {display_atlas_home()}/memories/\n")
+    elif sub == "vault":
+        from agent.memory_vault import (
+            get_memory_vault_dir,
+            memory_vault_status,
+            open_memory_vault,
+            search_memory_vault,
+            sync_memory_vault,
+        )
+
+        cmd = getattr(args, "memory_vault_command", None) or "sync"
+        if cmd == "path":
+            print(get_memory_vault_dir())
+        elif cmd == "open":
+            res = open_memory_vault()
+            if res.get("ok"):
+                print(f"Opened memory vault: {res['vault_path']}")
+            else:
+                print(f"Could not open memory vault: {res.get('error')}")
+                print(res.get("vault_path"))
+        elif cmd == "search":
+            query = " ".join(getattr(args, "query", []) or []).strip()
+            limit = max(1, min(int(getattr(args, "limit", 10) or 10), 100))
+            if not query:
+                print("Usage: atlas memory vault search <query>")
+                return
+            res = search_memory_vault(query, limit=limit)
+            results = res.get("results") or []
+            if not results:
+                print("No memory matches.")
+                return
+            for idx, item in enumerate(results, 1):
+                title = item.get("title") or "Untitled"
+                kind = item.get("kind") or "memory"
+                snippet = (item.get("snippet") or "").replace("\n", " ").strip()
+                session = item.get("session_id") or ""
+                suffix = f" [{session[:12]}]" if session else ""
+                print(f"{idx}. {title} ({kind}){suffix}")
+                if snippet:
+                    print(f"   {snippet[:220]}")
+        else:
+            res = sync_memory_vault()
+            stats = res.get("stats") or {}
+            print(f"Memory vault synced: {res['vault_path']}")
+            print(
+                "Nodes: "
+                + ", ".join(f"{key}={value}" for key, value in sorted(stats.items()))
+            )
+            status = memory_vault_status()
+            if status.get("dirty"):
+                print("Vault has new changes pending.")
     else:
         from atlas_cli.memory_setup import memory_command
 

@@ -50,4 +50,24 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
         default="all",
         help="Which store to reset: 'all' (default), 'memory', or 'user'",
     )
+    vault_parser = memory_sub.add_parser(
+        "vault",
+        help="Manage the generated Obsidian memory vault",
+        description=(
+            "Generate and inspect the Obsidian-compatible memory vault built "
+            "from Atlas memory files and saved sessions."
+        ),
+    )
+    vault_sub = vault_parser.add_subparsers(dest="memory_vault_command")
+    vault_sub.add_parser("sync", help="Regenerate the memory vault")
+    vault_sub.add_parser("path", help="Print the memory vault path")
+    vault_sub.add_parser("open", help="Open the memory vault folder")
+    vault_search = vault_sub.add_parser("search", help="Search memory vault sources")
+    vault_search.add_argument("query", nargs="+", help="Search query")
+    vault_search.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maximum number of results to print",
+    )
     memory_parser.set_defaults(func=cmd_memory)

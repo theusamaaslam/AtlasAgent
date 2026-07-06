@@ -133,6 +133,25 @@ DEFAULT_AGENT_IDENTITY = (
     "Be targeted and efficient in your exploration and investigations."
 )
 
+
+CREATOR_PROFILE_PATH = (
+    Path(__file__).resolve().parent.parent / "assets" / "creator-profile.md"
+)
+
+
+def load_creator_profile_prompt(max_chars: int = 1400) -> str:
+    """Load the checked-in creator profile as stable identity context."""
+    try:
+        text = CREATOR_PROFILE_PATH.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+    if not text:
+        return ""
+    if len(text) > max_chars:
+        text = text[:max_chars].rsplit("\n", 1)[0].strip() + "\n..."
+    return f"<creator_profile>\n{text}\n</creator_profile>"
+
+
 ATLAS_AGENT_HELP_GUIDANCE = (
     "You run on Atlas Agent (by Usama Aslam). When the user needs help with "
     "Atlas itself - configuring, setting up, using, extending, or troubleshooting "

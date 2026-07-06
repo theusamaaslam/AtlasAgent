@@ -9769,10 +9769,11 @@ class MemoryReset(BaseModel):
 
 
 @app.get("/api/memory")
-async def get_memory_status():
+async def get_memory_status(profile: Optional[str] = None):
     from plugins.memory import discover_memory_providers
 
-    cfg = load_config()
+    with _profile_scope(profile):
+        cfg = load_config()
     active = ""
     mem = cfg.get("memory")
     if isinstance(mem, dict):
@@ -9790,7 +9791,8 @@ async def get_memory_status():
         _log.exception("discover_memory_providers failed")
 
     # Built-in memory file sizes (so the UI can show what a reset would erase).
-    mem_dir = get_atlas_home() / "memories"
+    with _profile_scope(profile):
+        mem_dir = get_atlas_home() / "memories"
     files = {}
     for fname, key in (("MEMORY.md", "memory"), ("USER.md", "user")):
         path = mem_dir / fname
@@ -9804,7 +9806,7 @@ async def get_memory_status():
 
 
 @app.put("/api/memory/provider")
-async def set_memory_provider(body: MemoryProviderSelect):
+async def set_memory_provider(body: MemoryProviderSelect, profile: Optional[str] = None):
     provider = (body.provider or "").strip()
     if provider.lower() in {"built-in", "builtin", "none"}:
         provider = ""
@@ -9819,21 +9821,23 @@ async def set_memory_provider(body: MemoryProviderSelect):
                 detail=f"Unknown memory provider '{provider}'. Run `atlas memory setup` to configure a new one.",
             )
 
-    cfg = load_config()
-    if not isinstance(cfg.get("memory"), dict):
-        cfg["memory"] = {}
-    cfg["memory"]["provider"] = provider
-    save_config(cfg)
+    with _profile_scope(profile):
+        cfg = load_config()
+        if not isinstance(cfg.get("memory"), dict):
+            cfg["memory"] = {}
+        cfg["memory"]["provider"] = provider
+        save_config(cfg)
     return {"ok": True, "active": provider}
 
 
 @app.post("/api/memory/reset")
-async def reset_memory(body: MemoryReset):
+async def reset_memory(body: MemoryReset, profile: Optional[str] = None):
     target = (body.target or "all").strip().lower()
     if target not in {"all", "memory", "user"}:
         raise HTTPException(status_code=400, detail="target must be all, memory, or user")
 
-    mem_dir = get_atlas_home() / "memories"
+    with _profile_scope(profile):
+        mem_dir = get_atlas_home() / "memories"
     deleted = []
     targets = []
     if target in {"all", "memory"}:
@@ -9848,7 +9852,58 @@ async def reset_memory(body: MemoryReset):
                 deleted.append(fname)
             except OSError as exc:
                 raise HTTPException(status_code=500, detail=f"Could not delete {fname}: {exc}")
+    with _profile_scope(profile):
+        try:
+            from agent.memory_vault import mark_memory_vault_dirty
+
+            mark_memory_vault_dirty()
+        except Exception:
+            _log.debug("Could not mark memory vault dirty", exc_info=True)
     return {"ok": True, "deleted": deleted}
+
+
+@app.get("/api/memory/vault")
+async def get_memory_vault_status(profile: Optional[str] = None):
+    from agent.memory_vault import memory_vault_status
+
+    with _profile_scope(profile):
+        return memory_vault_status()
+
+
+@app.post("/api/memory/vault/sync")
+async def sync_memory_vault_api(profile: Optional[str] = None):
+    from agent.memory_vault import sync_memory_vault
+
+    with _profile_scope(profile):
+        return sync_memory_vault()
+
+
+@app.post("/api/memory/vault/open")
+async def open_memory_vault_api(profile: Optional[str] = None):
+    from agent.memory_vault import open_memory_vault
+
+    with _profile_scope(profile):
+        res = open_memory_vault()
+    if not res.get("ok"):
+        raise HTTPException(status_code=500, detail=res.get("error") or "Could not open vault")
+    return res
+
+
+@app.get("/api/memory/graph")
+async def get_memory_graph(profile: Optional[str] = None):
+    from agent.memory_vault import memory_vault_graph
+
+    with _profile_scope(profile):
+        return memory_vault_graph()
+
+
+@app.get("/api/memory/search")
+async def search_memory_graph(q: str = "", limit: int = 20, profile: Optional[str] = None):
+    from agent.memory_vault import search_memory_vault
+
+    safe_limit = max(1, min(int(limit or 20), 100))
+    with _profile_scope(profile):
+        return search_memory_vault(q, limit=safe_limit)
 
 
 # ---------------------------------------------------------------------------

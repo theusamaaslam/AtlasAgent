@@ -3234,7 +3234,15 @@ class SessionDB:
                 )
             return msg_id
 
-        return self._execute_write(_do)
+        msg_id = self._execute_write(_do)
+        if role in {"user", "assistant"}:
+            try:
+                from agent.memory_vault import mark_memory_vault_dirty
+
+                mark_memory_vault_dirty()
+            except Exception:
+                logger.debug("Could not mark memory vault dirty", exc_info=True)
+        return msg_id
 
     def _insert_message_rows(self, conn, session_id: str, messages: List[Dict[str, Any]]) -> tuple[int, int]:
         """Insert *messages* as fresh active rows for *session_id*.

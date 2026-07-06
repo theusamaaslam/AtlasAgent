@@ -310,6 +310,12 @@ class MemoryStore:
         """Persist entries to the appropriate file. Called after every mutation."""
         get_memory_dir().mkdir(parents=True, exist_ok=True)
         self._write_file(self._path_for(target), self._entries_for(target))
+        try:
+            from agent.memory_vault import mark_memory_vault_dirty
+
+            mark_memory_vault_dirty()
+        except Exception:
+            logger.debug("Could not mark memory vault dirty", exc_info=True)
 
     def _entries_for(self, target: str) -> List[str]:
         if target == "user":

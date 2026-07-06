@@ -42,6 +42,7 @@ from agent.prompt_builder import (
     TOOL_USE_ENFORCEMENT_GUIDANCE,
     TOOL_USE_ENFORCEMENT_MODELS,
     drain_truncation_warnings,
+    load_creator_profile_prompt,
 )
 from agent.runtime_cwd import resolve_context_cwd
 
@@ -160,6 +161,10 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
     if not _soul_loaded:
         # Fallback to hardcoded identity
         stable_parts.append(DEFAULT_AGENT_IDENTITY)
+
+    creator_profile = load_creator_profile_prompt()
+    if creator_profile:
+        stable_parts.append(creator_profile)
 
     # Pointer to the atlas-agent skill + docs for user questions about Atlas itself.
     stable_parts.append(ATLAS_AGENT_HELP_GUIDANCE)
