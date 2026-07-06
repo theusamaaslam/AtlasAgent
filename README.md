@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Created%20by-Usama%20Aslam-blueviolet?style=for-the-badge" alt="Created by Usama Aslam">
 </p>
 
-**The self-improving AI agent created by Usama Aslam.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. It can project that growing memory into an Obsidian-style graph so operators can see knowledge, sessions, topics, and interactions accumulate over time. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
+**The self-improving AI agent created by Usama Aslam.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Atlas now promotes high-value memories into ranked, source-cited facts the agent can recall automatically without stuffing every old interaction into the prompt. It can also project that growing memory into an Obsidian-style graph so operators can see knowledge, sessions, facts, topics, and interactions accumulate over time. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
 
 Use any compatible model provider you want — OpenRouter, OpenAI, your own endpoint, and many others. Switch with `atlas model` — no code changes, no lock-in.
 
@@ -20,7 +20,8 @@ Use any compatible model provider you want — OpenRouter, OpenAI, your own endp
 <tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
 <tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
 <tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. <a href="https://github.com/plastic-labs/honcho">Honcho</a> dialectic user modeling. Compatible with the <a href="https://agentskills.io">agentskills.io</a> open standard.</td></tr>
-<tr><td><b>Living memory graph</b></td><td>Every customer interaction can be projected into a generated Obsidian-compatible vault and visual dashboard graph. The graph links creator profile, curated memory, sessions, interaction turns, and topics; it is searchable from the dashboard and via <code>atlas memory vault search</code>.</td></tr>
+<tr><td><b>Agent-useful memory</b></td><td>Atlas logs raw interactions, consolidates important details into scored facts, and recalls only the most relevant memories before answering. Facts carry confidence, importance, topics, timestamps, and citations back to source sessions so memory behaves like evidence, not hidden instruction.</td></tr>
+<tr><td><b>Living memory graph</b></td><td>Every customer interaction can be projected into a generated Obsidian-compatible vault and visual dashboard graph. The graph links creator profile, curated memory, promoted facts, sessions, interaction turns, and topics; it is searchable from the dashboard and via <code>atlas memory vault search</code>.</td></tr>
 <tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
 <tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
 <tr><td><b>Runs anywhere, not just your laptop</b></td><td>Six terminal backends — local, Docker, SSH, Singularity, Modal, and Daytona. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand, costing nearly nothing between sessions. Run it on a $5 VPS or a GPU cluster.</td></tr>
@@ -167,6 +168,8 @@ atlas tools        # Configure which tools are enabled
 atlas config set   # Set individual config values
 atlas gateway      # Start the messaging gateway (Telegram, Discord, etc.)
 atlas setup        # Run the full setup wizard (configures everything at once)
+atlas memory recall "dashboard preferences"  # Ranked, agent-grade memory recall
+atlas memory consolidate                      # Promote useful facts from sessions
 atlas claw migrate # Migrate from OpenClaw (if coming from OpenClaw)
 atlas update       # Update to the latest version
 atlas doctor       # Diagnose any issues

@@ -50,6 +50,27 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
         default="all",
         help="Which store to reset: 'all' (default), 'memory', or 'user'",
     )
+    recall_parser = memory_sub.add_parser(
+        "recall",
+        help="Rank promoted facts and raw interactions for an agent prompt",
+    )
+    recall_parser.add_argument("query", nargs="+", help="Recall query")
+    recall_parser.add_argument(
+        "--limit",
+        type=int,
+        default=6,
+        help="Maximum number of facts/snippets to print",
+    )
+    consolidate_parser = memory_sub.add_parser(
+        "consolidate",
+        help="Extract promoted memory facts from recent sessions",
+    )
+    consolidate_parser.add_argument(
+        "--limit",
+        type=int,
+        default=200,
+        help="Maximum number of sessions to process",
+    )
     vault_parser = memory_sub.add_parser(
         "vault",
         help="Manage the generated Obsidian memory vault",

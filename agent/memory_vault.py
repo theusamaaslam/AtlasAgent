@@ -56,7 +56,11 @@ class VaultNode:
     source: str = ""
     timestamp: Optional[float] = None
     session_id: Optional[str] = None
+    source_message_id: Optional[str] = None
     role: Optional[str] = None
+    status: Optional[str] = None
+    importance: Optional[float] = None
+    confidence: Optional[float] = None
     topics: List[str] = field(default_factory=list)
     links: List[str] = field(default_factory=list)
 
@@ -210,81 +214,120 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
         except Exception:
             logger.debug("Could not open session DB for memory vault", exc_info=True)
             db = None
-    if db is None:
-        return nodes
-    try:
+    if db is not None:
         try:
-            sessions = db.list_sessions_rich(
-                limit=session_limit,
-                include_archived=True,
-                include_children=True,
-                project_compression_tips=False,
-                order_by_last_active=True,
-            )
-        except TypeError:
-            sessions = db.list_sessions_rich(limit=session_limit)
-
-        for session in sessions:
-            session_id = str(session.get("id") or "")
-            if not session_id:
-                continue
-            title = str(session.get("title") or session.get("preview") or f"Session {session_id[:8]}").strip()
-            session_node_id = f"session-{_slug(session_id)}"
-            session_title = f"Session {session_id[:8]}"
-            session_text = (
-                f"{title}\n\nSource: {session.get('source') or 'unknown'}\n"
-                f"Model: {session.get('model') or 'unknown'}"
-            )
-            nodes.append(
-                VaultNode(
-                    id=session_node_id,
-                    kind="session",
-                    title=session_title,
-                    path=f"Sessions/{_note_name(session_title, session_node_id)}",
-                    text=session_text,
-                    source=str(session.get("source") or ""),
-                    timestamp=session.get("started_at"),
-                    session_id=session_id,
-                    topics=_extract_topics(title),
-                )
-            )
-
             try:
-                messages = db.get_messages(session_id)
-            except Exception:
-                logger.debug("Could not load messages for %s", session_id, exc_info=True)
-                continue
-            for msg in messages:
-                role = str(msg.get("role") or "")
-                if role not in {"user", "assistant"}:
+                sessions = db.list_sessions_rich(
+                    limit=session_limit,
+                    include_archived=True,
+                    include_children=True,
+                    project_compression_tips=False,
+                    order_by_last_active=True,
+                )
+            except TypeError:
+                sessions = db.list_sessions_rich(limit=session_limit)
+
+            for session in sessions:
+                session_id = str(session.get("id") or "")
+                if not session_id:
                     continue
-                content = _text_content(msg.get("content")).strip()
-                if not content:
-                    continue
-                msg_id = msg.get("id")
-                interaction_id = f"interaction-{_slug(session_id)}-{msg_id}"
-                interaction_title = f"{role.title()} {session_id[:8]} #{msg_id}"
+                title = str(session.get("title") or session.get("preview") or f"Session {session_id[:8]}").strip()
+                session_node_id = f"session-{_slug(session_id)}"
+                session_title = f"Session {session_id[:8]}"
+                session_text = (
+                    f"{title}\n\nSource: {session.get('source') or 'unknown'}\n"
+                    f"Model: {session.get('model') or 'unknown'}"
+                )
                 nodes.append(
                     VaultNode(
-                        id=interaction_id,
-                        kind="interaction",
-                        title=interaction_title,
-                        path=f"Interactions/{_note_name(interaction_title, interaction_id)}",
-                        text=content,
+                        id=session_node_id,
+                        kind="session",
+                        title=session_title,
+                        path=f"Sessions/{_note_name(session_title, session_node_id)}",
+                        text=session_text,
                         source=str(session.get("source") or ""),
-                        timestamp=msg.get("timestamp"),
+                        timestamp=session.get("started_at"),
                         session_id=session_id,
-                        role=role,
-                        topics=_extract_topics(content),
-                        links=[session_node_id],
+                        topics=_extract_topics(title),
                     )
                 )
-    finally:
-        if close_db:
-            try:
-                db.close()
-            except Exception:
-                pass
+
+                try:
+                    messages = db.get_messages(session_id)
+                except Exception:
+                    logger.debug("Could not load messages for %s", session_id, exc_info=True)
+                    continue
+                for msg in messages:
+                    role = str(msg.get("role") or "")
+                    if role not in {"user", "assistant"}:
+                        continue
+                    content = _text_content(msg.get("content")).strip()
+                    if not content:
+                        continue
+                    msg_id = msg.get("id")
+                    interaction_id = f"interaction-{_slug(session_id)}-{msg_id}"
+                    interaction_title = f"{role.title()} {session_id[:8]} #{msg_id}"
+                    nodes.append(
+                        VaultNode(
+                            id=interaction_id,
+                            kind="interaction",
+                            title=interaction_title,
+                            path=f"Interactions/{_note_name(interaction_title, interaction_id)}",
+                            text=content,
+                            source=str(session.get("source") or ""),
+                            timestamp=msg.get("timestamp"),
+                            session_id=session_id,
+                            role=role,
+                            topics=_extract_topics(content),
+                            links=[session_node_id],
+                        )
+                    )
+        finally:
+            if close_db:
+                try:
+                    db.close()
+                except Exception:
+                    pass
+
+    try:
+        from agent.memory_facts import list_memory_facts
+
+        fact_res = list_memory_facts(atlas_home=atlas_home, limit=1000)
+        for idx, fact in enumerate(fact_res.get("facts") or [], 1):
+            status = str(fact.get("status") or "")
+            if status in {"rejected"}:
+                continue
+            fact_id = str(fact.get("id") or _stable_id("fact", str(fact.get("text") or "")))
+            kind = str(fact.get("kind") or "fact")
+            title = f"Fact {idx}: {kind.replace('_', ' ').title()}"
+            session_id = str(fact.get("source_session_id") or "")
+            source_message_id = str(fact.get("source_message_id") or "")
+            links = []
+            if session_id:
+                links.append(f"session-{_slug(session_id)}")
+            if session_id and source_message_id:
+                links.append(f"interaction-{_slug(session_id)}-{source_message_id}")
+            nodes.append(
+                VaultNode(
+                    id=fact_id,
+                    kind="fact",
+                    title=title,
+                    path=f"Facts/{_note_name(title, fact_id)}",
+                    text=str(fact.get("text") or ""),
+                    source="promoted-fact",
+                    timestamp=fact.get("updated_at") or fact.get("created_at"),
+                    session_id=session_id or None,
+                    source_message_id=source_message_id or None,
+                    role=str(fact.get("source_role") or "") or None,
+                    status=status,
+                    importance=fact.get("importance"),
+                    confidence=fact.get("confidence"),
+                    topics=list(fact.get("topics") or []),
+                    links=links,
+                )
+            )
+    except Exception:
+        logger.debug("Could not load memory facts for vault", exc_info=True)
 
     return nodes
 
@@ -340,8 +383,16 @@ def _write_note(vault: Path, node: VaultNode, by_id: Dict[str, VaultNode]) -> No
     ]
     if node.session_id:
         frontmatter.append(f"session_id: {_escape_yaml(node.session_id)}")
+    if node.source_message_id:
+        frontmatter.append(f"source_message_id: {_escape_yaml(node.source_message_id)}")
     if node.role:
         frontmatter.append(f"role: {_escape_yaml(node.role)}")
+    if node.status:
+        frontmatter.append(f"status: {_escape_yaml(node.status)}")
+    if node.importance is not None:
+        frontmatter.append(f"importance: {_escape_yaml(node.importance)}")
+    if node.confidence is not None:
+        frontmatter.append(f"confidence: {_escape_yaml(node.confidence)}")
     if node.timestamp is not None:
         frontmatter.append(f"timestamp: {_escape_yaml(node.timestamp)}")
     if node.topics:
@@ -390,7 +441,7 @@ def _write_index(vault: Path, nodes: List[VaultNode]) -> None:
     for kind in sorted(counts):
         lines.append(f"- {kind}: {counts[kind]}")
     lines.extend(["", "## Main Areas", "", "- [[Usama Aslam]]"])
-    for title in ("Curated Memory", "User Profile", "Sessions", "Interactions", "Topics"):
+    for title in ("Curated Memory", "User Profile", "Sessions", "Interactions", "Facts", "Topics"):
         lines.append(f"- {title}")
     (vault / "Atlas Memory.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -406,7 +457,7 @@ def sync_memory_vault(
     vault = get_memory_vault_dir(home)
     vault.mkdir(parents=True, exist_ok=True)
 
-    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Interactions", "Topics"):
+    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Interactions", "Facts", "Topics"):
         shutil.rmtree(vault / name, ignore_errors=True)
 
     nodes = _source_nodes(home, db=db, session_limit=session_limit)
@@ -427,6 +478,7 @@ def sync_memory_vault(
     plural = {
         "creator": "creators",
         "interaction": "interactions",
+        "fact": "facts",
         "memory": "memories",
         "session": "sessions",
         "topic": "topics",
@@ -452,7 +504,11 @@ def sync_memory_vault(
                 "source": node.source,
                 "timestamp": node.timestamp,
                 "session_id": node.session_id,
+                "source_message_id": node.source_message_id,
                 "role": node.role,
+                "status": node.status,
+                "importance": node.importance,
+                "confidence": node.confidence,
                 "topics": node.topics,
                 "links": node.links,
                 "snippet": node.text[:240],

@@ -12597,6 +12597,39 @@ def cmd_memory(args):
             status = memory_vault_status()
             if status.get("dirty"):
                 print("Vault has new changes pending.")
+    elif sub == "recall":
+        from agent.memory_facts import search_memory_recall
+
+        query = " ".join(getattr(args, "query", []) or []).strip()
+        limit = max(1, min(int(getattr(args, "limit", 6) or 6), 20))
+        if not query:
+            print("Usage: atlas memory recall <query>")
+            return
+        res = search_memory_recall(query, limit=limit)
+        facts = res.get("facts") or []
+        raw = res.get("raw_results") or []
+        if not facts and not raw:
+            print("No recalled memory.")
+            return
+        for idx, fact in enumerate(facts, 1):
+            print(f"{idx}. {fact.get('text')} [{fact.get('kind')}, {fact.get('citation')}]")
+        offset = len(facts)
+        for idx, item in enumerate(raw, offset + 1):
+            snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
+            print(f"{idx}. {snippet[:240]} [raw, {item.get('session_id') or 'unknown'}]")
+    elif sub == "consolidate":
+        from agent.memory_facts import consolidate_session_facts
+
+        limit = max(1, min(int(getattr(args, "limit", 200) or 200), 5000))
+        res = consolidate_session_facts(session_limit=limit)
+        print(
+            "Memory consolidation complete: "
+            f"sessions={res.get('sessions', 0)}, "
+            f"created={res.get('created', 0)}, "
+            f"approved={res.get('approved', 0)}, "
+            f"pending={res.get('pending', 0)}, "
+            f"existing={res.get('existing', 0)}"
+        )
     else:
         from atlas_cli.memory_setup import memory_command
 

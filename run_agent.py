@@ -3357,7 +3357,7 @@ class AIAgent:
         """
         if interrupted:
             return
-        if not (self._memory_manager and final_response and original_user_message):
+        if not (final_response and original_user_message):
             return
         # Multimodal turns carry content as a list of typed parts; providers
         # expect plain strings, so flatten to text first (newline-joined for
@@ -3365,6 +3365,19 @@ class AIAgent:
         user_text = _summarize_user_message_for_log(original_user_message, sep="\n")
         response_text = _summarize_user_message_for_log(final_response, sep="\n")
         if not (user_text and response_text):
+            return
+        try:
+            from agent.memory_facts import consolidate_turn_facts
+
+            consolidate_turn_facts(
+                user_text,
+                response_text,
+                session_id=self.session_id or "",
+                messages=messages,
+            )
+        except Exception:
+            logger.debug("Local memory fact consolidation failed", exc_info=True)
+        if not self._memory_manager:
             return
         try:
             sync_kwargs = {"session_id": self.session_id or ""}

@@ -114,6 +114,8 @@ class TurnContext:
     plugin_user_context: str = ""
     # External-memory prefetch result, reused across loop iterations.
     ext_prefetch_cache: str = ""
+    # Local promoted-fact recall, reused across loop iterations.
+    local_recall_context: str = ""
 
 
 def build_turn_context(
@@ -491,6 +493,17 @@ def build_turn_context(
         except Exception:
             pass
 
+    # Built-in promoted memory recall. This is API-call-time context only and is
+    # injected into the current user message by conversation_loop.py.
+    local_recall_context = ""
+    try:
+        from agent.memory_facts import format_recall_block
+
+        _query = original_user_message if isinstance(original_user_message, str) else ""
+        local_recall_context = format_recall_block(_query) or ""
+    except Exception:
+        logger.debug("Local memory recall skipped", exc_info=True)
+
     return TurnContext(
         user_message=user_message,
         original_user_message=original_user_message,
@@ -503,4 +516,5 @@ def build_turn_context(
         should_review_memory=should_review_memory,
         plugin_user_context=plugin_user_context,
         ext_prefetch_cache=ext_prefetch_cache,
+        local_recall_context=local_recall_context,
     )

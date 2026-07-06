@@ -596,6 +596,7 @@ def run_conversation(
     _should_review_memory = _ctx.should_review_memory
     _plugin_user_context = _ctx.plugin_user_context
     _ext_prefetch_cache = _ctx.ext_prefetch_cache
+    _local_recall_context = getattr(_ctx, "local_recall_context", "")
 
     # Main conversation loop counters (pure locals consumed by the loop below).
     api_call_count = 0
@@ -794,6 +795,8 @@ def run_conversation(
                     _fenced = build_memory_context_block(_ext_prefetch_cache)
                     if _fenced:
                         _injections.append(_fenced)
+                if _local_recall_context:
+                    _injections.append(_local_recall_context)
                 if _plugin_user_context:
                     _injections.append(_plugin_user_context)
                 if _injections:

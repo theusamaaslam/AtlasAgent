@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import {
   Brain,
+  Check,
   Copy,
+  Database,
   ExternalLink,
   FolderOpen,
   RefreshCw,
   Search,
+  Trash2,
+  X,
 } from "lucide-react";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
@@ -16,8 +21,10 @@ import { Toast } from "@nous-research/ui/ui/components/toast";
 import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { api } from "@/lib/api";
 import type {
+  MemoryFact,
   MemoryGraphNode,
   MemoryGraphResponse,
+  MemoryRecallRawResult,
   MemorySearchResult,
   MemoryVaultStatus,
 } from "@/lib/api";
@@ -29,6 +36,7 @@ const KIND_STYLES: Record<string, { fill: string; stroke: string }> = {
   user: { fill: "#8dd7ff", stroke: "#4fb6ee" },
   session: { fill: "#ffd36f", stroke: "#e4a82b" },
   interaction: { fill: "#ffffff", stroke: "#c7c9e8" },
+  fact: { fill: "#b8a6ff", stroke: "#8f83e6" },
   topic: { fill: "#ff8a70", stroke: "#df654f" },
 };
 
@@ -183,16 +191,81 @@ function ResultRow({ result }: { result: MemorySearchResult }) {
   );
 }
 
+function FactRow({
+  fact,
+  actions,
+}: {
+  fact: MemoryFact;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl border border-border bg-white/80 px-4 py-3 shadow-sm">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Badge tone="secondary">{fact.kind.replace("_", " ")}</Badge>
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {fact.status}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-foreground">{fact.text}</p>
+        </div>
+        {actions && <div className="flex shrink-0 gap-1">{actions}</div>}
+      </div>
+      <div className="mt-2 flex min-w-0 flex-wrap gap-2 text-[11px] text-muted-foreground">
+        <span>importance {fact.importance.toFixed(2)}</span>
+        <span>confidence {fact.confidence.toFixed(2)}</span>
+        {fact.citation && <span className="font-mono">{fact.citation}</span>}
+        {fact.source_session_id && !fact.citation && (
+          <span className="font-mono">{fact.source_session_id.slice(0, 12)}</span>
+        )}
+        {fact.topics.slice(0, 5).map((topic) => (
+          <span key={topic}>#{topic}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RawRecallRow({ item }: { item: MemoryRecallRawResult }) {
+  return (
+    <div className="rounded-xl border border-border bg-white/60 px-4 py-3 text-sm">
+      <div className="font-semibold text-foreground">{item.title}</div>
+      <p className="mt-1 line-clamp-2 text-muted-foreground">{item.snippet}</p>
+      {item.session_id && (
+        <div className="mt-2 font-mono text-[11px] text-muted-foreground">
+          {item.session_id.slice(0, 18)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MemoryPage() {
   const { toast, showToast } = useToast();
   const [status, setStatus] = useState<MemoryVaultStatus | null>(null);
   const [graph, setGraph] = useState<MemoryGraphResponse | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MemorySearchResult[]>([]);
+  const [recallQuery, setRecallQuery] = useState("");
+  const [recallFacts, setRecallFacts] = useState<MemoryFact[]>([]);
+  const [recallRaw, setRecallRaw] = useState<MemoryRecallRawResult[]>([]);
+  const [pendingFacts, setPendingFacts] = useState<MemoryFact[]>([]);
   const [selectedNode, setSelectedNode] = useState<MemoryGraphNode | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [consolidating, setConsolidating] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [recalling, setRecalling] = useState(false);
+
+  const loadPendingFacts = useCallback(async () => {
+    try {
+      const res = await api.getPendingMemoryFacts(50);
+      setPendingFacts(res.facts);
+    } catch (error) {
+      showToast(`Pending facts failed: ${error}`, "error");
+    }
+  }, [showToast]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -210,12 +283,13 @@ export default function MemoryPage() {
         stats: graphRes.stats,
       });
       setSelectedNode(graphRes.nodes.find((node) => node.kind === "creator") ?? graphRes.nodes[0] ?? null);
+      void loadPendingFacts();
     } catch (error) {
       showToast(`Memory load failed: ${error}`, "error");
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [loadPendingFacts, showToast]);
 
   useEffect(() => {
     void load();
@@ -257,6 +331,65 @@ export default function MemoryPage() {
       showToast(`Search failed: ${error}`, "error");
     } finally {
       setSearching(false);
+    }
+  };
+
+  const runRecall = async () => {
+    const clean = recallQuery.trim();
+    if (!clean) {
+      setRecallFacts([]);
+      setRecallRaw([]);
+      return;
+    }
+    setRecalling(true);
+    try {
+      const res = await api.recallMemory(clean, 8);
+      setRecallFacts(res.facts);
+      setRecallRaw(res.raw_results);
+    } catch (error) {
+      showToast(`Recall failed: ${error}`, "error");
+    } finally {
+      setRecalling(false);
+    }
+  };
+
+  const consolidate = async () => {
+    setConsolidating(true);
+    try {
+      const res = await api.consolidateMemory(500);
+      showToast(
+        `Consolidated ${res.sessions} sessions: ${res.approved} approved, ${res.pending} pending`,
+        "success",
+      );
+      await loadPendingFacts();
+      const graphRes = await api.getMemoryGraph();
+      setGraph(graphRes);
+      setStatus({
+        ok: graphRes.ok,
+        vault_path: graphRes.vault_path,
+        exists: graphRes.exists,
+        dirty: graphRes.dirty,
+        last_sync: graphRes.last_sync,
+        stats: graphRes.stats,
+      });
+    } catch (error) {
+      showToast(`Consolidation failed: ${error}`, "error");
+    } finally {
+      setConsolidating(false);
+    }
+  };
+
+  const actOnFact = async (fact: MemoryFact, action: "approve" | "reject" | "stale" | "delete") => {
+    try {
+      if (action === "approve") await api.approveMemoryFact(fact.id);
+      if (action === "reject") await api.rejectMemoryFact(fact.id);
+      if (action === "stale") await api.markMemoryFactStale(fact.id);
+      if (action === "delete") await api.deleteMemoryFact(fact.id);
+      setPendingFacts((items) => items.filter((item) => item.id !== fact.id));
+      setRecallFacts((items) => items.filter((item) => item.id !== fact.id || action === "approve"));
+      showToast(action === "approve" ? "Fact approved" : "Fact removed", "success");
+    } catch (error) {
+      showToast(`Fact update failed: ${error}`, "error");
     }
   };
 
@@ -311,6 +444,15 @@ export default function MemoryPage() {
                 onClick={() => void openVault()}
               >
                 Open
+              </Button>
+              <Button
+                size="sm"
+                ghost
+                prefix={consolidating ? <Spinner className="h-3.5 w-3.5" /> : <Database className="h-3.5 w-3.5" />}
+                onClick={() => void consolidate()}
+                disabled={consolidating}
+              >
+                Consolidate
               </Button>
               <Button
                 size="sm"
@@ -436,6 +578,133 @@ export default function MemoryPage() {
             ) : (
               <div className="py-8 text-center text-sm text-muted-foreground">
                 No matches.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent recall</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              <Input
+                value={recallQuery}
+                onChange={(event) => setRecallQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") void runRecall();
+                }}
+                placeholder="Ask what Atlas should remember"
+              />
+              <Button
+                size="icon"
+                aria-label="Recall memory"
+                onClick={() => void runRecall()}
+                disabled={recalling}
+              >
+                {recalling ? <Spinner className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+              </Button>
+            </div>
+            <div className="rounded-xl border border-border bg-white/70 p-3 text-xs leading-5 text-muted-foreground">
+              Recall ranks promoted facts first, then falls back to matching raw interactions.
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="min-w-0">
+          <CardContent className="grid gap-3 py-4">
+            {recallFacts.map((fact) => (
+              <FactRow
+                key={fact.id}
+                fact={fact}
+                actions={
+                  <>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Mark fact stale"
+                      onClick={() => void actOnFact(fact, "stale")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Delete fact"
+                      onClick={() => void actOnFact(fact, "delete")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                }
+              />
+            ))}
+            {recallRaw.map((item, index) => (
+              <RawRecallRow key={`${item.session_id}-${item.message_id}-${index}`} item={item} />
+            ))}
+            {!recallFacts.length && !recallRaw.length && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No recalled facts yet.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <Card className="min-w-0">
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <CardTitle>Pending facts</CardTitle>
+            <Button
+              size="sm"
+              ghost
+              prefix={<RefreshCw className="h-3.5 w-3.5" />}
+              onClick={() => void loadPendingFacts()}
+            >
+              Refresh
+            </Button>
+          </CardHeader>
+          <CardContent className={cn("grid gap-3", pendingFacts.length > 1 && "xl:grid-cols-2")}>
+            {pendingFacts.map((fact) => (
+              <FactRow
+                key={fact.id}
+                fact={fact}
+                actions={
+                  <>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Approve fact"
+                      onClick={() => void actOnFact(fact, "approve")}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Reject fact"
+                      onClick={() => void actOnFact(fact, "reject")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Delete fact"
+                      onClick={() => void actOnFact(fact, "delete")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                }
+              />
+            ))}
+            {!pendingFacts.length && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No pending facts.
               </div>
             )}
           </CardContent>

@@ -10,6 +10,7 @@ from agent.memory_vault import (
     search_memory_vault,
     sync_memory_vault,
 )
+from agent.memory_facts import extract_fact_candidates, store_memory_facts
 from agent.prompt_builder import load_creator_profile_prompt
 
 
@@ -81,6 +82,27 @@ def test_memory_vault_sync_includes_creator_memory_and_sessions(tmp_path):
     assert "Usama Aslam" in titles
     assert any(title.startswith("User 20260706") for title in titles)
     assert graph["edges"]
+
+
+def test_memory_vault_sync_includes_fact_nodes_and_source_links(tmp_path):
+    facts = extract_fact_candidates(
+        "I prefer searchable graph memory in the dashboard.",
+        role="user",
+        session_id="20260706_123456_demo",
+        message_id="1",
+        timestamp=1_783_000_001.0,
+    )
+    store_memory_facts(facts, atlas_home=tmp_path)
+
+    payload = sync_memory_vault(atlas_home=tmp_path, db=FakeSessionDB())
+
+    fact_nodes = [node for node in payload["nodes"] if node["kind"] == "fact"]
+    assert fact_nodes
+    assert payload["stats"]["facts"] == len(fact_nodes)
+    assert any(
+        edge["source"] == fact_nodes[0]["id"] and edge["target"].startswith("interaction-")
+        for edge in payload["edges"]
+    )
 
 
 def test_memory_vault_search_and_dirty_status(tmp_path):

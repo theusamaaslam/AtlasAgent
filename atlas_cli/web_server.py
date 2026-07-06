@@ -9906,6 +9906,80 @@ async def search_memory_graph(q: str = "", limit: int = 20, profile: Optional[st
         return search_memory_vault(q, limit=safe_limit)
 
 
+@app.get("/api/memory/recall")
+async def recall_memory(q: str = "", limit: int = 6, profile: Optional[str] = None):
+    from agent.memory_facts import search_memory_recall
+
+    safe_limit = max(1, min(int(limit or 6), 20))
+    with _profile_scope(profile):
+        return search_memory_recall(q, limit=safe_limit)
+
+
+@app.post("/api/memory/consolidate")
+async def consolidate_memory(profile: Optional[str] = None, limit: int = 200):
+    from agent.memory_facts import consolidate_session_facts
+
+    safe_limit = max(1, min(int(limit or 200), 5000))
+    with _profile_scope(profile):
+        return {"ok": True, **consolidate_session_facts(session_limit=safe_limit)}
+
+
+@app.get("/api/memory/facts/pending")
+async def pending_memory_facts(limit: int = 50, profile: Optional[str] = None):
+    from agent.memory_facts import list_memory_facts
+
+    safe_limit = max(1, min(int(limit or 50), 200))
+    with _profile_scope(profile):
+        return list_memory_facts(status="pending", limit=safe_limit)
+
+
+@app.get("/api/memory/facts/search")
+async def search_memory_facts(
+    q: str = "",
+    status: Optional[str] = None,
+    limit: int = 50,
+    profile: Optional[str] = None,
+):
+    from agent.memory_facts import list_memory_facts
+
+    safe_limit = max(1, min(int(limit or 50), 200))
+    clean_status = (status or "").strip().lower() or None
+    with _profile_scope(profile):
+        return list_memory_facts(status=clean_status, query=q, limit=safe_limit)
+
+
+@app.post("/api/memory/facts/{fact_id}/approve")
+async def approve_memory_fact_api(fact_id: str, profile: Optional[str] = None):
+    from agent.memory_facts import approve_memory_fact
+
+    with _profile_scope(profile):
+        return approve_memory_fact(fact_id)
+
+
+@app.post("/api/memory/facts/{fact_id}/reject")
+async def reject_memory_fact_api(fact_id: str, profile: Optional[str] = None):
+    from agent.memory_facts import reject_memory_fact
+
+    with _profile_scope(profile):
+        return reject_memory_fact(fact_id)
+
+
+@app.post("/api/memory/facts/{fact_id}/stale")
+async def stale_memory_fact_api(fact_id: str, profile: Optional[str] = None):
+    from agent.memory_facts import mark_memory_fact_stale
+
+    with _profile_scope(profile):
+        return mark_memory_fact_stale(fact_id)
+
+
+@app.delete("/api/memory/facts/{fact_id}")
+async def delete_memory_fact_api(fact_id: str, profile: Optional[str] = None):
+    from agent.memory_facts import delete_memory_fact
+
+    with _profile_scope(profile):
+        return delete_memory_fact(fact_id)
+
+
 # ---------------------------------------------------------------------------
 # Operations endpoints — doctor / security audit / backup / import /
 # checkpoints / hooks.

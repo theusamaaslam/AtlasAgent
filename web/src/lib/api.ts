@@ -1059,6 +1059,41 @@ export const api = {
     fetchJSON<MemorySearchResponse>(
       `/api/memory/search?q=${encodeURIComponent(query)}&limit=${limit}`,
     ),
+  recallMemory: (query: string, limit = 6) =>
+    fetchJSON<MemoryRecallResponse>(
+      `/api/memory/recall?q=${encodeURIComponent(query)}&limit=${limit}`,
+    ),
+  consolidateMemory: (limit = 200) =>
+    fetchJSON<MemoryConsolidateResponse>(
+      `/api/memory/consolidate?limit=${limit}`,
+      { method: "POST" },
+    ),
+  getPendingMemoryFacts: (limit = 50) =>
+    fetchJSON<MemoryFactsResponse>(`/api/memory/facts/pending?limit=${limit}`),
+  searchMemoryFacts: (query: string, status = "", limit = 50) =>
+    fetchJSON<MemoryFactsResponse>(
+      `/api/memory/facts/search?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&limit=${limit}`,
+    ),
+  approveMemoryFact: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/facts/${encodeURIComponent(id)}/approve`,
+      { method: "POST" },
+    ),
+  rejectMemoryFact: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/facts/${encodeURIComponent(id)}/reject`,
+      { method: "POST" },
+    ),
+  markMemoryFactStale: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/facts/${encodeURIComponent(id)}/stale`,
+      { method: "POST" },
+    ),
+  deleteMemoryFact: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/facts/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    ),
   syncMemoryVault: () =>
     fetchJSON<MemoryGraphResponse>("/api/memory/vault/sync", { method: "POST" }),
   openMemoryVault: () =>
@@ -1545,7 +1580,11 @@ export interface MemoryGraphNode {
   source?: string;
   timestamp?: number | null;
   session_id?: string | null;
+  source_message_id?: string | null;
   role?: string | null;
+  status?: string | null;
+  importance?: number | null;
+  confidence?: number | null;
   topics: string[];
   links: string[];
   snippet?: string;
@@ -1577,6 +1616,68 @@ export interface MemorySearchResponse {
   ok: boolean;
   query: string;
   results: MemorySearchResult[];
+}
+
+export interface MemoryFact {
+  id: string;
+  kind: string;
+  text: string;
+  status: string;
+  importance: number;
+  confidence: number;
+  topics: string[];
+  source_session_id?: string;
+  source_message_id?: string;
+  source_role?: string;
+  source_timestamp?: number | null;
+  created_at?: number;
+  updated_at?: number;
+  expires_at?: number | null;
+  superseded_by?: string;
+  metadata?: Record<string, unknown>;
+  score?: number;
+  citation?: string;
+}
+
+export interface MemoryRecallRawResult {
+  kind: string;
+  title: string;
+  snippet: string;
+  session_id?: string | null;
+  message_id?: string | number | null;
+  role?: string | null;
+  timestamp?: number | null;
+  source?: string;
+}
+
+export interface MemoryRecallResponse {
+  ok: boolean;
+  query: string;
+  facts: MemoryFact[];
+  raw_results: MemoryRecallRawResult[];
+}
+
+export interface MemoryFactsResponse {
+  ok: boolean;
+  facts: MemoryFact[];
+  count: number;
+}
+
+export interface MemoryConsolidateResponse {
+  ok: boolean;
+  sessions: number;
+  created: number;
+  existing: number;
+  approved: number;
+  pending: number;
+}
+
+export interface MemoryFactActionResponse {
+  ok: boolean;
+  id: string;
+  status?: string;
+  changed?: number;
+  deleted?: number;
 }
 
 export interface HookEntry {
