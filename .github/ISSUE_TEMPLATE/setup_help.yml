@@ -12,7 +12,7 @@ body:
         - Run `atlas debug share` and paste the links in the Debug Report section below
         - If you're in a chat session, you can use `/debug` instead — it does the same thing
         - Try `atlas update` to get the latest version
-        - Check the [README troubleshooting section](https://github.com/UsamaAslam/atlas-agent#troubleshooting)
+        - Check the [README troubleshooting section](https://github.com/theusamaaslam/AtlasAgent#troubleshooting)
         - For general questions, use the Atlas Agent repository discussions and issues for help
 
   - type: textarea

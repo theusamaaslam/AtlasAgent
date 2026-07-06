@@ -41,17 +41,17 @@ No clone needed. Nix fetches, builds, and runs everything:
 
 ```bash
 # Run the desktop app
-nix run github:UsamaAslam/atlas-agent#desktop
+nix run github:theusamaaslam/AtlasAgent#desktop
 
 # Or install persistently
-nix profile install github:UsamaAslam/atlas-agent#desktop
+nix profile install github:theusamaaslam/AtlasAgent#desktop
 
 # run the tui
-nix run github:UsamaAslam/atlas-agent -- setup
-nix run github:UsamaAslam/atlas-agent -- --tui
+nix run github:theusamaaslam/AtlasAgent -- setup
+nix run github:theusamaaslam/AtlasAgent -- --tui
 
 # or install it in your profile
-nix profile install github:UsamaAslam/atlas-agent
+nix profile install github:theusamaaslam/AtlasAgent
 atlas setup
 atlas --tui
 ```
@@ -69,7 +69,7 @@ The `default` package adds ~700 MB to the closure. If you only need messaging pl
 <summary><strong>Running from a local clone</strong></summary>
 
 ```bash
-git clone https://github.com/UsamaAslam/atlas-agent.git
+git clone https://github.com/theusamaaslam/AtlasAgent.git
 cd atlas-agent
 nix develop
 atlas setup
@@ -94,7 +94,7 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    atlas-agent.url = "github:UsamaAslam/atlas-agent";
+    atlas-agent.url = "github:theusamaaslam/AtlasAgent";
   };
 
   outputs = { nixpkgs, atlas-agent, ... }: {
@@ -733,7 +733,7 @@ External flakes can override the package directly:
 
 ```nix
 {
-  inputs.atlas-agent.url = "github:UsamaAslam/atlas-agent";
+  inputs.atlas-agent.url = "github:theusamaaslam/AtlasAgent";
   outputs = { atlas-agent, nixpkgs, ... }: {
     nixpkgs.overlays = [ atlas-agent.overlays.default ];
     # Then:

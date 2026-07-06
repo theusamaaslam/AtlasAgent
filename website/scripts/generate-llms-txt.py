@@ -9,7 +9,7 @@ Outputs:
                                     comments separating files.
 
 Both publish from the configured docs site at:
-  https://github.com/UsamaAslam/atlas-agent
+  https://github.com/theusamaaslam/AtlasAgent
 
 The `/docs/` prefix is not a mistake — Docusaurus serves `website/static/`
 at the `docs/` base path. Clients and IDE plugins that probe the classic
@@ -30,7 +30,7 @@ WEBSITE = SCRIPT_DIR.parent
 DOCS = WEBSITE / "docs"
 STATIC = WEBSITE / "static"
 
-SITE_BASE = "https://github.com/UsamaAslam/atlas-agent/tree/main/website/docs"
+SITE_BASE = "https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs"
 
 # Curated sections for llms.txt — mirrors the product story, not the filesystem.
 # Each entry: (docs-relative path without .md, display title, optional short desc).
@@ -214,7 +214,7 @@ def emit_llms_index() -> str:
         "(Linux, macOS, WSL2, Termux)"
     )
     lines.append("")
-    lines.append("Repo: https://github.com/UsamaAslam/atlas-agent")
+    lines.append("Repo: https://github.com/theusamaaslam/AtlasAgent")
     lines.append("")
 
     for section, items in SECTIONS:
@@ -247,7 +247,7 @@ def emit_llms_full() -> str:
             "Started, Using Atlas, Features, Messaging, Integrations, Guides, "
             "Developer Guide, Reference, then everything else.\n"
         ),
-        "Canonical repo: https://github.com/UsamaAslam/atlas-agent\n",
+        "Canonical repo: https://github.com/theusamaaslam/AtlasAgent\n",
         "Short index: website/static/llms.txt\n",
         "\n---\n\n",
     ]

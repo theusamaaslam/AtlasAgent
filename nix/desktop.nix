@@ -160,7 +160,7 @@ stdenv.mkDerivation {
 
   meta = with lib; {
     description = "Native Electron desktop shell for Atlas Agent";
-    homepage = "https://github.com/UsamaAslam/atlas-agent";
+    homepage = "https://github.com/theusamaaslam/AtlasAgent";
     license = licenses.mit;
     platforms = platforms.unix;
     mainProgram = "atlas-desktop";

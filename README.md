@@ -35,13 +35,13 @@ Use any compatible model provider you want — OpenRouter, OpenAI, your own endp
 The install scripts live in this repo and clone the Atlas source checkout into a managed environment:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/install.ps1)
+iex (irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1)
 ```
 
 Forked or private deployments can keep the same scripts and point them at a different repository:
@@ -87,7 +87,7 @@ atlas              # start chatting!
 Use the deploy helper when you want a machine-accessible dashboard on port `9119` with password authentication configured up front:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/deploy-dashboard.sh | bash
+curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
 ```
 
 Recommended explicit production form:
@@ -97,7 +97,7 @@ ATLAS_HOST=0.0.0.0 \
 ATLAS_PORT=9119 \
 ATLAS_DASHBOARD_USER=admin \
 ATLAS_DASHBOARD_PASSWORD='replace-with-a-long-random-password' \
-curl -fsSL https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/deploy-dashboard.sh | bash
+curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
 ```
 
 The script installs Atlas, writes `dashboard.basic_auth.username` and `dashboard.basic_auth.password_hash`, starts `atlas dashboard --host "$ATLAS_HOST" --port "$ATLAS_PORT" --no-open`, and prints the dashboard URL plus credentials. Logs are written to `$ATLAS_HOME/logs/dashboard.log`.

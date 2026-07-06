@@ -32,7 +32,7 @@ def test_agent_json_matches_official_registry_required_fields():
     assert re.fullmatch(r"[a-z][a-z0-9-]*", data["id"])
     assert data["name"] == "Atlas Agent"
     assert data["description"]
-    assert data["repository"] == "https://github.com/UsamaAslam/atlas-agent"
+    assert data["repository"] == "https://github.com/theusamaaslam/AtlasAgent"
     assert data["website"].startswith("https://atlas-agent.nousresearch.com/")
     assert data["authors"] == ["Usama Aslam"]
     assert data["license"] == "MIT"

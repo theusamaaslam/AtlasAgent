@@ -6,7 +6,7 @@ scope for vulnerability reports.
 
 ## 1. Reporting a Vulnerability
 
-Report privately via [GitHub Security Advisories](https://github.com/UsamaAslam/atlas-agent/security/advisories/new)
+Report privately via [GitHub Security Advisories](https://github.com/theusamaaslam/AtlasAgent/security/advisories/new)
 or **security@nousresearch.com**. Do not open public issues for
 security vulnerabilities. **Atlas Agent does not operate a bug
 bounty program.**

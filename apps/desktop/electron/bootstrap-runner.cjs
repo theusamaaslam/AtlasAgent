@@ -109,7 +109,7 @@ function downloadInstallScript(commit, destPath) {
   // is immutable (unlike a branch ref), so we don't need integrity
   // verification beyond "did the file we wrote pass a syntax probe."
   const scriptName = installScriptName()
-  const baseUrl = process.env.ATLAS_INSTALL_SCRIPT_BASE_URL || 'https://raw.githubusercontent.com/UsamaAslam/atlas-agent'
+  const baseUrl = process.env.ATLAS_INSTALL_SCRIPT_BASE_URL || 'https://raw.githubusercontent.com/theusamaaslam/AtlasAgent'
   const url = `${baseUrl.replace(/\/+$/, '')}/${commit}/scripts/${scriptName}`
   return new Promise((resolve, reject) => {
     fs.mkdirSync(path.dirname(destPath), { recursive: true })

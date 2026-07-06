@@ -2711,7 +2711,7 @@ DEFAULT_CONFIG = {
     # The default URL is served by the docs site GitHub Pages deploy.
     "model_catalog": {
         "enabled": True,
-        "url": "https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/website/static/api/model-catalog.json",
+        "url": "https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/website/static/api/model-catalog.json",
         # Disk cache TTL in hours.  Beyond this, the CLI refetches on the
         # next /model or `atlas model` invocation; network failures
         # silently fall back to the stale cache.

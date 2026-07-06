@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   check-freshness:
-    if: github.repository == 'UsamaAslam/atlas-agent'
+    if: github.repository == 'theusamaaslam/AtlasAgent'
     runs-on: ubuntu-latest
     steps:
       - name: Probe live index

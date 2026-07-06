@@ -229,7 +229,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   meta = with lib; {
     description = "AI agent with advanced tool-calling capabilities";
-    homepage = "https://github.com/UsamaAslam/atlas-agent";
+    homepage = "https://github.com/theusamaaslam/AtlasAgent";
     mainProgram = "atlas";
     license = licenses.mit;
     platforms = platforms.unix;

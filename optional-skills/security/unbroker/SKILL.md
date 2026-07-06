@@ -12,7 +12,7 @@ metadata:
     tags: [privacy, data-broker, opt-out, ccpa, gdpr, security, doxxing]
     category: security
     related_skills: [google-workspace, agentmail, himalaya, scrapling, osint-investigation]
-    homepage: https://github.com/UsamaAslam/atlas-agent
+    homepage: https://github.com/theusamaaslam/AtlasAgent
 ---
 
 # unbroker

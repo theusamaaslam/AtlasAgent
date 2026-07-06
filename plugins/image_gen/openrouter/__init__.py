@@ -337,7 +337,7 @@ class OpenRouterCompatImageProvider(ImageGenProvider):
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             # OpenRouter attribution headers (harmless against Atlas Gateway).
-            "HTTP-Referer": "https://github.com/UsamaAslam/atlas-agent",
+            "HTTP-Referer": "https://github.com/theusamaaslam/AtlasAgent",
             "X-Title": "Atlas Agent",
         }
         last_error: Optional[Dict[str, Any]] = None

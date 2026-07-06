@@ -81,7 +81,7 @@ Watch a GitHub repo (set `GITHUB_TOKEN` in `${ATLAS_HOME:-~/.atlas}/.env` to avo
 
 ```bash
 python $ATLAS_HOME/skills/devops/watchers/scripts/watch_github.py \
-  --name atlas-issues --repo UsamaAslam/atlas-agent --scope issues
+  --name atlas-issues --repo theusamaaslam/AtlasAgent --scope issues
 ```
 
 Poll an arbitrary JSON API:

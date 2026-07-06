@@ -24,10 +24,10 @@ A quick search before you build saves your time and keeps the PR queue clean —
 
 - **Search both open *and* merged PRs and issues** for your topic or error symptom — the duplicate-check in the PR template fires at review time, after you've already done the work:
   ```bash
-  gh search issues --repo UsamaAslam/atlas-agent "<your terms>"
-  gh search prs --repo UsamaAslam/atlas-agent --state all "<your terms>"
+  gh search issues --repo theusamaaslam/AtlasAgent "<your terms>"
+  gh search prs --repo theusamaaslam/AtlasAgent --state all "<your terms>"
   ```
-  Or use the web UI: [issues](https://github.com/UsamaAslam/atlas-agent/issues?q=) · [PRs (all states)](https://github.com/UsamaAslam/atlas-agent/pulls?q=is%3Apr).
+  Or use the web UI: [issues](https://github.com/theusamaaslam/AtlasAgent/issues?q=) · [PRs (all states)](https://github.com/theusamaaslam/AtlasAgent/pulls?q=is%3Apr).
 - **The issue tracker can lag the code.** Many requested features are already implemented in-tree, so also search the source (`search_files`, or your editor's grep) for the capability before proposing it.
 - **If an open PR already addresses it**, consider reviewing or improving that one instead of opening a competing duplicate.
 - **For larger work**, comment on the issue to signal you're working on it, so others don't start the same thing.
@@ -156,7 +156,7 @@ which silently destroys the running runtime mid-session. Keeping it outside the
 tree means no relative path from the workspace resolves to it.
 
 ```bash
-git clone https://github.com/UsamaAslam/atlas-agent.git
+git clone https://github.com/theusamaaslam/AtlasAgent.git
 cd atlas-agent
 
 # Create venv with Python 3.11, OUTSIDE the source tree
@@ -987,7 +987,7 @@ test(tools): add unit tests for file_operations
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/UsamaAslam/atlas-agent/issues)
+- Use [GitHub Issues](https://github.com/theusamaaslam/AtlasAgent/issues)
 - Include: OS, Python version, Atlas version (`atlas version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates
@@ -997,7 +997,7 @@ test(tools): add unit tests for file_operations
 
 ## Community
 
-- **Community**: [github.com/UsamaAslam/atlas-agent](https://github.com/UsamaAslam/atlas-agent) — for questions, showcasing projects, and sharing skills
+- **Community**: [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent) — for questions, showcasing projects, and sharing skills
 - **GitHub Discussions**: For design proposals and architecture discussions
 - **Skills Hub**: Upload specialized skills to a registry and share them with the community
 

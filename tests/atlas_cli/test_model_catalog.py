@@ -182,7 +182,7 @@ class TestFallbackChain:
 
     PRIMARY = "https://atlas-agent.nousresearch.com/docs/api/model-catalog.json"
     FALLBACK = (
-        "https://raw.githubusercontent.com/UsamaAslam/atlas-agent"
+        "https://raw.githubusercontent.com/theusamaaslam/AtlasAgent"
         "/main/website/static/api/model-catalog.json"
     )
 

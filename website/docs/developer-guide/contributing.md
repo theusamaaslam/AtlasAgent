@@ -81,7 +81,7 @@ which silently destroys the running runtime mid-session. Keeping it outside the
 tree means no relative path from the workspace resolves to it.
 
 ```bash
-git clone https://github.com/UsamaAslam/atlas-agent.git
+git clone https://github.com/theusamaaslam/AtlasAgent.git
 cd atlas-agent
 
 # Create venv with Python 3.11, OUTSIDE the source tree
@@ -135,7 +135,7 @@ scripts/run_tests.sh
 - **Comments**: Only when explaining non-obvious intent, trade-offs, or API quirks
 - **Error handling**: Catch specific exceptions. Use `logger.warning()`/`logger.error()` with `exc_info=True` for unexpected errors
 - **Cross-platform**: Never assume Unix (see below)
-- **Profile-safe paths**: Never hardcode `~/.atlas` — use `get_atlas_home()` from `atlas_constants` for code paths and `display_atlas_home()` for user-facing messages. See [AGENTS.md](https://github.com/UsamaAslam/atlas-agent/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
+- **Profile-safe paths**: Never hardcode `~/.atlas` — use `get_atlas_home()` from `atlas_constants` for code paths and `display_atlas_home()` for user-facing messages. See [AGENTS.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
 
 ## Cross-Platform Compatibility
 
@@ -271,7 +271,7 @@ fix(security): prevent shell injection in sudo password piping
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/UsamaAslam/atlas-agent/issues)
+- Use [GitHub Issues](https://github.com/theusamaaslam/AtlasAgent/issues)
 - Include: OS, Python version, Atlas version (`atlas version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates
@@ -279,10 +279,10 @@ fix(security): prevent shell injection in sudo password piping
 
 ## Community
 
-- **Community**: [github.com/UsamaAslam/atlas-agent](https://github.com/UsamaAslam/atlas-agent)
+- **Community**: [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent)
 - **GitHub Discussions**: For design proposals and architecture discussions
 - **Skills Hub**: Upload specialized skills and share with the community
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/UsamaAslam/atlas-agent/blob/main/LICENSE).
+By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/theusamaaslam/AtlasAgent/blob/main/LICENSE).

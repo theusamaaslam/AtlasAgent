@@ -3052,7 +3052,7 @@ class OptionalSkillSource(SkillSource):
     (search / install / inspect) and labelled "official" with "builtin" trust.
     """
 
-    OFFICIAL_REPO = "UsamaAslam/atlas-agent"
+    OFFICIAL_REPO = "theusamaaslam/AtlasAgent"
 
     def __init__(self):
         from atlas_constants import get_optional_skills_dir

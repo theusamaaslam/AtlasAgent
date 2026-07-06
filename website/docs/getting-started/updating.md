@@ -155,7 +155,7 @@ You no longer need to wrap `atlas update` in `screen` or `tmux` to survive a ter
 atlas version
 ```
 
-Compare against the latest release at the [GitHub releases page](https://github.com/UsamaAslam/atlas-agent/releases).
+Compare against the latest release at the [GitHub releases page](https://github.com/theusamaaslam/AtlasAgent/releases).
 
 ### Updating from Messaging Platforms
 

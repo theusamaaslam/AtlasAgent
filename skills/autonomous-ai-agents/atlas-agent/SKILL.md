@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   atlas:
     tags: [atlas, setup, configuration, multi-agent, spawning, cli, gateway, development]
-    homepage: https://github.com/UsamaAslam/atlas-agent
+    homepage: https://github.com/theusamaaslam/AtlasAgent
     related_skills: [claude-code, codex, opencode]
 ---
 
@@ -40,7 +40,7 @@ Good verification targets:
 
 - CLI commands: `atlas --help`, `atlas <command> --help`, and `atlas_cli/main.py`
 - User documentation: https://atlas-agent.nousresearch.com/docs/
-- Source tree: https://github.com/UsamaAslam/atlas-agent
+- Source tree: https://github.com/theusamaaslam/AtlasAgent
 
 ## Quick Start
 

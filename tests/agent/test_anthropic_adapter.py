@@ -2403,7 +2403,7 @@ class TestConvertToolsToAnthropicDedup:
 
     Anthropic rejects requests with duplicate tool names.  This guard converts
     a hard failure into a warning log.  See:
-    https://github.com/UsamaAslam/atlas-agent/issues/18478
+    https://github.com/theusamaaslam/AtlasAgent/issues/18478
     """
 
     def _make_openai_tool(self, name: str) -> dict:

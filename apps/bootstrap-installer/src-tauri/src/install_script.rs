@@ -20,7 +20,7 @@ use tokio::io::AsyncWriteExt;
 use crate::paths;
 
 const DEFAULT_INSTALL_SCRIPT_BASE_URL: &str =
-    "https://raw.githubusercontent.com/UsamaAslam/atlas-agent";
+    "https://raw.githubusercontent.com/theusamaaslam/AtlasAgent";
 
 /// Identity of the install.ps1 we'll execute. Used by both the manifest
 /// fetch and the per-stage runs.

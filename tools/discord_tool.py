@@ -79,7 +79,7 @@ def _discord_request(
         headers={
             "Authorization": f"Bot {token}",
             "Content-Type": "application/json",
-            "User-Agent": "Atlas-Agent (https://github.com/UsamaAslam/atlas-agent)",
+            "User-Agent": "Atlas-Agent (https://github.com/theusamaaslam/AtlasAgent)",
         },
     )
 

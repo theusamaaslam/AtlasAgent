@@ -1,10 +1,10 @@
 # Atlas Desktop ☤
 
 <p align="center">
-  <a href="https://github.com/UsamaAslam/atlas-agent/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
+  <a href="https://github.com/theusamaaslam/AtlasAgent/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
   <a href="https://atlas-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-atlas--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://github.com/UsamaAslam/atlas-agent"><img src="https://img.shields.io/badge/GitHub-Atlas_Agent-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-  <a href="https://github.com/UsamaAslam/atlas-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/theusamaaslam/AtlasAgent"><img src="https://img.shields.io/badge/GitHub-Atlas_Agent-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+  <a href="https://github.com/theusamaaslam/AtlasAgent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
 **The native desktop app for [Atlas Agent](../../README.md) — the self-improving AI agent from [Usama Aslam](https://nousresearch.com).** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
@@ -128,9 +128,9 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\atlas\atlas-agent\venv"
 
 ## Community
 
-- Project: [github.com/UsamaAslam/atlas-agent](https://github.com/UsamaAslam/atlas-agent)
+- Project: [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent)
 - 📖 [Documentation](https://atlas-agent.nousresearch.com/docs/)
-- 🐛 [Issues](https://github.com/UsamaAslam/atlas-agent/issues)
+- 🐛 [Issues](https://github.com/theusamaaslam/AtlasAgent/issues)
 
 ---
 

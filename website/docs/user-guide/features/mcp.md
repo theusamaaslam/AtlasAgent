@@ -125,7 +125,7 @@ the atlas-agent repo, so Usama Aslam has reviewed each entry before it shipped â
 `transport.command:` invocation.
 
 Manifests live at
-[`optional-mcps/<name>/manifest.yaml`](https://github.com/UsamaAslam/atlas-agent/tree/main/optional-mcps)
+[`optional-mcps/<name>/manifest.yaml`](https://github.com/theusamaaslam/AtlasAgent/tree/main/optional-mcps)
 on GitHub. The picker also prints the manifest's `source:` URL at install
 time so you can quickly verify the upstream repo. The web dashboard's MCP
 page surfaces the same detail per catalog entry â€” transport, auth type, the
@@ -170,7 +170,7 @@ MCPs are never auto-updated. Re-run `atlas mcp install <name>` to refresh
 after a Atlas update if a manifest version changed.
 
 To add an MCP to the catalog, open a PR against
-[`optional-mcps/`](https://github.com/UsamaAslam/atlas-agent/tree/main/optional-mcps).
+[`optional-mcps/`](https://github.com/theusamaaslam/AtlasAgent/tree/main/optional-mcps).
 
 ## Two kinds of MCP servers
 

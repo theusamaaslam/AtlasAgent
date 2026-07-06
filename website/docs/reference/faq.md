@@ -836,6 +836,6 @@ If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter o
 
 If your issue isn't covered here:
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/UsamaAslam/atlas-agent/issues)
+1. **Search existing issues:** [GitHub Issues](https://github.com/theusamaaslam/AtlasAgent/issues)
 2. **Ask the community:** [Usama Aslam Discord](https://discord.gg/nousresearch)
 3. **File a bug report:** Include your OS, Python version (`python3 --version`), Atlas version (`atlas --version`), and the full error message

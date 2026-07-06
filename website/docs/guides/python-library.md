@@ -15,19 +15,19 @@ Atlas isn't just a CLI tool. You can import `AIAgent` directly and use it progra
 Install Atlas directly from the repository:
 
 ```bash
-pip install git+https://github.com/UsamaAslam/atlas-agent.git
+pip install git+https://github.com/theusamaaslam/AtlasAgent.git
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv pip install git+https://github.com/UsamaAslam/atlas-agent.git
+uv pip install git+https://github.com/theusamaaslam/AtlasAgent.git
 ```
 
 You can also pin it in your `requirements.txt`:
 
 ```text
-atlas-agent @ git+https://github.com/UsamaAslam/atlas-agent.git
+atlas-agent @ git+https://github.com/theusamaaslam/AtlasAgent.git
 ```
 
 :::tip

@@ -13,7 +13,7 @@ import urllib.request
 
 DEFAULT_UA = (
     "atlas-osint-investigation/0.2 "
-    "(+https://github.com/UsamaAslam/atlas-agent; "
+    "(+https://github.com/theusamaaslam/AtlasAgent; "
     "set ATLAS_OSINT_UA env var to identify yourself per "
     "Wikimedia / SEC fair-use guidance)"
 )

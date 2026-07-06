@@ -13,7 +13,7 @@ required_credential_files:
 metadata:
   atlas:
     tags: [Google, Gmail, Calendar, Drive, Sheets, Docs, Contacts, Email, OAuth]
-    homepage: https://github.com/UsamaAslam/atlas-agent
+    homepage: https://github.com/theusamaaslam/AtlasAgent
     related_skills: [himalaya]
 ---
 

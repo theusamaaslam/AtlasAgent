@@ -5,7 +5,7 @@
 # Uses uv for fast Python provisioning and package management.
 #
 # Usage:
-#   iex (irm https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/install.ps1)
+#   iex (irm https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.ps1)
 #
 # Or download and run with options:
 #   .\install.ps1 -NoVenv -SkipSetup
@@ -136,10 +136,10 @@ foreach ($tmpVar in @('TEMP', 'TMP')) {
 # Configuration
 # ============================================================================
 
-$RepoUrlSsh = if ($env:ATLAS_AGENT_REPO_SSH) { $env:ATLAS_AGENT_REPO_SSH } else { "git@github.com:UsamaAslam/atlas-agent.git" }
-$RepoUrlHttps = if ($env:ATLAS_AGENT_REPO_HTTPS) { $env:ATLAS_AGENT_REPO_HTTPS } else { "https://github.com/UsamaAslam/atlas-agent.git" }
+$RepoUrlSsh = if ($env:ATLAS_AGENT_REPO_SSH) { $env:ATLAS_AGENT_REPO_SSH } else { "git@github.com:theusamaaslam/AtlasAgent.git" }
+$RepoUrlHttps = if ($env:ATLAS_AGENT_REPO_HTTPS) { $env:ATLAS_AGENT_REPO_HTTPS } else { "https://github.com/theusamaaslam/AtlasAgent.git" }
 $RepoArchiveBase = $RepoUrlHttps -replace '\.git$', ''
-$InstallScriptBaseUrl = if ($env:ATLAS_INSTALL_SCRIPT_BASE_URL) { $env:ATLAS_INSTALL_SCRIPT_BASE_URL.TrimEnd('/') } else { "https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts" }
+$InstallScriptBaseUrl = if ($env:ATLAS_INSTALL_SCRIPT_BASE_URL) { $env:ATLAS_INSTALL_SCRIPT_BASE_URL.TrimEnd('/') } else { "https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts" }
 $PythonVersion = "3.11"
 # Minor versions the installer accepts when the requested $PythonVersion isn't
 # available, in preference order.  uv discovers both uv-managed and system

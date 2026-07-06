@@ -3,7 +3,7 @@
   "name": "Atlas Agent",
   "version": "0.18.0",
   "description": "Self-improving open-source AI agent by Usama Aslam with ACP editor integration, persistent memory, skills, and rich tool support.",
-  "repository": "https://github.com/UsamaAslam/atlas-agent",
+  "repository": "https://github.com/theusamaaslam/AtlasAgent",
   "website": "https://atlas-agent.nousresearch.com/docs/user-guide/features/acp",
   "authors": ["Usama Aslam"],
   "license": "MIT",

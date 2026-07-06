@@ -295,14 +295,14 @@ export default function UserStoriesCollage(): JSX.Element {
       <div className={styles.footer}>
         Built something with Atlas?{' '}
         <a
-          href="https://github.com/UsamaAslam/atlas-agent/edit/main/website/src/data/userStories.json"
+          href="https://github.com/theusamaaslam/AtlasAgent/edit/main/website/src/data/userStories.json"
           target="_blank"
           rel="noopener noreferrer"
         >
           Add your story to this page
         </a>{' '}
         by editing <code>userStories.json</code>, or post it in the{' '}
-        <a href="https://github.com/UsamaAslam/atlas-agent" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/theusamaaslam/AtlasAgent" target="_blank" rel="noopener noreferrer">
           Usama Aslam Discord
         </a>{' '}
         and we&apos;ll pick it up.

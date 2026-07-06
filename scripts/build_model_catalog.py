@@ -17,7 +17,7 @@ Usage::
 Output: ``website/static/api/model-catalog.json``
 
 Live URL (after ``deploy-site.yml`` runs on merge to main):
-``https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/website/static/api/model-catalog.json``
+``https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/website/static/api/model-catalog.json``
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ def build_catalog() -> dict:
         "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "metadata": {
             "source": "atlas-agent repo",
-            "docs": "https://github.com/UsamaAslam/atlas-agent/tree/main/website/docs/reference/model-catalog",
+            "docs": "https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs/reference/model-catalog",
         },
         "providers": {
             "openrouter": {

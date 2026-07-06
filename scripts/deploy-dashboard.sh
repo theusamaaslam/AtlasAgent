@@ -2,7 +2,7 @@
 # Production dashboard deploy helper for Atlas Agent.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/deploy-dashboard.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/deploy-dashboard.sh | bash
 #
 # Optional environment:
 #   ATLAS_HOST=0.0.0.0
@@ -18,7 +18,7 @@ set -euo pipefail
 ATLAS_HOST="${ATLAS_HOST:-0.0.0.0}"
 ATLAS_PORT="${ATLAS_PORT:-9119}"
 ATLAS_DASHBOARD_USER="${ATLAS_DASHBOARD_USER:-atlas}"
-ATLAS_INSTALL_SCRIPT_URL="${ATLAS_INSTALL_SCRIPT_URL:-https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/install.sh}"
+ATLAS_INSTALL_SCRIPT_URL="${ATLAS_INSTALL_SCRIPT_URL:-https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh}"
 ATLAS_HOME="${ATLAS_HOME:-$HOME/.atlas}"
 
 if [ -n "${ATLAS_INSTALL_DIR:-}" ]; then

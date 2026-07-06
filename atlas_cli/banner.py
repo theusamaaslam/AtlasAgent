@@ -141,7 +141,7 @@ _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 # (e.g. nix-built atlas — no local git history to count against).
 UPDATE_AVAILABLE_NO_COUNT = -1
 
-_UPSTREAM_REPO_URL = "https://github.com/UsamaAslam/atlas-agent.git"
+_UPSTREAM_REPO_URL = "https://github.com/theusamaaslam/AtlasAgent.git"
 _OFFICIAL_REPO_CANONICAL = "github.com/usamaaslam/atlas-agent"
 
 
@@ -479,7 +479,7 @@ def get_git_banner_state(repo_dir: Optional[Path] = None) -> Optional[dict]:
     return {"upstream": upstream, "local": local, "ahead": max(ahead, 0)}
 
 
-_RELEASE_URL_BASE = "https://github.com/UsamaAslam/atlas-agent/releases/tag"
+_RELEASE_URL_BASE = "https://github.com/theusamaaslam/AtlasAgent/releases/tag"
 _latest_release_cache: Optional[tuple] = None  # (tag, url) once resolved
 
 
@@ -488,7 +488,7 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
     Local-only — runs ``git describe --tags --abbrev=0`` against the
     Atlas checkout. Cached per-process. Release URL always points at the
-    canonical UsamaAslam/atlas-agent repo (forks don't get a link).
+    canonical theusamaaslam/AtlasAgent repo (forks don't get a link).
     """
     global _latest_release_cache
     if _latest_release_cache is not None:

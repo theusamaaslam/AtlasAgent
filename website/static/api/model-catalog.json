@@ -3,7 +3,7 @@
   "updated_at": "2026-07-01T20:08:52Z",
   "metadata": {
     "source": "atlas-agent repo",
-    "docs": "https://github.com/UsamaAslam/atlas-agent/tree/main/website/docs/reference/model-catalog"
+    "docs": "https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs/reference/model-catalog"
   },
   "providers": {
     "openrouter": {

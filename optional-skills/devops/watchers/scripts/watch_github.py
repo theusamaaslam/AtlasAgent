@@ -6,7 +6,7 @@ Usage (via cron with --no-agent):
     atlas cron create atlas-issues \\
       --schedule "*/5 * * * *" --no-agent \\
       --script "$ATLAS_HOME/skills/devops/watchers/scripts/watch_github.py" \\
-      --script-args "--name atlas-issues --repo UsamaAslam/atlas-agent --scope issues"
+      --script-args "--name atlas-issues --repo theusamaaslam/AtlasAgent --scope issues"
 
 Set GITHUB_TOKEN (or GH_TOKEN) in the Atlas .env file
 (``${ATLAS_HOME:-~/.atlas}/.env``) to avoid the 60 req/hr

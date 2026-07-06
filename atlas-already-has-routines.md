@@ -153,7 +153,7 @@ Full automation blueprints gallery: [atlas-agent.nousresearch.com/docs/reference
 
 Documentation: [atlas-agent.nousresearch.com](https://atlas-agent.nousresearch.com)
 
-GitHub: [github.com/UsamaAslam/atlas-agent](https://github.com/UsamaAslam/atlas-agent)
+GitHub: [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent)
 
 ---
 

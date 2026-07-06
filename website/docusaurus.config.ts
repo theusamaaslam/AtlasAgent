@@ -7,7 +7,7 @@ const config: Config = {
   tagline: 'The self-improving AI agent',
   favicon: 'img/favicon.ico',
 
-  url: 'https://github.com/UsamaAslam/atlas-agent',
+  url: 'https://github.com/theusamaaslam/AtlasAgent',
   baseUrl: '/docs/',
 
   organizationName: 'UsamaAslam',
@@ -86,7 +86,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',  // Docs at the root of /docs/
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/UsamaAslam/atlas-agent/edit/main/website/',
+          editUrl: 'https://github.com/theusamaaslam/AtlasAgent/edit/main/website/',
         },
         blog: false,
         theme: {
@@ -127,22 +127,22 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/UsamaAslam/atlas-agent',
+          href: 'https://github.com/theusamaaslam/AtlasAgent',
           label: 'Download',
           position: 'left',
         },
         {
-          href: 'https://github.com/UsamaAslam/atlas-agent',
+          href: 'https://github.com/theusamaaslam/AtlasAgent',
           label: 'Home',
           position: 'right',
         },
         {
-          href: 'https://github.com/UsamaAslam/atlas-agent',
+          href: 'https://github.com/theusamaaslam/AtlasAgent',
           label: 'GitHub',
           position: 'right',
         },
         {
-          href: 'https://github.com/UsamaAslam/atlas-agent',
+          href: 'https://github.com/theusamaaslam/AtlasAgent',
           label: 'Discord',
           position: 'right',
         },
@@ -163,16 +163,16 @@ const config: Config = {
         {
           title: 'Community',
           items: [
-            { label: 'GitHub', href: 'https://github.com/UsamaAslam/atlas-agent' },
-            { label: 'GitHub Issues', href: 'https://github.com/UsamaAslam/atlas-agent/issues' },
+            { label: 'GitHub', href: 'https://github.com/theusamaaslam/AtlasAgent' },
+            { label: 'GitHub Issues', href: 'https://github.com/theusamaaslam/AtlasAgent/issues' },
             { label: 'Skills Hub', href: 'https://agentskills.io' },
           ],
         },
         {
           title: 'More',
           items: [
-            { label: 'Desktop Download', href: 'https://github.com/UsamaAslam/atlas-agent/releases' },
-            { label: 'GitHub', href: 'https://github.com/UsamaAslam/atlas-agent' },
+            { label: 'Desktop Download', href: 'https://github.com/theusamaaslam/AtlasAgent/releases' },
+            { label: 'GitHub', href: 'https://github.com/theusamaaslam/AtlasAgent' },
             { label: 'Usama Aslam', href: 'https://github.com/UsamaAslam' },
           ],
         },

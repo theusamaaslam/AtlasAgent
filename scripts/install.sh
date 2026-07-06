@@ -6,7 +6,7 @@
 # Uses uv for desktop/server installs and Python's stdlib venv + pip on Termux.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts/install.sh | bash
 #
 # Or with options:
 #   curl -fsSL ... | bash -s -- --no-venv --skip-setup
@@ -43,9 +43,9 @@ NC='\033[0m' # No Color
 BOLD='\033[1m'
 
 # Configuration
-REPO_URL_SSH="${ATLAS_AGENT_REPO_SSH:-git@github.com:UsamaAslam/atlas-agent.git}"
-REPO_URL_HTTPS="${ATLAS_AGENT_REPO_HTTPS:-https://github.com/UsamaAslam/atlas-agent.git}"
-INSTALL_SCRIPT_BASE_URL="${ATLAS_INSTALL_SCRIPT_BASE_URL:-https://raw.githubusercontent.com/UsamaAslam/atlas-agent/main/scripts}"
+REPO_URL_SSH="${ATLAS_AGENT_REPO_SSH:-git@github.com:theusamaaslam/AtlasAgent.git}"
+REPO_URL_HTTPS="${ATLAS_AGENT_REPO_HTTPS:-https://github.com/theusamaaslam/AtlasAgent.git}"
+INSTALL_SCRIPT_BASE_URL="${ATLAS_INSTALL_SCRIPT_BASE_URL:-https://raw.githubusercontent.com/theusamaaslam/AtlasAgent/main/scripts}"
 ATLAS_HOME="${ATLAS_HOME:-$HOME/.atlas}"
 # INSTALL_DIR is resolved AFTER arg parsing and OS detection so we can pick an
 # FHS-style layout for root installs.  Track whether the user gave us an

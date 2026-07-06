@@ -87,7 +87,7 @@ Why these packages?
 ### 2. Clone Atlas
 
 ```bash
-git clone https://github.com/UsamaAslam/atlas-agent.git
+git clone https://github.com/theusamaaslam/AtlasAgent.git
 cd atlas-agent
 ```
 

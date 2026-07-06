@@ -214,7 +214,7 @@ If you've worked through this guide and the issue persists:
 
 1. Run the job with `atlas cron run <job_id>` (fires on next gateway tick) and watch for errors in the chat output
 2. Check `~/.atlas/logs/agent.log` for scheduler messages and `~/.atlas/logs/errors.log` for warnings
-3. Open an issue at [github.com/UsamaAslam/atlas-agent](https://github.com/UsamaAslam/atlas-agent) with:
+3. Open an issue at [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent) with:
    - The job ID and schedule
    - The delivery target
    - What you expected vs. what happened
