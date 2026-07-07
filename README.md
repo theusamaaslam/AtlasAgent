@@ -304,7 +304,6 @@ scripts/run_tests.sh
 
 - 📚 [Skills Hub](https://agentskills.io)
 - 🔌 [computer-use-linux](https://github.com/avifenesh/computer-use-linux) — Linux desktop-control MCP server for Atlas and other MCP hosts, with AT-SPI accessibility trees, Wayland/X11 input, screenshots, and compositor window targeting.
-- 🔌 [AtlasClaw](https://github.com/AaronWong1999/atlasclaw) — Community WeChat bridge: Run Atlas Agent and OpenClaw on the same WeChat account.
 
 ---
 
