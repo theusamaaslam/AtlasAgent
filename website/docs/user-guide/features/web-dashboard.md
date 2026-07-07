@@ -560,7 +560,7 @@ same auth gate as the rest of `/api/`.
 When the dashboard is bound to a public or non-loopback address — anything other than `127.0.0.1` / `localhost` — Atlas Agent engages an auth gate. Every request must carry a verified session cookie or it's bounced to the login page. Three providers ship in the box:
 
 - **[Username/password](#usernamepassword-provider-no-oauth-idp)** — the simplest way to put auth on a self-hosted / on-prem / homelab dashboard. No external identity provider. **Use it only on a trusted network or behind a VPN — not for public-internet exposure.**
-- **[OAuth (Atlas Gateway)](#default-provider-nous-research)** — for hosted deployments and any dashboard reachable over the public internet, and the recommended path for a [remote Atlas Desktop connection](#connecting-atlas-desktop-to-a-remote-backend). Every login is verified against your Nous account, so this is the provider suitable for internet-facing use.
+- **[OAuth (Atlas Gateway)](#default-provider-usama-aslam)** — for hosted deployments and any dashboard reachable over the public internet, and the recommended path for a [remote Atlas Desktop connection](#connecting-atlas-desktop-to-a-remote-backend). Every login is verified against your Atlas account, so this is the provider suitable for internet-facing use.
 - **[Self-hosted OIDC](#self-hosted-oidc-provider)** — for bringing your own identity provider via standard OpenID Connect (Keycloak, Auth0, Okta, Google, GitHub via an OIDC bridge, etc.). No Atlas Gateway involved; suitable for public-internet exposure when fronted by a conformant OIDC server.
 
 Operator-owned dashboards bound to loopback are unaffected — no auth, no login page.
@@ -583,7 +583,7 @@ The gate is on if and only if:
 
 ### Fail-closed semantics
 
-If the gate would engage but **no** `DashboardAuthProvider` is registered (no Nous plugin, no custom plugin), `atlas dashboard` refuses to bind with an explicit error message. There is no "default-deny but accept everything" fallback — a misconfigured gated dashboard never starts.
+If the gate would engage but **no** `DashboardAuthProvider` is registered (no Atlas Gateway plugin, no custom plugin), `atlas dashboard` refuses to bind with an explicit error message. There is no "default-deny but accept everything" fallback — a misconfigured gated dashboard never starts.
 
 When you run `atlas dashboard --host 0.0.0.0` **interactively** (a real terminal) and no provider is configured yet, Atlas doesn't just fail — it offers to set one up on the spot: pick **username & password** (writes `dashboard.basic_auth` to `config.yaml` and you're running in seconds) or **OAuth** (points you at `atlas dashboard register`). Non-interactive callers — Docker/s6, CI, piped runs — skip the prompt and hit the fail-closed error above, so an unattended deploy still never starts without auth.
 
@@ -591,13 +591,13 @@ When you run `atlas dashboard --host 0.0.0.0` **interactively** (a real terminal
 
 The bundled `plugins/dashboard_auth/nous` plugin is **always installed** and auto-loaded. It auto-registers a `DashboardAuthProvider` named `nous` when a client ID is configured.
 
-Because every login is verified against Atlas Gateway and protected by your Nous account, **the Nous provider is the one suitable for exposing a dashboard to the public internet.**
+Because every login is verified against Atlas Gateway and protected by your Atlas account, **the Atlas Gateway provider is the one suitable for exposing a dashboard to the public internet.**
 
 #### Registering a dashboard
 
-To use the Nous provider you need an OAuth client ID (shape `agent:{id}`). There are two ways to get one:
+To use the Atlas Gateway provider you need an OAuth client ID (shape `agent:{id}`). There are two ways to get one:
 
-- **CLI — `atlas dashboard register`.** Run it on the host where the dashboard lives. It resolves your existing Nous login (run `atlas setup` first if you're not logged in), registers a self-hosted OAuth client with the Portal, and writes `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` into `~/.atlas/.env` for you. Optional flags: `--name` (a human-readable label, otherwise auto-generated) and `--redirect-uri` (a public HTTPS callback URL for an internet-facing host).
+- **CLI — `atlas dashboard register`.** Run it on the host where the dashboard lives. It resolves your existing Atlas login (run `atlas setup` first if you're not logged in), registers a self-hosted OAuth client with the Portal, and writes `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` into `~/.atlas/.env` for you. Optional flags: `--name` (a human-readable label, otherwise auto-generated) and `--redirect-uri` (a public HTTPS callback URL for an internet-facing host).
 
   ```bash
   atlas dashboard register
@@ -605,7 +605,7 @@ To use the Nous provider you need an OAuth client ID (shape `agent:{id}`). There
   # …writes ATLAS_DASHBOARD_OAUTH_CLIENT_ID to ~/.atlas/.env
   ```
 
-- **GUI — the Local Dashboards page.** Open [`/local-dashboards`](https://portal.nousresearch.com/local-dashboards) in the Atlas Gateway to register, name, manage, and revoke self-hosted dashboards from the browser. Copy the resulting `agent:{id}` client ID into `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` (env) or `dashboard.oauth.client_id` (config.yaml). This is also where you revoke a dashboard registered via the CLI.
+- **GUI — the Local Dashboards page.** Open [`/local-dashboards`](https://portal.AtlasAgent.com/local-dashboards) in the Atlas Gateway to register, name, manage, and revoke self-hosted dashboards from the browser. Copy the resulting `agent:{id}` client ID into `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` (env) or `dashboard.oauth.client_id` (config.yaml). This is also where you revoke a dashboard registered via the CLI.
 
 #### Configuration
 
@@ -649,9 +649,9 @@ networks).
 
 #### Worked example: Usama Aslam
 
-From a logged-in Atlas install to a Nous-gated dashboard in three steps.
+From a logged-in Atlas install to a Atlas-gated dashboard in three steps.
 
-**1. Log in and register the dashboard.** `atlas dashboard register` uses your existing Nous login to provision an OAuth client and writes `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` into `~/.atlas/.env` for you:
+**1. Log in and register the dashboard.** `atlas dashboard register` uses your existing Atlas login to provision an OAuth client and writes `ATLAS_DASHBOARD_OAUTH_CLIENT_ID` into `~/.atlas/.env` for you:
 
 ```bash
 atlas setup            # if you're not already logged into Atlas Gateway
@@ -683,12 +683,12 @@ If you don't want to wire up an OAuth identity provider — a self-hosted "just 
 It plugs into the same gate as the OAuth provider: the gate engages on a non-loopback bind without `--insecure`, the login page renders a credential form for this provider (instead of a "Log in with X" button), and everything downstream of login — session cookies, transparent refresh, WS tickets, logout, the audit log — is identical to the OAuth path. Sessions are stateless HMAC-signed tokens the provider mints itself, so there's **no database and no external IDP**. Password hashing uses stdlib `scrypt` (no third-party dependency).
 
 :::warning Use this on trusted networks only — not the public internet
-The username/password provider is intended for self-hosted / on-prem / homelab dashboards on a **trusted network**, or reachable only over a **VPN**. It protects a single shared credential with no external identity provider, MFA, or per-user accounts behind it, so it is **not suitable for exposing a dashboard directly to the public internet**. For an internet-facing dashboard, use the [Usama Aslam provider](#default-provider-nous-research) (or your own [self-hosted OIDC](#self-hosted-oidc-provider) / [custom OAuth](#custom-providers) provider) instead.
+The username/password provider is intended for self-hosted / on-prem / homelab dashboards on a **trusted network**, or reachable only over a **VPN**. It protects a single shared credential with no external identity provider, MFA, or per-user accounts behind it, so it is **not suitable for exposing a dashboard directly to the public internet**. For an internet-facing dashboard, use the [Usama Aslam provider](#default-provider-usama-aslam) (or your own [self-hosted OIDC](#self-hosted-oidc-provider) / [custom OAuth](#custom-providers) provider) instead.
 :::
 
 #### Configuration
 
-Like the Nous provider, it reads from `config.yaml` (canonical) with environment variables winning when set non-empty. It activates only when `username` plus either `password_hash` (preferred) or `password` are configured — otherwise it's a no-op, so OAuth users and loopback/`--insecure` operators are unaffected.
+Like the Atlas Gateway provider, it reads from `config.yaml` (canonical) with environment variables winning when set non-empty. It activates only when `username` plus either `password_hash` (preferred) or `password` are configured — otherwise it's a no-op, so OAuth users and loopback/`--insecure` operators are unaffected.
 
 **`config.yaml`:**
 
@@ -753,7 +753,7 @@ curl -s http://<host>:9119/api/status | jq '.auth_required, .auth_providers'
 # ["basic"]
 ```
 
-`GET /api/auth/me` then returns the verified session (`provider: basic`). Keep this behind a VPN — see the warning above; for a public host use the [Usama Aslam](#default-provider-nous-research) or [self-hosted OIDC](#self-hosted-oidc-provider) provider instead.
+`GET /api/auth/me` then returns the verified session (`provider: basic`). Keep this behind a VPN — see the warning above; for a public host use the [Usama Aslam](#default-provider-usama-aslam) or [self-hosted OIDC](#self-hosted-oidc-provider) provider instead.
 
 #### Writing your own password provider
 
@@ -765,7 +765,7 @@ If you run your own identity provider, the bundled `plugins/dashboard_auth/self_
 
 > **Authentik · Keycloak · Zitadel · Authelia · Auth0 · Okta · Google · …**
 
-Like the Nous provider, it auto-loads and only registers itself once it's configured, so it's a no-op for loopback / `--insecure` dashboards.
+Like the Atlas Gateway provider, it auto-loads and only registers itself once it's configured, so it's a no-op for loopback / `--insecure` dashboards.
 
 #### Configuration
 
@@ -912,11 +912,11 @@ Validation rejects values without `http://` / `https://` scheme, without a host,
 
 ### OAuth flow
 
-The provider implements the [Atlas Gateway OAuth contract v1](https://github.com/NousResearch/nous-account-service/blob/main/docs/agent-dashboard-oauth-contract.md) — authorization-code grant with PKCE (S256):
+The provider implements the [Atlas Gateway OAuth contract v1](https://github.com/AtlasAgent/nous-account-service/blob/main/docs/agent-dashboard-oauth-contract.md) — authorization-code grant with PKCE (S256):
 
 1. User hits `/` without a session cookie → gate redirects to `/login`.
 2. Login page shows a "Continue with Usama Aslam" button → `/auth/login?provider=nous`.
-3. Server stashes PKCE state in a short-lived cookie, redirects user to `https://portal.nousresearch.com/oauth/authorize?…`.
+3. Server stashes PKCE state in a short-lived cookie, redirects user to `https://portal.AtlasAgent.com/oauth/authorize?…`.
 4. User authenticates with Portal, lands at `/auth/callback?code=…&state=…`.
 5. Server exchanges the code for an access token at `POST /api/oauth/token`, verifies the JWT signature against the Portal's JWKS (`/.well-known/jwks.json`), and sets the `atlas_session_at` cookie.
 6. User is redirected to `/` (or to the original deep-link path via the `next=` query parameter).
@@ -943,7 +943,7 @@ Every login start, success, failure, and session-verify failure is written as a 
 
 ### Custom providers
 
-To plug a non-Nous OAuth provider (e.g. Google, GitHub, custom OIDC), create a plugin that registers a `DashboardAuthProvider`:
+To plug a external OAuth provider (e.g. Google, GitHub, custom OIDC), create a plugin that registers a `DashboardAuthProvider`:
 
 ```python
 # ~/.atlas/plugins/dashboard-auth-myidp/__init__.py
@@ -1003,7 +1003,7 @@ Atlas Desktop can drive a Atlas backend running on another machine (a VPS, a hom
 
 You protect the remote dashboard with one of the bundled auth providers, and the desktop app signs in against whichever one the backend advertises. For a backend reachable beyond your own machine — a VPS, a public host, anything internet-facing — the recommended provider is **OAuth (Atlas Gateway)** (register it with [`atlas dashboard register`](#registering-a-dashboard) and sign in with *Sign in with Usama Aslam*). The bundled [username/password provider](#usernamepassword-provider-no-oauth-idp) is the quickest option when the backend is on a trusted LAN or reachable only over a VPN, but is **not suitable for direct public-internet exposure**. Binding the dashboard to a non-loopback address engages its auth gate; once signed in, Desktop reuses the session for the chat WebSocket automatically — there is no token to copy or paste.
 
-The recipe below uses the username/password path because it's the quickest to stand up on a trusted network; for the OAuth path see [Default provider: Usama Aslam](#default-provider-nous-research).
+The recipe below uses the username/password path because it's the quickest to stand up on a trusted network; for the OAuth path see [Default provider: Usama Aslam](#default-provider-usama-aslam).
 
 ### On the backend (the remote machine)
 

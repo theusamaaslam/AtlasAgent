@@ -19,15 +19,15 @@ import React, {
 } from "react";
 import { api, fetchJSON, authedFetch, buildWsUrl, buildWsAuthParam } from "@/lib/api";
 import { cn, timeAgo, isoTimeAgo } from "@/lib/utils";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@nous-research/ui/ui/components/card";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { Separator } from "@nous-research/ui/ui/components/separator";
-import { Tabs, TabsList, TabsTrigger } from "@nous-research/ui/ui/components/tabs";
+import { Badge } from "@atlas/ui/ui/components/badge";
+import { Button } from "@atlas/ui/ui/components/button";
+import { Checkbox } from "@atlas/ui/ui/components/checkbox";
+import { Select, SelectOption } from "@atlas/ui/ui/components/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@atlas/ui/ui/components/card";
+import { Input } from "@atlas/ui/ui/components/input";
+import { Label } from "@atlas/ui/ui/components/label";
+import { Separator } from "@atlas/ui/ui/components/separator";
+import { Tabs, TabsList, TabsTrigger } from "@atlas/ui/ui/components/tabs";
 import { useI18n } from "@/i18n";
 import { registerSlot, PluginSlot } from "./slots";
 

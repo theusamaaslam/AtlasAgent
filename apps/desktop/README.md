@@ -2,12 +2,12 @@
 
 <p align="center">
   <a href="https://github.com/theusamaaslam/AtlasAgent/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
-  <a href="https://atlas-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-atlas--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs"><img src="https://img.shields.io/badge/Docs-AtlasAgent-FFD700?style=for-the-badge" alt="Documentation"></a>
   <a href="https://github.com/theusamaaslam/AtlasAgent"><img src="https://img.shields.io/badge/GitHub-Atlas_Agent-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
   <a href="https://github.com/theusamaaslam/AtlasAgent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
-**The native desktop app for [Atlas Agent](../../README.md) — the self-improving AI agent from [Usama Aslam](https://nousresearch.com).** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
+**The native desktop app for [Atlas Agent](../../README.md) — the self-improving AI agent created by Usama Aslam.** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
 
 <table>
 <tr><td><b>Chat with the full agent</b></td><td>Streaming responses, live tool activity, structured tool summaries, and the same conversation history as every other Atlas surface.</td></tr>
@@ -34,7 +34,7 @@ It builds and launches the GUI against your existing install — same config, ke
 
 ### Prebuilt installers
 
-Prebuilt installers are built and distributed via [the Atlas Desktop website.](https://atlas-agent.nousresearch.com/).
+Prebuilt installers are built from this repository's release workflow.
 
 ---
 
@@ -110,7 +110,7 @@ rm "$HOME/.atlas/atlas-agent/.atlas-bootstrap-complete"
 # Rebuild a broken Python venv
 rm -rf "$HOME/.atlas/atlas-agent/venv"
 # Reset a stuck macOS microphone prompt (macOS only)
-tccutil reset Microphone com.nousresearch.atlas
+tccutil reset Microphone com.usamaaslam.atlas
 ```
 
 **Windows (PowerShell):**
@@ -129,7 +129,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\atlas\atlas-agent\venv"
 ## Community
 
 - Project: [github.com/theusamaaslam/AtlasAgent](https://github.com/theusamaaslam/AtlasAgent)
-- 📖 [Documentation](https://atlas-agent.nousresearch.com/docs/)
+- 📖 [Documentation](https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs)
 - 🐛 [Issues](https://github.com/theusamaaslam/AtlasAgent/issues)
 
 ---
@@ -138,4 +138,4 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\atlas\atlas-agent\venv"
 
 MIT — see [LICENSE](../../LICENSE).
 
-Built by [Usama Aslam](https://nousresearch.com).
+Created by Usama Aslam.

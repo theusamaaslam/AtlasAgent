@@ -29,7 +29,7 @@ export const composerDockCard = (edge: 'bottom' | 'top' = 'top') =>
  *  so it renders identically whether mounted inside the composer or portaled out
  *  of it. Visual skin only — consumers add their own size/position/padding. */
 export const composerPanelCard = cn(
-  'rounded-2xl border border-border/65 shadow-nous text-[length:var(--conversation-tool-font-size)]',
+  'rounded-2xl border border-border/65 shadow-atlas text-[length:var(--conversation-tool-font-size)]',
   'bg-[color-mix(in_srgb,var(--dt-card)_72%,transparent)]',
   composerSurfaceGlass
 )

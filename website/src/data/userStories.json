@@ -36,7 +36,7 @@
     "id": "vectorize-hindsight",
     "source": "linkedin",
     "author": "Vectorize.io",
-    "url": "https://www.linkedin.com/posts/vectorizeio_connect-your-nous-research-atlas-agent-to-activity-7447280348457107456-_Y7L",
+    "url": "https://www.linkedin.com/posts/vectorizeio_connect-your-Atlas-atlas-agent-to-activity-7447280348457107456-_Y7L",
     "date": "2026",
     "category": "integrations",
     "headline": "Hindsight Cloud memory, connected",
@@ -491,7 +491,7 @@
     "date": "2026-04-14",
     "category": "personal-assistant",
     "headline": "Sometimes Atlas Agent melts my heart",
-    "quote": "Sometimes Atlas Agent melts my heart @NousResearch.",
+    "quote": "Sometimes Atlas Agent melts my heart @AtlasAgent.",
     "size": "sm"
   },
   {
@@ -997,14 +997,14 @@
     "date": "2026",
     "category": "dev-workflow",
     "headline": "5 apps built and launched in a single day",
-    "quote": "I've switched to Nous-Research Atlas-Agent from previous Agents I've been experimenting with. Atlas is unique in that it self-learns. Within a single day, I built and launched five small applications.",
+    "quote": "I've switched to Atlas Atlas-Agent from previous Agents I've been experimenting with. Atlas is unique in that it self-learns. Within a single day, I built and launched five small applications.",
     "size": "sm"
   },
   {
     "id": "firecrawl-integration",
     "source": "linkedin",
     "author": "Firecrawl",
-    "url": "https://www.linkedin.com/posts/firecrawl_atlas-agent-by-nous-research-can-now-scrape-activity-7445140884683395072-sm2d",
+    "url": "https://www.linkedin.com/posts/firecrawl_atlas-agent-by-Atlas-can-now-scrape-activity-7445140884683395072-sm2d",
     "date": "2026",
     "category": "integrations",
     "headline": "Firecrawl for scrape/search/browse",
@@ -1752,7 +1752,7 @@
     "id": "discord-denis-skripnik-nvda-translator",
     "source": "discord",
     "author": "@denis_skripnik",
-    "url": "https://github.com/teknium1/nous-discord-archive/blob/main/archives/community-projects-showcase/1477982563099349036-AI-translater-NVDA-addon-with-Nous-research.txt",
+    "url": "https://github.com/teknium1/nous-discord-archive/blob/main/archives/community-projects-showcase/1477982563099349036-AI-translater-NVDA-addon-with-Atlas.txt",
     "date": "",
     "category": "general",
     "headline": "Blind since birth, I built an NVDA translator addon with Nous",
@@ -1763,7 +1763,7 @@
     "id": "kisztof-modal",
     "source": "blog",
     "author": "Krzysztof Słomka (Medium)",
-    "url": "https://kisztof.medium.com/atlas-agent-review-nous-researchs-self-improving-ai-agent-e72bc244435a",
+    "url": "https://kisztof.medium.com/atlas-agent-review-Atlass-self-improving-ai-agent-e72bc244435a",
     "date": "2026-04-20",
     "category": "dev-workflow",
     "headline": "Telegram → Modal serverless. 40% faster on research tasks.",
@@ -1818,11 +1818,11 @@
     "id": "reddit-windows-wrapper",
     "source": "reddit",
     "author": "r/SideProject",
-    "url": "https://www.reddit.com/r/SideProject/comments/1sdaojm/i_took_the_nousresearch_atlas_agent_and_built_a/",
+    "url": "https://www.reddit.com/r/SideProject/comments/1sdaojm/i_took_the_AtlasAgent_atlas_agent_and_built_a/",
     "date": "2026",
     "category": "meta",
     "headline": "Native Windows app wrapper for Atlas",
-    "quote": "The NousResearch team built Atlas Agent — an open-source agentic AI system with tools, skills, memory, and multi-platform messaging. It's good. So I built a native Windows app around it.",
+    "quote": "The AtlasAgent team built Atlas Agent — an open-source agentic AI system with tools, skills, memory, and multi-platform messaging. It's good. So I built a native Windows app around it.",
     "size": "sm"
   },
   {
@@ -2107,7 +2107,7 @@
     "date": "2026-03-16",
     "category": "enterprise",
     "headline": "Why 95% of AI users see no results — Hype's Atlas deep dive",
-    "quote": "Of the 95% of people who use AI, only 5% see real results. Hype's VP of AI, @glitch_, on why the gap isn't the models, but the architecture. Read his deep dive on building with Atlas Agent, @NousResearch, agent swarms, experiment loops, and what actually compounds.",
+    "quote": "Of the 95% of people who use AI, only 5% see real results. Hype's VP of AI, @glitch_, on why the gap isn't the models, but the architecture. Read his deep dive on building with Atlas Agent, @AtlasAgent, agent swarms, experiment loops, and what actually compounds.",
     "size": "md",
     "id": "x-hypepartners-why-of"
   },
@@ -2192,7 +2192,7 @@
     "id": "reddit-hermify",
     "source": "reddit",
     "author": "r/vibecoding",
-    "url": "https://www.reddit.com/r/vibecoding/comments/1slhhj1/i_took_the_nousresearch_atlas_agent_and_built_a/",
+    "url": "https://www.reddit.com/r/vibecoding/comments/1slhhj1/i_took_the_AtlasAgent_atlas_agent_and_built_a/",
     "date": "2026",
     "category": "meta",
     "headline": "Hermify: managed hosting for Atlas",
@@ -2427,7 +2427,7 @@
     "date": "2026-04-21",
     "category": "business-ops",
     "headline": "Live inventory tracking on Atlas",
-    "quote": "With Atlas (built by @NousResearch) providing 40+ built-in tools, persistent memory, and subagent parallelization, the development experience is best-in-class. Built for operations like inventory tracking where context, memory, and real-time inputs are non-negotiable.",
+    "quote": "With Atlas (built by @AtlasAgent) providing 40+ built-in tools, persistent memory, and subagent parallelization, the development experience is best-in-class. Built for operations like inventory tracking where context, memory, and real-time inputs are non-negotiable.",
     "size": "md"
   },
   {
@@ -2493,7 +2493,7 @@
     "date": "2026-04-21",
     "category": "creative",
     "headline": "My Atlas agent makes movies now",
-    "quote": "My @NousResearch atlas-agent can make movies now using @browser_use skill. No API needed. No human intervention. I told it to set the mood, action, camera movement, dialog and overall story — it used Browser-Use and Seedance 2.0 to generate a video.",
+    "quote": "My @AtlasAgent atlas-agent can make movies now using @browser_use skill. No API needed. No human intervention. I told it to set the mood, action, camera movement, dialog and overall story — it used Browser-Use and Seedance 2.0 to generate a video.",
     "size": "md"
   },
   {

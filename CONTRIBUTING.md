@@ -93,7 +93,7 @@ The reason is maintenance load, not quality. Every external product absorbed int
 
 Publish these as a **standalone plugin repo** instead:
 
-- Implement the relevant ABC and use the existing plugin discovery path (`~/.atlas/plugins/`, project `.atlas/plugins/`, or a pip entry point) — see [Build a Atlas Plugin](https://atlas-agent.nousresearch.com/docs/guides/build-a-atlas-plugin)
+- Implement the relevant ABC and use the existing plugin discovery path (`~/.atlas/plugins/`, project `.atlas/plugins/`, or a pip entry point) — see the plugin guide in `website/docs/guides/build-a-atlas-plugin.md`
 - Register lifecycle hooks (`pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_start`, `on_session_end`), tools (`ctx.register_tool`), and CLI subcommands (`ctx.register_cli_command`) through the surface we already expose — no core changes needed
 - If your plugin needs a capability the framework doesn't expose, that's a feature request to **widen the generic plugin surface** (a new hook or `ctx` method) — never special-case your plugin in core
 - Promote it through the Atlas Agent repository so users can find and install it
@@ -124,7 +124,9 @@ development environment on the same layout the CLI, updater, lazy dependency
 installer, gateway, and docs assume.
 
 ```bash
-curl -fsSL https://atlas-agent.nousresearch.com/install.sh | bash
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+bash scripts/install.sh
 cd "${ATLAS_HOME:-$HOME/.atlas}/atlas-agent"
 
 # Add dev/test extras on top of the standard install.
@@ -274,7 +276,7 @@ atlas-agent/
 ├── skills/                   # Bundled skills (copied to ~/.atlas/skills/ on install)
 ├── optional-skills/          # Official optional skills (discoverable via hub, not activated by default)
 ├── tests/                    # Test suite
-├── website/                  # Documentation site (atlas-agent.nousresearch.com)
+├── website/                  # Documentation site
 │
 ├── cli-config.yaml.example   # Example configuration (copied to ~/.atlas/config.yaml)
 └── AGENTS.md                 # Development guide for AI coding assistants

@@ -15,9 +15,9 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Typography } from "@nous-research/ui/ui/components/typography/index";
+import { Badge } from "@atlas/ui/ui/components/badge";
+import { Spinner } from "@atlas/ui/ui/components/spinner";
+import { Typography } from "@atlas/ui/ui/components/typography/index";
 import { AtlasLogo } from "@/components/AtlasLogo";
 import { useProfileScope } from "@/contexts/useProfileScope";
 import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";

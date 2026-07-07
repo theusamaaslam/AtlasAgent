@@ -12,13 +12,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@atlas/ui/ui/components/badge";
+import { Button } from "@atlas/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@atlas/ui/ui/components/card";
+import { Input } from "@atlas/ui/ui/components/input";
+import { Spinner } from "@atlas/ui/ui/components/spinner";
+import { Toast } from "@atlas/ui/ui/components/toast";
+import { useToast } from "@atlas/ui/hooks/use-toast";
 import { api } from "@/lib/api";
 import type {
   MemoryFact,

@@ -16,9 +16,9 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Card, CardContent } from "@nous-research/ui/ui/components/card";
+import { Badge } from "@atlas/ui/ui/components/badge";
+import { Button } from "@atlas/ui/ui/components/button";
+import { Card, CardContent } from "@atlas/ui/ui/components/card";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +26,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@nous-research/ui/ui/components/dialog";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
+} from "@atlas/ui/ui/components/dialog";
+import { Input } from "@atlas/ui/ui/components/input";
+import { Spinner } from "@atlas/ui/ui/components/spinner";
+import { Toast } from "@atlas/ui/ui/components/toast";
+import { useToast } from "@atlas/ui/hooks/use-toast";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { api } from "@/lib/api";

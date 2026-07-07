@@ -63,7 +63,7 @@
     "@icons-pack/react-simple-icons": "=13.11.1",
     "@lezer/highlight": "^1.2.3",
     "@nanostores/react": "^1.1.0",
-    "@nous-research/ui": "^0.13.0",
+    "@atlas/ui": "npm:@nous\u002dresearch/ui@^0.13.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@streamdown/code": "^1.1.1",
     "@tabler/icons-react": "^3.41.1",
@@ -148,7 +148,7 @@
   },
   "build": {
     "electronVersion": "40.10.2",
-    "appId": "com.nousresearch.atlas",
+    "appId": "com.usamaaslam.atlas",
     "productName": "Atlas",
     "executableName": "Atlas",
     "protocols": [
@@ -245,7 +245,7 @@
     },
     "linux": {
       "category": "Development",
-      "maintainer": "Usama Aslam <support@nousresearch.com>",
+      "maintainer": "Usama Aslam <support@atlasagent.local>",
       "synopsis": "Native desktop shell for Atlas Agent.",
       "target": [
         "AppImage",

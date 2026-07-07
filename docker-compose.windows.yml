@@ -11,7 +11,7 @@
 #
 services:
   gateway:
-    image: nousresearch/atlas-agent:latest
+    image: ghcr.io/theusamaaslam/atlas-agent:latest
     container_name: atlas
     restart: unless-stopped
     volumes:
@@ -22,7 +22,7 @@ services:
     command: ["gateway", "run"]
 
   dashboard:
-    image: nousresearch/atlas-agent:latest
+    image: ghcr.io/theusamaaslam/atlas-agent:latest
     container_name: atlas-dashboard
     restart: unless-stopped
     depends_on:

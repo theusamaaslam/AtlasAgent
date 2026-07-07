@@ -25,19 +25,19 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { H2 } from "@nous-research/ui/ui/components/typography/h2";
-import { Card, CardContent } from "@nous-research/ui/ui/components/card";
-import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
+import { Badge } from "@atlas/ui/ui/components/badge";
+import { Button } from "@atlas/ui/ui/components/button";
+import { Spinner } from "@atlas/ui/ui/components/spinner";
+import { H2 } from "@atlas/ui/ui/components/typography/h2";
+import { Card, CardContent } from "@atlas/ui/ui/components/card";
+import { Checkbox } from "@atlas/ui/ui/components/checkbox";
+import { Input } from "@atlas/ui/ui/components/input";
+import { Label } from "@atlas/ui/ui/components/label";
+import { Select, SelectOption } from "@atlas/ui/ui/components/select";
+import { Toast } from "@atlas/ui/ui/components/toast";
+import { useToast } from "@atlas/ui/hooks/use-toast";
+import { useConfirmDelete } from "@atlas/ui/hooks/use-confirm-delete";
+import { ConfirmDialog } from "@atlas/ui/ui/components/confirm-dialog";
 import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { AtlasConsoleModal } from "@/components/AtlasConsoleModal";

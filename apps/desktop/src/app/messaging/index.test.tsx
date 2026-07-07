@@ -76,7 +76,7 @@ describe('MessagingView setup-guide link', () => {
   })
 
   it('opens a real docs URL through the validated external opener', async () => {
-    const docsUrl = 'https://atlas-agent.nousresearch.com/docs/user-guide/messaging/teams'
+    const docsUrl = 'https://github.com/theusamaaslam/AtlasAgent/tree/main/website/docs/user-guide/messaging/teams.md'
     getMessagingPlatforms.mockResolvedValue({ platforms: [platform({ docs_url: docsUrl })] })
 
     await renderMessaging()

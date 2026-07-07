@@ -1,4 +1,4 @@
-import { Typography } from "@nous-research/ui/ui/components/typography/index";
+import { Typography } from "@atlas/ui/ui/components/typography/index";
 import { cn } from "@/lib/utils";
 
 export function AtlasLogo({
