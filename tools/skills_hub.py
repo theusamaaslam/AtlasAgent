@@ -3650,10 +3650,9 @@ def check_for_skill_updates(
 
 
 # ---------------------------------------------------------------------------
-# Atlas centralized index source
+# Optional local Atlas index source
 # ---------------------------------------------------------------------------
 
-ATLAS_INDEX_URL = "https://atlas-agent.nousresearch.com/docs/api/skills-index.json"
 ATLAS_INDEX_TTL = 6 * 3600  # 6 hours
 
 
@@ -3661,13 +3660,28 @@ def _atlas_index_cache_file() -> Path:
     return _index_cache_dir() / "atlas-index.json"
 
 
-def _load_atlas_index() -> Optional[dict]:
-    """Fetch the centralized skills index, with local cache.
+def _atlas_index_local_file() -> Optional[Path]:
+    """Return an operator-supplied local skills index path, if configured."""
+    forced = _override("ATLAS_INDEX_PATH")
+    if forced is None:
+        forced = os.environ.get("ATLAS_SKILLS_HUB_ATLAS_INDEX_PATH")
+    if not forced:
+        return None
+    return Path(forced)
 
-    The index is a JSON file hosted on the docs site, rebuilt daily by CI.
-    We cache it locally for ATLAS_INDEX_TTL seconds to avoid repeated
-    downloads within a session.
+
+def _load_atlas_index() -> Optional[dict]:
+    """Load an optional local skills index, with local cache.
+
+    Public AtlasAgent builds do not depend on a hosted skills-index endpoint.
+    Operators can point ATLAS_SKILLS_HUB_ATLAS_INDEX_PATH at a JSON index if
+    they want the zero-API-call search optimization; otherwise this source is
+    simply unavailable and the normal local/GitHub/community sources run.
     """
+    local_index = _atlas_index_local_file()
+    if local_index is None:
+        return None
+
     # Check local cache
     atlas_index_cache_file = _atlas_index_cache_file()
     if atlas_index_cache_file.exists():
@@ -3678,20 +3692,15 @@ def _load_atlas_index() -> Optional[dict]:
         except (OSError, json.JSONDecodeError):
             pass
 
-    # Fetch from docs site
     try:
-        resp = httpx.get(ATLAS_INDEX_URL, timeout=15, follow_redirects=True)
-        if resp.status_code != 200:
-            logger.debug("Atlas index fetch returned %d", resp.status_code)
-            return _load_stale_index_cache()
-        data = resp.json()
-    except (httpx.HTTPError, json.JSONDecodeError) as e:
-        logger.debug("Atlas index fetch failed: %s", e)
-        return _load_stale_index_cache()
+        data = json.loads(local_index.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        logger.debug("Atlas local index load failed: %s", e)
+        return None
 
     # Validate structure
     if not isinstance(data, dict) or "skills" not in data:
-        return _load_stale_index_cache()
+        return None
 
     # Cache locally
     try:
@@ -3715,12 +3724,11 @@ def _load_stale_index_cache() -> Optional[dict]:
 
 
 class AtlasIndexSource(SkillSource):
-    """Skill source backed by the centralized Atlas Skills Index.
+    """Skill source backed by an optional local Atlas Skills Index.
 
-    The index is a JSON catalog published to the docs site and rebuilt
-    daily by CI.  It contains metadata + resolved GitHub paths for every
-    skill, eliminating the need for users to hit the GitHub API for
-    search or path discovery.
+    The index contains metadata + resolved GitHub paths for every skill,
+    eliminating the need for users to hit the GitHub API for search or path
+    discovery when an operator supplies a local index file.
 
     When the index is unavailable, all methods return empty / None so
     downstream sources take over transparently.
@@ -3916,7 +3924,6 @@ def create_source_router(auth: Optional[GitHubAuth] = None) -> List[SkillSource]
 
     sources: List[SkillSource] = [
         OptionalSkillSource(),        # Official optional skills (highest priority)
-        AtlasIndexSource(auth=auth), # Centralized index (search + resolved install paths)
         SkillsShSource(auth=auth),
         WellKnownSkillSource(),
         UrlSource(),                  # Direct HTTP(S) URL to a SKILL.md file
