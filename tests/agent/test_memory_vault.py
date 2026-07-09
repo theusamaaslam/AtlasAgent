@@ -62,7 +62,7 @@ class FakeSessionDB:
         ]
 
 
-def test_memory_vault_sync_includes_creator_memory_and_sessions(tmp_path):
+def test_memory_vault_sync_includes_creator_and_curated_memory_without_session_nodes(tmp_path):
     mem_dir = tmp_path / "memories"
     mem_dir.mkdir()
     (mem_dir / "MEMORY.md").write_text("- The user wants graph memory.\n", encoding="utf-8")
@@ -72,7 +72,7 @@ def test_memory_vault_sync_includes_creator_memory_and_sessions(tmp_path):
 
     assert payload["ok"] is True
     assert payload["stats"]["creators"] == 1
-    assert payload["stats"]["sessions"] == 1
+    assert "sessions" not in payload["stats"]
     assert "interactions" not in payload["stats"]
     assert (tmp_path / "memory-vault" / "Creator" / "Usama Aslam.md").exists()
 
@@ -80,7 +80,7 @@ def test_memory_vault_sync_includes_creator_memory_and_sessions(tmp_path):
     graph = json.loads(graph_path.read_text(encoding="utf-8"))
     titles = {node["title"] for node in graph["nodes"]}
     assert "Usama Aslam" in titles
-    assert any(title.startswith("User 20260706") for title in titles)
+    assert not any(title.startswith("User 20260706") for title in titles)
     assert graph["edges"]
 
 
@@ -94,7 +94,7 @@ def test_memory_vault_sync_includes_fact_nodes_and_source_links(tmp_path):
     )
     store_memory_facts(facts, atlas_home=tmp_path)
 
-    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), chunk_turns=1)
+    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), chunk_turns=1, use_llm=False)
     payload = sync_memory_vault(atlas_home=tmp_path, db=FakeSessionDB())
 
     fact_nodes = [node for node in payload["nodes"] if node["kind"] == "fact"]
@@ -105,7 +105,7 @@ def test_memory_vault_sync_includes_fact_nodes_and_source_links(tmp_path):
     assert payload["stats"]["summaries"] == len(summary_nodes)
     assert any(
         edge["source"] == fact_nodes[0]["id"] and (
-            edge["target"].startswith("session-") or edge["target"].startswith("summary-")
+            edge["target"].startswith("summary-")
         )
         for edge in payload["edges"]
     )

@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from atlas_constants import get_atlas_home
 
@@ -551,16 +551,93 @@ def _summarize_chunk(messages: Sequence[Dict[str, Any]]) -> str:
     return _word_cap(" ".join(pieces), SUMMARY_WORD_LIMIT)
 
 
+_MEMORY_SUMMARY_SYSTEM_PROMPT = (
+    "You write compact long-term memory summaries for Atlas Agent. Summarize only the "
+    "clean user and assistant conversation shown by the user message. Ignore any system "
+    "prompt, tool output, plugin context, or recalled memory if it appears. Capture durable "
+    "user preferences, personal facts, project decisions, corrections, recurring tasks, and "
+    "important context. Do not invent details. Do not include secrets, passwords, API keys, "
+    "or temporary task progress. Return one concise paragraph in English, maximum 200 words."
+)
+
+
+def _response_text(response: Any) -> str:
+    try:
+        return str(response.choices[0].message.content or "")
+    except Exception:
+        return ""
+
+
+def _llm_summarize_chunk(
+    messages: Sequence[Dict[str, Any]],
+    *,
+    main_runtime: Optional[Dict[str, Any]] = None,
+    timeout: Optional[float] = None,
+) -> Optional[str]:
+    if not messages:
+        return None
+    clean_lines = []
+    for msg in messages[:16]:
+        role = str(msg.get("role") or "")
+        if role not in {"user", "assistant"}:
+            continue
+        content = _word_cap(_message_text(msg.get("content")), 140)
+        if content:
+            clean_lines.append(f"{role.upper()} #{msg.get('id') or '?'}: {content}")
+    if not clean_lines:
+        return None
+    try:
+        from agent.agent_runtime_helpers import strip_think_blocks
+        from agent.auxiliary_client import call_llm
+
+        response = call_llm(
+            task="memory_summary",
+            messages=[
+                {"role": "system", "content": _MEMORY_SUMMARY_SYSTEM_PROMPT},
+                {"role": "user", "content": "\n\n".join(clean_lines)},
+            ],
+            temperature=0.2,
+            max_tokens=320,
+            timeout=timeout,
+            main_runtime=main_runtime,
+        )
+        text = strip_think_blocks(None, _response_text(response)).strip().strip('"\'')
+        text = re.sub(r"^summary\s*:\s*", "", text, flags=re.I).strip()
+        text = _word_cap(text, SUMMARY_WORD_LIMIT)
+        return text if len(text.split()) >= 8 else None
+    except Exception as exc:
+        logger.debug("LLM memory summary generation failed; using local fallback: %s", exc, exc_info=True)
+        return None
+
+
 def build_memory_summary(
     messages: Sequence[Dict[str, Any]],
     *,
     session_id: str = "",
     approve_threshold: float = SUMMARY_APPROVE_THRESHOLD,
+    summary_text: Optional[str] = None,
+    llm_summarizer: Optional[Callable[[Sequence[Dict[str, Any]]], Optional[str]]] = None,
+    main_runtime: Optional[Dict[str, Any]] = None,
+    llm_timeout: Optional[float] = None,
+    use_llm: bool = True,
 ) -> Optional[MemorySummary]:
     clean_messages = _eligible_memory_messages(messages)
     if not clean_messages:
         return None
-    text = _summarize_chunk(clean_messages)
+    text = _word_cap(summary_text or "", SUMMARY_WORD_LIMIT) if summary_text else ""
+    extractor = "llm-provided-summary-v2.5" if text else ""
+    if not text and llm_summarizer is not None:
+        try:
+            text = _word_cap(llm_summarizer(clean_messages) or "", SUMMARY_WORD_LIMIT)
+            extractor = "llm-summary-v2.5" if text else ""
+        except Exception as exc:
+            logger.debug("Custom LLM memory summarizer failed; using fallback: %s", exc, exc_info=True)
+    if not text and use_llm:
+        text = _llm_summarize_chunk(clean_messages, main_runtime=main_runtime, timeout=llm_timeout) or ""
+        extractor = "llm-summary-v2.5" if text else ""
+    if not text:
+        text = _summarize_chunk(clean_messages)
+        extractor = "local-fallback-summary-v2.5"
     if not text:
         return None
     first = clean_messages[0]
@@ -582,7 +659,11 @@ def build_memory_summary(
         end_message_id=end_id,
         start_timestamp=first.get("timestamp"),
         end_timestamp=last.get("timestamp"),
-        metadata={"summary_words": len(text.split()), "extractor": "summary-v2.5"},
+        metadata={
+            "summary_words": len(text.split()),
+            "extractor": extractor,
+            "generated_by": "llm" if extractor.startswith("llm") else "local_fallback",
+        },
     )
 
 
@@ -863,6 +944,8 @@ def summarize_session_memory(
     session_limit: int = 200,
     chunk_turns: int = SUMMARY_TURN_CHUNK,
     approve_threshold: float = SUMMARY_APPROVE_THRESHOLD,
+    main_runtime: Optional[Dict[str, Any]] = None,
+    use_llm: bool = True,
 ) -> Dict[str, int]:
     """Create compact memory summaries for unsummarized session chunks."""
     counts = {
@@ -930,6 +1013,8 @@ def summarize_session_memory(
                         chunk,
                         session_id=session_id,
                         approve_threshold=approve_threshold,
+                        main_runtime=main_runtime,
+                        use_llm=use_llm,
                     )
                     if not summary:
                         continue
@@ -971,6 +1056,8 @@ def consolidate_turn_facts(
     session_id: str = "",
     messages: Optional[Sequence[Dict[str, Any]]] = None,
     atlas_home: Optional[Path] = None,
+    main_runtime: Optional[Dict[str, Any]] = None,
+    use_llm: bool = True,
 ) -> Dict[str, int]:
     """Extract immediate explicit facts and summarize every few chat turns."""
     counts = {
@@ -1000,7 +1087,7 @@ def consolidate_turn_facts(
                     seen_users += 1
                 if seen_users >= SUMMARY_TURN_CHUNK:
                     break
-            summary = build_memory_summary(chunk, session_id=session_id)
+            summary = build_memory_summary(chunk, session_id=session_id, main_runtime=main_runtime, use_llm=use_llm)
             if summary:
                 summary_counts = store_memory_summaries([summary], atlas_home=atlas_home)
                 counts["summaries"] += summary_counts["created"]
@@ -1020,6 +1107,8 @@ def consolidate_session_facts(
     db: Any = None,
     session_limit: int = 200,
     approve_threshold: float = 0.78,
+    main_runtime: Optional[Dict[str, Any]] = None,
+    use_llm: bool = True,
 ) -> Dict[str, int]:
     """Process sessions into compact summaries, then derive fact candidates."""
     summary_counts = summarize_session_memory(
@@ -1028,6 +1117,8 @@ def consolidate_session_facts(
         session_limit=session_limit,
         chunk_turns=1,
         approve_threshold=SUMMARY_APPROVE_THRESHOLD,
+        main_runtime=main_runtime,
+        use_llm=use_llm,
     )
     counts = {
         "created": int(summary_counts.get("facts_created", 0)),
@@ -1475,6 +1566,26 @@ def mark_conflicting_facts_for_query(
                  WHERE id = ?
                 """,
                 (STALE, time.time(), json.dumps(meta, sort_keys=True), fact.id),
+            )
+            changed += 1
+        summary_rows = conn.execute(
+            "SELECT * FROM memory_summaries WHERE status = ?",
+            (APPROVED,),
+        ).fetchall()
+        for row in summary_rows:
+            summary = _row_to_summary(row)
+            if len(q_tokens & set(_tokens(summary.text))) < 2:
+                continue
+            meta = dict(summary.metadata)
+            meta["stale_reason"] = "Possible conflict with newer user message"
+            meta["conflict_query"] = query[:500]
+            conn.execute(
+                """
+                UPDATE memory_summaries
+                   SET status = ?, updated_at = ?, metadata_json = ?
+                 WHERE id = ?
+                """,
+                (STALE, time.time(), json.dumps(meta, sort_keys=True), summary.id),
             )
             changed += 1
         conn.commit()

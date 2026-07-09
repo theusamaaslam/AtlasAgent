@@ -3374,6 +3374,7 @@ class AIAgent:
                 response_text,
                 session_id=self.session_id or "",
                 messages=messages,
+                main_runtime=self._current_main_runtime(),
             )
         except Exception:
             logger.debug("Local memory fact consolidation failed", exc_info=True)

@@ -204,61 +204,6 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
                 )
             )
 
-    close_db = False
-    if db is None:
-        try:
-            from atlas_state import SessionDB
-
-            db = SessionDB(read_only=True)
-            close_db = True
-        except Exception:
-            logger.debug("Could not open session DB for memory vault", exc_info=True)
-            db = None
-    if db is not None:
-        try:
-            try:
-                sessions = db.list_sessions_rich(
-                    limit=session_limit,
-                    include_archived=True,
-                    include_children=True,
-                    project_compression_tips=False,
-                    order_by_last_active=True,
-                )
-            except TypeError:
-                sessions = db.list_sessions_rich(limit=session_limit)
-
-            for session in sessions:
-                session_id = str(session.get("id") or "")
-                if not session_id:
-                    continue
-                title = str(session.get("title") or session.get("preview") or f"Session {session_id[:8]}").strip()
-                session_node_id = f"session-{_slug(session_id)}"
-                session_title = f"Session {session_id[:8]}"
-                session_text = (
-                    f"{title}\n\nSource: {session.get('source') or 'unknown'}\n"
-                    f"Model: {session.get('model') or 'unknown'}"
-                )
-                nodes.append(
-                    VaultNode(
-                        id=session_node_id,
-                        kind="session",
-                        title=session_title,
-                        path=f"Sessions/{_note_name(session_title, session_node_id)}",
-                        text=session_text,
-                        source=str(session.get("source") or ""),
-                        timestamp=session.get("started_at"),
-                        session_id=session_id,
-                        topics=_extract_topics(title),
-                    )
-                )
-
-        finally:
-            if close_db:
-                try:
-                    db.close()
-                except Exception:
-                    pass
-
     try:
         from agent.memory_facts import list_memory_facts, list_memory_summaries
 
@@ -271,8 +216,6 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
             title = f"Summary {idx}"
             session_id = str(summary.get("source_session_id") or "")
             links = []
-            if session_id:
-                links.append(f"session-{_slug(session_id)}")
             nodes.append(
                 VaultNode(
                     id=summary_id,
@@ -304,8 +247,6 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
             session_id = str(fact.get("source_session_id") or "")
             source_message_id = str(fact.get("source_message_id") or "")
             links = []
-            if session_id:
-                links.append(f"session-{_slug(session_id)}")
             summary_id = (fact.get("metadata") or {}).get("source_summary_id")
             if summary_id:
                 links.append(str(summary_id))
@@ -431,7 +372,7 @@ def _write_index(vault: Path, nodes: List[VaultNode]) -> None:
         "",
         "# Atlas Memory",
         "",
-        "Generated Obsidian vault for Atlas Agent memory and interactions.",
+        "Generated Obsidian vault for Atlas Agent summary and fact memory.",
         "",
         "## Creator",
         "",
@@ -443,7 +384,7 @@ def _write_index(vault: Path, nodes: List[VaultNode]) -> None:
     for kind in sorted(counts):
         lines.append(f"- {kind}: {counts[kind]}")
     lines.extend(["", "## Main Areas", "", "- [[Usama Aslam]]"])
-    for title in ("Curated Memory", "User Profile", "Sessions", "Summaries", "Facts", "Topics"):
+    for title in ("Curated Memory", "User Profile", "Summaries", "Facts", "Topics"):
         lines.append(f"- {title}")
     (vault / "Atlas Memory.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -479,10 +420,8 @@ def sync_memory_vault(
 
     plural = {
         "creator": "creators",
-        "interaction": "interactions",
         "fact": "facts",
         "memory": "memories",
-        "session": "sessions",
         "summary": "summaries",
         "topic": "topics",
         "user": "user_profile",

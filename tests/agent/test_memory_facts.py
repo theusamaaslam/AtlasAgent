@@ -194,6 +194,7 @@ def test_summary_excludes_system_tool_and_recalled_memory(tmp_path):
             {"id": 4, "role": "tool", "content": "tool output should not appear"},
         ],
         session_id="s1",
+        use_llm=False,
     )
 
     assert summary is not None
@@ -204,8 +205,25 @@ def test_summary_excludes_system_tool_and_recalled_memory(tmp_path):
     assert "Mina" in summary.text
 
 
+def test_memory_summary_uses_llm_summarizer_when_available(tmp_path):
+    summary = build_memory_summary(
+        [
+            {"id": 1, "role": "user", "content": "Mina is the launch designer for the Atlas memory project."},
+            {"id": 2, "role": "assistant", "content": "Noted for durable project memory."},
+        ],
+        session_id="s1",
+        llm_summarizer=lambda _messages: "The user said Mina is the launch designer for the Atlas memory project.",
+        use_llm=False,
+    )
+
+    assert summary is not None
+    assert summary.metadata["generated_by"] == "llm"
+    assert summary.metadata["extractor"] == "llm-summary-v2.5"
+    assert "Mina" in summary.text
+
+
 def test_summarize_session_memory_and_semantic_recall(tmp_path):
-    res = summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1)
+    res = summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1, use_llm=False)
 
     assert res["summaries"] >= 1
     summaries = list_memory_summaries(atlas_home=tmp_path)["summaries"]
@@ -222,7 +240,7 @@ def test_summarize_session_memory_and_semantic_recall(tmp_path):
 
 
 def test_archive_search_and_embedding_rebuild_are_graceful(tmp_path):
-    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1)
+    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1, use_llm=False)
 
     archive = search_memory_archive("Obsidian graph", atlas_home=tmp_path)
     assert archive["ok"] is True

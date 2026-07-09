@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent, ReactNode } from "react";
 import {
   Brain,
   Check,
@@ -7,6 +7,8 @@ import {
   Database,
   ExternalLink,
   FolderOpen,
+  Pause,
+  Play,
   RefreshCw,
   Search,
   Trash2,
@@ -51,6 +53,16 @@ function statEntries(status: MemoryVaultStatus | null): Array<[string, number]> 
   return Object.entries(status?.stats ?? {}).sort(([a], [b]) => a.localeCompare(b));
 }
 
+interface GraphParticle {
+  node: MemoryGraphNode;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
+
+const GRAPH_NODE_KINDS = new Set(["creator", "summary", "fact", "topic"]);
+
 function GraphPreview({
   graph,
   selected,
@@ -60,114 +72,186 @@ function GraphPreview({
   selected: string | null;
   onSelect: (node: MemoryGraphNode) => void;
 }) {
-  const nodes = useMemo(() => (graph?.nodes ?? []).slice(0, 140), [graph]);
-  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
-  const layout = useMemo(() => {
-    const centerX = 420;
-    const centerY = 250;
-    const radius = 185;
-    return nodes.map((node, index) => {
-      const angle = (Math.PI * 2 * index) / Math.max(nodes.length, 1);
-      const kindOffset =
-        node.kind === "creator" ? 0 : node.kind === "topic" ? 42 : node.kind === "interaction" ? 18 : -18;
-      return {
-        node,
-        x: centerX + Math.cos(angle) * (radius + kindOffset),
-        y: centerY + Math.sin(angle) * (radius + kindOffset),
-      };
-    });
-  }, [nodes]);
-  const position = useMemo(
-    () => new Map(layout.map((item) => [item.node.id, item])),
-    [layout],
-  );
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const dragIdRef = useRef<string | null>(null);
+  const [playing, setPlaying] = useState(true);
+  const visibleNodes = useMemo(() => {
+    const graphNodes = graph?.nodes ?? [];
+    const memoryNodes = graphNodes.filter((node) => GRAPH_NODE_KINDS.has(node.kind));
+    return (memoryNodes.length ? memoryNodes : graphNodes).slice(0, 180);
+  }, [graph]);
+  const byId = useMemo(() => new Map(visibleNodes.map((node) => [node.id, node])), [visibleNodes]);
   const edges = useMemo(
     () =>
       (graph?.edges ?? [])
         .filter((edge) => byId.has(edge.source) && byId.has(edge.target))
-        .slice(0, 260),
+        .slice(0, 360),
     [byId, graph],
   );
+  const [particles, setParticles] = useState<GraphParticle[]>([]);
 
-  if (!nodes.length) {
-    return (
-      <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">
-        Sync the vault to draw the graph.
-      </div>
+  useEffect(() => {
+    const centerX = 420;
+    const centerY = 250;
+    setParticles(
+      visibleNodes.map((node, index) => {
+        const angle = (Math.PI * 2 * index) / Math.max(visibleNodes.length, 1);
+        const ring = node.kind === "topic" ? 210 : node.kind === "creator" ? 32 : 132;
+        return { node, x: centerX + Math.cos(angle) * ring, y: centerY + Math.sin(angle) * ring, vx: 0, vy: 0 };
+      }),
     );
+  }, [visibleNodes]);
+
+  useEffect(() => {
+    if (!playing || !particles.length) return undefined;
+    const tick = () => {
+      setParticles((current) => {
+        const next = current.map((item) => ({ ...item }));
+        const lookup = new Map(next.map((item) => [item.node.id, item]));
+        for (const edge of edges) {
+          const a = lookup.get(edge.source);
+          const b = lookup.get(edge.target);
+          if (!a || !b) continue;
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const distance = Math.max(24, Math.hypot(dx, dy));
+          const target = a.node.kind === "summary" || b.node.kind === "summary" ? 96 : 132;
+          const force = (distance - target) * 0.0022;
+          const fx = (dx / distance) * force;
+          const fy = (dy / distance) * force;
+          if (dragIdRef.current !== a.node.id) {
+            a.vx += fx;
+            a.vy += fy;
+          }
+          if (dragIdRef.current !== b.node.id) {
+            b.vx -= fx;
+            b.vy -= fy;
+          }
+        }
+        for (let i = 0; i < next.length; i += 1) {
+          for (let j = i + 1; j < next.length; j += 1) {
+            const a = next[i];
+            const b = next[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const distance = Math.max(18, Math.hypot(dx, dy));
+            const repel = 34 / (distance * distance);
+            const fx = (dx / distance) * repel;
+            const fy = (dy / distance) * repel;
+            if (dragIdRef.current !== a.node.id) {
+              a.vx -= fx;
+              a.vy -= fy;
+            }
+            if (dragIdRef.current !== b.node.id) {
+              b.vx += fx;
+              b.vy += fy;
+            }
+          }
+        }
+        for (const item of next) {
+          if (dragIdRef.current === item.node.id) continue;
+          item.vx += (420 - item.x) * 0.0009;
+          item.vy += (250 - item.y) * 0.0009;
+          item.vx *= 0.88;
+          item.vy *= 0.88;
+          item.x = Math.min(805, Math.max(35, item.x + item.vx));
+          item.y = Math.min(465, Math.max(35, item.y + item.vy));
+        }
+        return next;
+      });
+      frameRef.current = window.requestAnimationFrame(tick);
+    };
+    frameRef.current = window.requestAnimationFrame(tick);
+    return () => {
+      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    };
+  }, [edges, particles.length, playing]);
+
+  const pointForEvent = (event: PointerEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 420, y: 250 };
+    const rect = svg.getBoundingClientRect();
+    return { x: ((event.clientX - rect.left) / rect.width) * 840, y: ((event.clientY - rect.top) / rect.height) * 500 };
+  };
+
+  const position = useMemo(() => new Map(particles.map((item) => [item.node.id, item])), [particles]);
+
+  if (!visibleNodes.length) {
+    return <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">Sync the vault to draw the graph.</div>;
   }
 
   return (
-    <svg
-      role="img"
-      aria-label="Memory graph"
-      viewBox="0 0 840 500"
-      className="h-[420px] w-full max-w-full"
-    >
-      <defs>
-        <radialGradient id="memoryGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#eef0fb" stopOpacity="0.35" />
-        </radialGradient>
-      </defs>
-      <rect width="840" height="500" rx="22" fill="url(#memoryGlow)" />
-      {edges.map((edge, index) => {
-        const a = position.get(edge.source);
-        const b = position.get(edge.target);
-        if (!a || !b) return null;
-        return (
-          <line
-            key={`${edge.source}-${edge.target}-${index}`}
-            x1={a.x}
-            y1={a.y}
-            x2={b.x}
-            y2={b.y}
-            stroke="#b5b9e8"
-            strokeOpacity="0.38"
-            strokeWidth="1"
-          />
-        );
-      })}
-      {layout.map(({ node, x, y }) => {
-        const style = KIND_STYLES[node.kind] ?? KIND_STYLES.interaction;
-        const active = selected === node.id;
-        const size = node.kind === "creator" ? 15 : node.kind === "topic" ? 10 : 8;
-        return (
-          <g
-            key={node.id}
-            className="cursor-pointer"
-            onClick={() => onSelect(node)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") onSelect(node);
-            }}
-            tabIndex={0}
-            role="button"
-            aria-label={node.title}
-          >
-            <circle
-              cx={x}
-              cy={y}
-              r={active ? size + 5 : size}
-              fill={style.fill}
-              stroke={style.stroke}
-              strokeWidth={active ? 4 : 2}
-              opacity={node.kind === "interaction" ? 0.78 : 0.96}
-            />
-            {(active || node.kind === "creator") && (
-              <text
-                x={x + 14}
-                y={y + 5}
-                fill="#252238"
-                fontSize="13"
-                fontFamily="ui-sans-serif, system-ui"
-              >
-                {node.title.slice(0, 34)}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-white/70">
+      <div className="absolute right-3 top-3 z-10 flex gap-2">
+        <Button size="sm" ghost prefix={playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />} onClick={() => setPlaying((value) => !value)}>
+          {playing ? "Pause" : "Play"}
+        </Button>
+      </div>
+      <svg
+        ref={svgRef}
+        role="img"
+        aria-label="Memory graph"
+        viewBox="0 0 840 500"
+        className="h-[420px] w-full max-w-full touch-none"
+        onPointerMove={(event) => {
+          const dragId = dragIdRef.current;
+          if (!dragId) return;
+          const point = pointForEvent(event);
+          setParticles((current) => current.map((item) => (item.node.id === dragId ? { ...item, x: point.x, y: point.y, vx: 0, vy: 0 } : item)));
+        }}
+        onPointerUp={() => {
+          dragIdRef.current = null;
+        }}
+        onPointerLeave={() => {
+          dragIdRef.current = null;
+        }}
+      >
+        <defs>
+          <radialGradient id="memoryGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#eef0fb" stopOpacity="0.35" />
+          </radialGradient>
+        </defs>
+        <rect width="840" height="500" rx="22" fill="url(#memoryGlow)" />
+        {edges.map((edge, index) => {
+          const a = position.get(edge.source);
+          const b = position.get(edge.target);
+          if (!a || !b) return null;
+          return <line key={`${edge.source}-${edge.target}-${index}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#9fa5e3" strokeOpacity="0.42" strokeWidth="1.15" />;
+        })}
+        {particles.map(({ node, x, y }) => {
+          const style = KIND_STYLES[node.kind] ?? KIND_STYLES.summary;
+          const active = selected === node.id;
+          const size = node.kind === "creator" ? 15 : node.kind === "topic" ? 9 : node.kind === "summary" ? 11 : 8;
+          return (
+            <g
+              key={node.id}
+              className="cursor-grab active:cursor-grabbing"
+              onPointerDown={(event) => {
+                dragIdRef.current = node.id;
+                onSelect(node);
+                event.currentTarget.setPointerCapture(event.pointerId);
+              }}
+              onClick={() => onSelect(node)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") onSelect(node);
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={node.title}
+            >
+              <circle cx={x} cy={y} r={active ? size + 5 : size} fill={style.fill} stroke={style.stroke} strokeWidth={active ? 4 : 2} opacity={0.96} />
+              {(active || node.kind === "creator" || node.kind === "summary") && (
+                <text x={x + 14} y={y + 5} fill="#252238" fontSize="12" fontFamily="ui-sans-serif, system-ui">
+                  {node.title.slice(0, 38)}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
