@@ -62,7 +62,7 @@ bash scripts/install.sh
 ### Linux, macOS, WSL2, Termux
 
 ```bash
-python -m pip install atlas-agent
+python -m pip install git+https://github.com/theusamaaslam/AtlasAgent.git
 ```
 
 ### Windows (native, PowerShell)
@@ -72,7 +72,7 @@ python -m pip install atlas-agent
 Run this in PowerShell:
 
 ```powershell
-py -m pip install atlas-agent
+py -m pip install git+https://github.com/theusamaaslam/AtlasAgent.git
 ```
 
 The installer handles everything: uv, Python 3.11, Node.js, ripgrep, ffmpeg, **and a portable Git Bash** (MinGit, unpacked to `%LOCALAPPDATA%\atlas\git` — no admin required, completely isolated from any system Git install). Atlas uses this bundled Git Bash to run shell commands.
