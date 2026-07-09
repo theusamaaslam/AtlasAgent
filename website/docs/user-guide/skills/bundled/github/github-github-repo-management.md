@@ -15,13 +15,13 @@ Clone/create/fork repos; manage remotes, releases.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/github/github-repo-management` |
+| Path | `skills/github\github-repo-management` |
 | Version | `1.1.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `GitHub`, `Repositories`, `Git`, `Releases`, `Secrets`, `Configuration` |
-| Related skills | [`github-auth`](/docs/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/docs/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-issues`](/docs/user-guide/skills/bundled/github/github-github-issues) |
+| Related skills | [`github-auth`](/user-guide/skills/bundled/github/github-github-auth), [`github-pr-workflow`](/user-guide/skills/bundled/github/github-github-pr-workflow), [`github-issues`](/user-guide/skills/bundled/github/github-github-issues) |
 
 ## Reference: full SKILL.md
 

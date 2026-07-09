@@ -15,7 +15,7 @@ Canvas LMS integration — fetch enrolled courses and assignments using API toke
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/productivity/canvas` |
-| Path | `optional-skills/productivity/canvas` |
+| Path | `optional-skills/productivity\canvas` |
 | Version | `1.0.0` |
 | Author | community |
 | License | MIT |

@@ -15,13 +15,13 @@ Plan, set up, and monitor a multi-agent video production pipeline backed by Atla
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/creative/kanban-video-orchestrator` |
-| Path | `optional-skills/creative/kanban-video-orchestrator` |
+| Path | `optional-skills/creative\kanban-video-orchestrator` |
 | Version | `1.0.0` |
 | Author | ['SHL0MS', 'alt-glitch'] |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `video`, `kanban`, `multi-agent`, `orchestration`, `production-pipeline` |
-| Related skills | [`ascii-video`](/docs/user-guide/skills/bundled/creative/creative-ascii-video), [`manim-video`](/docs/user-guide/skills/bundled/creative/creative-manim-video), [`p5js`](/docs/user-guide/skills/bundled/creative/creative-p5js), [`comfyui`](/docs/user-guide/skills/bundled/creative/creative-comfyui), [`touchdesigner-mcp`](/docs/user-guide/skills/bundled/creative/creative-touchdesigner-mcp), [`blender-mcp`](/docs/user-guide/skills/optional/creative/creative-blender-mcp), [`pixel-art`](/docs/user-guide/skills/optional/creative/creative-pixel-art), [`ascii-art`](/docs/user-guide/skills/bundled/creative/creative-ascii-art), [`songwriting-and-ai-music`](/docs/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music), [`heartmula`](/docs/user-guide/skills/bundled/media/media-heartmula), [`songsee`](/docs/user-guide/skills/bundled/media/media-songsee), `spotify`, [`youtube-content`](/docs/user-guide/skills/bundled/media/media-youtube-content), [`claude-design`](/docs/user-guide/skills/bundled/creative/creative-claude-design), [`excalidraw`](/docs/user-guide/skills/bundled/creative/creative-excalidraw), [`architecture-diagram`](/docs/user-guide/skills/bundled/creative/creative-architecture-diagram), [`concept-diagrams`](/docs/user-guide/skills/optional/creative/creative-concept-diagrams), [`baoyu-comic`](/docs/user-guide/skills/optional/creative/creative-baoyu-comic), [`baoyu-infographic`](/docs/user-guide/skills/bundled/creative/creative-baoyu-infographic), [`humanizer`](/docs/user-guide/skills/bundled/creative/creative-humanizer), [`gif-search`](/docs/user-guide/skills/bundled/media/media-gif-search), [`meme-generation`](/docs/user-guide/skills/optional/creative/creative-meme-generation) |
+| Related skills | [`ascii-video`](/user-guide/skills/bundled/creative/creative-ascii-video), [`manim-video`](/user-guide/skills/bundled/creative/creative-manim-video), [`p5js`](/user-guide/skills/bundled/creative/creative-p5js), [`comfyui`](/user-guide/skills/bundled/creative/creative-comfyui), [`touchdesigner-mcp`](/user-guide/skills/bundled/creative/creative-touchdesigner-mcp), [`blender-mcp`](/user-guide/skills/optional/creative/creative-blender-mcp), [`pixel-art`](/user-guide/skills/optional/creative/creative-pixel-art), [`ascii-art`](/user-guide/skills/bundled/creative/creative-ascii-art), [`songwriting-and-ai-music`](/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music), [`heartmula`](/user-guide/skills/bundled/media/media-heartmula), [`songsee`](/user-guide/skills/bundled/media/media-songsee), `spotify`, [`youtube-content`](/user-guide/skills/bundled/media/media-youtube-content), [`claude-design`](/user-guide/skills/bundled/creative/creative-claude-design), [`excalidraw`](/user-guide/skills/bundled/creative/creative-excalidraw), [`architecture-diagram`](/user-guide/skills/bundled/creative/creative-architecture-diagram), [`concept-diagrams`](/user-guide/skills/optional/creative/creative-concept-diagrams), [`baoyu-comic`](/user-guide/skills/optional/creative/creative-baoyu-comic), [`baoyu-infographic`](/user-guide/skills/bundled/creative/creative-baoyu-infographic), [`humanizer`](/user-guide/skills/bundled/creative/creative-humanizer), [`gif-search`](/user-guide/skills/bundled/media/media-gif-search), [`meme-generation`](/user-guide/skills/optional/creative/creative-meme-generation) |
 
 ## Reference: full SKILL.md
 
@@ -76,7 +76,7 @@ time, listen, then proceed. Make reasonable assumptions whenever the user
 implies an answer.
 
 For complete intake patterns and per-style question banks, see
-**[references/intake.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/intake.md)**.
+**[references/intake.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/intake.md)**.
 
 ### Step 2 — Brief
 
@@ -100,10 +100,10 @@ clone.** Most videos need 4-7 profiles. The director is always present; the
 rest are picked by what the brief actually requires.
 
 For the role library and per-style team compositions, see
-**[references/role-archetypes.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/role-archetypes.md)**.
+**[references/role-archetypes.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/role-archetypes.md)**.
 
 For mapping role → which Atlas skills + toolsets it loads, see
-**[references/tool-matrix.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/tool-matrix.md)**.
+**[references/tool-matrix.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/tool-matrix.md)**.
 
 ### Step 4 — Setup
 
@@ -118,7 +118,7 @@ Generate a setup script (`setup.sh`) and run it. The script:
 7. Fires the initial `atlas kanban create` task assigned to the director
 
 Use `scripts/bootstrap_pipeline.py` to generate setup.sh from a brief +
-team-design JSON. See **[references/kanban-setup.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/kanban-setup.md)**
+team-design JSON. See **[references/kanban-setup.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/kanban-setup.md)**
 for the setup script structure, profile config patterns, and the critical
 "shared workspace" rule.
 
@@ -149,14 +149,14 @@ heartbeats. When a worker's output fails review, the standard interventions are:
 3. Adjust the brief's scope and let the director re-decompose
 
 For diagnostic patterns, intervention recipes, and the "task is stuck"
-playbook, see **[references/monitoring.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/monitoring.md)**.
+playbook, see **[references/monitoring.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/monitoring.md)**.
 
 ## Reference: worked examples
 
 Six concrete pipelines covering very different video styles — narrative film,
 product/marketing, music video, math/algorithm explainer, ASCII video, real-time
 installation — showing how the same workflow yields very different teams and
-task graphs. See **[references/examples.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/examples.md)**.
+task graphs. See **[references/examples.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/creative\kanban-video-orchestrator/references/examples.md)**.
 
 ## Critical rules
 
@@ -186,8 +186,9 @@ task graphs. See **[references/examples.md](https://github.com/theusamaaslam/Atl
 6. **The director never executes.** Even with the full `kanban + terminal +
    file` toolset, the director's `SOUL.md` rules forbid it from executing
    work itself. It decomposes and routes only — every concrete task becomes
-   a `atlas kanban create` call to a specialist profile. The
-   auto-injected kanban orchestration guidance spells this out further.
+   a `atlas kanban create` call to a specialist profile. The kanban
+   orchestration guidance auto-injected into every kanban worker's system
+   prompt spells this out further.
 
 7. **Don't over-decompose.** A 30-second product video does NOT need 20 tasks.
    Aim for the smallest task graph that still parallelizes well and exposes the

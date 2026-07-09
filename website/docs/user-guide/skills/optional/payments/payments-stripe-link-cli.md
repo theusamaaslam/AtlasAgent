@@ -15,13 +15,13 @@ Agent payments via Stripe Link — cards, SPT, approvals.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/payments/stripe-link-cli` |
-| Path | `optional-skills/payments/stripe-link-cli` |
+| Path | `optional-skills/payments\stripe-link-cli` |
 | Version | `0.1.0` |
 | Author | Teknium (teknium1), Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `Payments`, `Stripe`, `Link`, `Checkout`, `MPP` |
-| Related skills | [`mpp-agent`](/docs/user-guide/skills/optional/payments/payments-mpp-agent), [`stripe-projects`](/docs/user-guide/skills/optional/payments/payments-stripe-projects) |
+| Related skills | [`mpp-agent`](/user-guide/skills/optional/payments/payments-mpp-agent), [`stripe-projects`](/user-guide/skills/optional/payments/payments-stripe-projects) |
 
 ## Reference: full SKILL.md
 

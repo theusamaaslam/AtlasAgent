@@ -15,7 +15,7 @@ Gym workout planner and nutrition tracker. Search 690+ exercises by muscle, equi
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/health/fitness-nutrition` |
-| Path | `optional-skills/health/fitness-nutrition` |
+| Path | `optional-skills/health\fitness-nutrition` |
 | Version | `1.0.0` |
 | License | MIT |
 | Platforms | linux, macos, windows |

@@ -15,13 +15,13 @@ Build auditable Excel workbooks headless with openpyxl — blue/black/green cell
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/finance/excel-author` |
-| Path | `optional-skills/finance/excel-author` |
+| Path | `optional-skills/finance\excel-author` |
 | Version | `1.0.0` |
 | Author | Anthropic (adapted by Usama Aslam) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `excel`, `openpyxl`, `finance`, `spreadsheet`, `modeling` |
-| Related skills | [`pptx-author`](/docs/user-guide/skills/optional/finance/finance-pptx-author), [`dcf-model`](/docs/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/docs/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/docs/user-guide/skills/optional/finance/finance-lbo-model), [`3-statement-model`](/docs/user-guide/skills/optional/finance/finance-3-statement-model) |
+| Related skills | [`pptx-author`](/user-guide/skills/optional/finance/finance-pptx-author), [`dcf-model`](/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/user-guide/skills/optional/finance/finance-lbo-model), [`3-statement-model`](/user-guide/skills/optional/finance/finance-3-statement-model) |
 
 ## Reference: full SKILL.md
 

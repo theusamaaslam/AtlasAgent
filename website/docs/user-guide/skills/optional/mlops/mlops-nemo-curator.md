@@ -15,7 +15,7 @@ GPU-accelerated data curation for LLM training. Supports text/image/video/audio.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/nemo-curator` |
-| Path | `optional-skills/mlops/nemo-curator` |
+| Path | `optional-skills/mlops\nemo-curator` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -390,8 +390,8 @@ cluster.close()
 
 ## References
 
-- **[Filtering Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/nemo-curator/references/filtering.md)** - 30+ quality filters, heuristics
-- **[Deduplication Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/nemo-curator/references/deduplication.md)** - Exact, fuzzy, semantic methods
+- **[Filtering Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\nemo-curator/references/filtering.md)** - 30+ quality filters, heuristics
+- **[Deduplication Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\nemo-curator/references/deduplication.md)** - Exact, fuzzy, semantic methods
 
 ## Resources
 

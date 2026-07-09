@@ -15,7 +15,7 @@ Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/research/blogwatcher` |
+| Path | `skills/research\blogwatcher` |
 | Version | `2.0.0` |
 | Author | JulienTant (fork of Hyaxia/blogwatcher) |
 | License | MIT |

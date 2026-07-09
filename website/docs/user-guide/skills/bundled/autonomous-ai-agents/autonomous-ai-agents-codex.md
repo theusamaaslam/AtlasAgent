@@ -15,13 +15,13 @@ Delegate coding to OpenAI Codex CLI (features, PRs).
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/autonomous-ai-agents/codex` |
+| Path | `skills/autonomous-ai-agents\codex` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Coding-Agent`, `Codex`, `OpenAI`, `Code-Review`, `Refactoring` |
-| Related skills | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

@@ -15,13 +15,13 @@ Delegate coding to OpenHands CLI (model-agnostic, LiteLLM).
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/autonomous-ai-agents/openhands` |
-| Path | `optional-skills/autonomous-ai-agents/openhands` |
+| Path | `optional-skills/autonomous-ai-agents\openhands` |
 | Version | `0.1.0` |
 | Author | Tim Koepsel (xzessmedia), Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `Coding-Agent`, `OpenHands`, `Model-Agnostic`, `LiteLLM` |
-| Related skills | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`opencode`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-opencode), [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`opencode`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-opencode), [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

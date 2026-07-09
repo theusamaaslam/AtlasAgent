@@ -1,11 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: 💬 Usama Aslam Discord
-    url: https://github.com/theusamaaslam/AtlasAgent
-    about: For quick questions, showcasing projects, sharing skills, and community chat.
-  - name: 📖 Documentation
-    url: https://github.com/theusamaaslam/AtlasAgent/blob/main/README.md
-    about: Check the README and docs before opening an issue.
-  - name: 🤝 Contributing Guide
+  - name: Atlas Agent Documentation
+    url: https://theusamaaslam.github.io/AtlasAgent/
+    about: Read the public documentation and installation guides.
+  - name: Contributing Guide
     url: https://github.com/theusamaaslam/AtlasAgent/blob/main/CONTRIBUTING.md
-    about: Read this before submitting a PR.
+    about: Read this before submitting a pull request.

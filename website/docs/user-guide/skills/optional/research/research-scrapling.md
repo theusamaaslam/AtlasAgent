@@ -15,13 +15,13 @@ Web scraping with Scrapling - HTTP fetching, stealth browser automation, Cloudfl
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/research/scrapling` |
-| Path | `optional-skills/research/scrapling` |
+| Path | `optional-skills/research\scrapling` |
 | Version | `1.0.0` |
 | Author | FEUAZUR |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Web Scraping`, `Browser`, `Cloudflare`, `Stealth`, `Crawling`, `Spider` |
-| Related skills | [`duckduckgo-search`](/docs/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/docs/user-guide/skills/optional/research/research-domain-intel) |
+| Related skills | [`duckduckgo-search`](/user-guide/skills/optional/research/research-duckduckgo-search), [`domain-intel`](/user-guide/skills/optional/research/research-domain-intel) |
 
 ## Reference: full SKILL.md
 

@@ -15,13 +15,13 @@ Jailbreak LLMs: Parseltongue, GODMODE, ULTRAPLINIAN.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/security/godmode` |
-| Path | `optional-skills/security/godmode` |
+| Path | `optional-skills/security\godmode` |
 | Version | `1.0.0` |
 | Author | Atlas Agent + Teknium |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `jailbreak`, `red-teaming`, `G0DM0D3`, `Parseltongue`, `GODMODE`, `uncensoring`, `safety-bypass`, `prompt-engineering`, `L1B3RT4S` |
-| Related skills | [`obliteratus`](/docs/user-guide/skills/optional/mlops/mlops-obliteratus) |
+| Related skills | [`obliteratus`](/user-guide/skills/optional/mlops/mlops-obliteratus) |
 
 ## Reference: full SKILL.md
 

@@ -15,7 +15,7 @@ Provides guidance for LLM post-training with RL using slime, a Megatron+SGLang f
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/slime` |
-| Path | `optional-skills/mlops/slime` |
+| Path | `optional-skills/mlops\slime` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |

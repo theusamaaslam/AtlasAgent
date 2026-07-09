@@ -15,7 +15,7 @@ Iterative Python via live Jupyter kernel (hamelnb).
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/data-science/jupyter-live-kernel` |
+| Path | `skills/data-science\jupyter-live-kernel` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |

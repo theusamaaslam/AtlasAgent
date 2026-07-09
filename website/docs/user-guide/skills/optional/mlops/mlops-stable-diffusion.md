@@ -15,7 +15,7 @@ State-of-the-art text-to-image generation with Stable Diffusion models via Huggi
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/stable-diffusion` |
-| Path | `optional-skills/mlops/stable-diffusion` |
+| Path | `optional-skills/mlops\stable-diffusion` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -531,8 +531,8 @@ image = pipe(prompt, num_inference_steps=20).images[0]
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/stable-diffusion/references/advanced-usage.md)** - Custom pipelines, fine-tuning, deployment
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/stable-diffusion/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\stable-diffusion/references/advanced-usage.md)** - Custom pipelines, fine-tuning, deployment
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\stable-diffusion/references/troubleshooting.md)** - Common issues and solutions
 
 ## Resources
 

@@ -15,13 +15,13 @@ Migrate a user's OpenClaw customization footprint into Atlas Agent. Imports Atla
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/migration/openclaw-migration` |
-| Path | `optional-skills/migration/openclaw-migration` |
+| Path | `optional-skills/migration\openclaw-migration` |
 | Version | `1.0.0` |
 | Author | Atlas Agent (Usama Aslam) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Migration`, `OpenClaw`, `Atlas`, `Memory`, `Persona`, `Import` |
-| Related skills | [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

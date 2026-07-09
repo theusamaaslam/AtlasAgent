@@ -15,7 +15,7 @@ Edit PDF text/typos/titles via nano-pdf CLI (NL prompts).
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/productivity/nano-pdf` |
+| Path | `skills/productivity\nano-pdf` |
 | Version | `1.0.0` |
 | Author | community |
 | License | MIT |

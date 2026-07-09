@@ -1,7 +1,7 @@
 ---
 title: "Atlas S6 Container Supervision"
 sidebar_label: "Atlas S6 Container Supervision"
-description: "Modify, debug, or extend the s6-overlay supervision tree inside the Atlas Agent Docker image — adding new services, debugging profile gateways, understandin..."
+description: "Modify, debug, or extend the s6-overlay supervision tree inside the Atlas Agent Docker image — adding new services, debugging profile gateways, understanding..."
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
@@ -15,13 +15,13 @@ Modify, debug, or extend the s6-overlay supervision tree inside the Atlas Agent 
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/devops/atlas-s6-container-supervision` |
-| Path | `optional-skills/devops/atlas-s6-container-supervision` |
+| Path | `optional-skills/devops\atlas-s6-container-supervision` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | linux |
 | Tags | `docker`, `s6`, `supervision`, `gateway`, `profiles` |
-| Related skills | [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent), `atlas-agent-dev` |
+| Related skills | [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent), `atlas-agent-dev` |
 
 ## Reference: full SKILL.md
 

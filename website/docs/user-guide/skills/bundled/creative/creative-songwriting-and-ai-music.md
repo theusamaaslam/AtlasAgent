@@ -15,7 +15,7 @@ Songwriting craft and Suno AI music prompts.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/creative/songwriting-and-ai-music` |
+| Path | `skills/creative\songwriting-and-ai-music` |
 | Platforms | linux, macos, windows |
 
 ## Reference: full SKILL.md

@@ -15,13 +15,13 @@ Build, test, inspect, install, and deploy MCP servers with FastMCP in Python. Us
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mcp/fastmcp` |
-| Path | `optional-skills/mcp/fastmcp` |
+| Path | `optional-skills/mcp\fastmcp` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `MCP`, `FastMCP`, `Python`, `Tools`, `Resources`, `Prompts`, `Deployment` |
-| Related skills | `native-mcp`, [`mcporter`](/docs/user-guide/skills/optional/mcp/mcp-mcporter) |
+| Related skills | `native-mcp`, [`mcporter`](/user-guide/skills/optional/mcp/mcp-mcporter) |
 
 ## Reference: full SKILL.md
 

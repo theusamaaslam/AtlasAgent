@@ -143,7 +143,6 @@ const sidebars: SidebarsConfig = {
                     'user-guide/skills/bundled/apple/apple-apple-reminders',
                     'user-guide/skills/bundled/apple/apple-findmy',
                     'user-guide/skills/bundled/apple/apple-imessage',
-                    'user-guide/skills/bundled/apple/apple-macos-computer-use',
                   ],
                 },
                 {
@@ -152,10 +151,19 @@ const sidebars: SidebarsConfig = {
                   key: 'skills-bundled-autonomous-ai-agents',
                   collapsed: true,
                   items: [
+                    'user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent',
                     'user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code',
                     'user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex',
-                    'user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent',
                     'user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-opencode',
+                  ],
+                },
+                {
+                  type: 'category',
+                  label: 'computer-use',
+                  key: 'skills-bundled-computer-use',
+                  collapsed: true,
+                  items: [
+                    'user-guide/skills/bundled/computer-use/computer-use-computer-use',
                   ],
                 },
                 {
@@ -396,9 +404,9 @@ const sidebars: SidebarsConfig = {
                   key: 'skills-optional-devops',
                   collapsed: true,
                   items: [
+                    'user-guide/skills/optional/devops/devops-atlas-s6-container-supervision',
                     'user-guide/skills/optional/devops/devops-cli',
                     'user-guide/skills/optional/devops/devops-docker-management',
-                    'user-guide/skills/optional/devops/devops-atlas-s6-container-supervision',
                     'user-guide/skills/optional/devops/devops-pinggy-tunnel',
                     'user-guide/skills/optional/devops/devops-watchers',
                   ],
@@ -569,6 +577,7 @@ const sidebars: SidebarsConfig = {
                     'user-guide/skills/optional/security/security-godmode',
                     'user-guide/skills/optional/security/security-oss-forensics',
                     'user-guide/skills/optional/security/security-sherlock',
+                    'user-guide/skills/optional/security/security-unbroker',
                     'user-guide/skills/optional/security/security-web-pentest',
                   ],
                 },
@@ -589,6 +598,7 @@ const sidebars: SidebarsConfig = {
                   key: 'skills-optional-web-development',
                   collapsed: true,
                   items: [
+                    'user-guide/skills/optional/web-development/web-development-cloudflare-temporary-deploy',
                     'user-guide/skills/optional/web-development/web-development-page-agent',
                   ],
                 },

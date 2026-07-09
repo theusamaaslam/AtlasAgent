@@ -15,7 +15,7 @@ AudioCraft: MusicGen text-to-music, AudioGen text-to-sound.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/mlops/models/audiocraft` |
+| Path | `skills/mlops\models\audiocraft` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -575,8 +575,8 @@ for desc in descriptions:
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/mlops/models/audiocraft/references/advanced-usage.md)** - Training, fine-tuning, deployment
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/mlops/models/audiocraft/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/mlops\models\audiocraft/references/advanced-usage.md)** - Training, fine-tuning, deployment
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/mlops\models\audiocraft/references/troubleshooting.md)** - Common issues and solutions
 
 ## Resources
 

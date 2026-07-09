@@ -15,7 +15,7 @@ Pixel art w/ era palettes (NES, Game Boy, PICO-8).
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/creative/pixel-art` |
-| Path | `optional-skills/creative/pixel-art` |
+| Path | `optional-skills/creative\pixel-art` |
 | Version | `2.0.0` |
 | Author | dodo-reach |
 | License | MIT |

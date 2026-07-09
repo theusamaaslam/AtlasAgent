@@ -7,11 +7,11 @@ const config: Config = {
   tagline: 'The self-improving AI agent',
   favicon: 'img/favicon.ico',
 
-  url: 'https://github.com/theusamaaslam/AtlasAgent',
-  baseUrl: '/docs/',
+  url: 'https://theusamaaslam.github.io',
+  baseUrl: '/AtlasAgent/',
 
-  organizationName: 'UsamaAslam',
-  projectName: 'atlas-agent',
+  organizationName: 'theusamaaslam',
+  projectName: 'AtlasAgent',
 
   onBrokenLinks: 'warn',
 
@@ -52,7 +52,7 @@ const config: Config = {
         // reference/optional-skills-catalog) remain indexed.
         //
         // Note: ignoreFiles matches `route` (baseUrl stripped, no leading
-        // slash). With baseUrl '/docs/', `/docs/user-guide/skills/bundled/x`
+        // slash). With docs at the site root, `/user-guide/skills/bundled/x`
         // becomes 'user-guide/skills/bundled/x'.
         ignoreFiles: [
           /^user-guide\/skills\/bundled\//,
@@ -67,7 +67,7 @@ const config: Config = {
       '@docusaurus/plugin-client-redirects',
       {
         // Static-host redirects for renamed doc pages (GitHub Pages can't
-        // do server-side redirects). Paths are relative to baseUrl (/docs/).
+        // do server-side redirects). Paths are relative to baseUrl.
         redirects: [
           {
             // Renamed in #44470 (Automation Blueprints terminology rebrand)
@@ -84,7 +84,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          routeBasePath: '/',  // Docs at the root of /docs/
+          routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/theusamaaslam/AtlasAgent/edit/main/website/',
         },
@@ -112,7 +112,7 @@ const config: Config = {
       title: 'Atlas Agent',
       logo: {
         alt: 'Atlas Agent',
-        src: 'img/logo.png',
+        src: 'img/favicon.svg',
       },
       items: [
         {
@@ -127,23 +127,18 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/theusamaaslam/AtlasAgent',
+          to: '/getting-started/installation',
           label: 'Download',
           position: 'left',
         },
         {
-          href: 'https://github.com/theusamaaslam/AtlasAgent',
+          to: '/',
           label: 'Home',
           position: 'right',
         },
         {
           href: 'https://github.com/theusamaaslam/AtlasAgent',
           label: 'GitHub',
-          position: 'right',
-        },
-        {
-          href: 'https://github.com/theusamaaslam/AtlasAgent',
-          label: 'Discord',
           position: 'right',
         },
       ],
@@ -161,23 +156,24 @@ const config: Config = {
           ],
         },
         {
-          title: 'Community',
+          title: 'Platform',
           items: [
-            { label: 'GitHub', href: 'https://github.com/theusamaaslam/AtlasAgent' },
-            { label: 'GitHub Issues', href: 'https://github.com/theusamaaslam/AtlasAgent/issues' },
-            { label: 'Skills Hub', href: 'https://agentskills.io' },
+            { label: 'Memory', to: '/user-guide/features/memory' },
+            { label: 'Dashboard', to: '/user-guide/features/api-server' },
+            { label: 'Messaging Gateway', to: '/user-guide/messaging' },
+            { label: 'Skills', to: '/skills' },
           ],
         },
         {
           title: 'More',
           items: [
-            { label: 'Desktop Download', href: 'https://github.com/theusamaaslam/AtlasAgent/releases' },
+            { label: 'Releases', href: 'https://github.com/theusamaaslam/AtlasAgent/releases' },
             { label: 'GitHub', href: 'https://github.com/theusamaaslam/AtlasAgent' },
-            { label: 'Usama Aslam', href: 'https://github.com/UsamaAslam' },
+            { label: 'Creator', href: 'https://github.com/theusamaaslam' },
           ],
         },
       ],
-      copyright: `Built by <a href="https://github.com/UsamaAslam">Usama Aslam</a> · MIT License · ${new Date().getFullYear()}`,
+      copyright: `Built by <a href="https://github.com/theusamaaslam">Usama Aslam</a> | MIT License | ${new Date().getFullYear()}`,
     },
     prism: {
       theme: prismThemes.github,

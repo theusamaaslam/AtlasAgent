@@ -15,13 +15,13 @@ Plan mode: write an actionable markdown plan to .atlas/plans/, no execution. Bit
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/software-development/plan` |
+| Path | `skills/software-development\plan` |
 | Version | `2.0.0` |
 | Author | Atlas Agent (writing-craft adapted from obra/superpowers) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `planning`, `plan-mode`, `implementation`, `workflow`, `design`, `documentation` |
-| Related skills | [`subagent-driven-development`](/docs/user-guide/skills/optional/software-development/software-development-subagent-driven-development), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
+| Related skills | [`subagent-driven-development`](/user-guide/skills/optional/software-development/software-development-subagent-driven-development), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development), [`requesting-code-review`](/user-guide/skills/bundled/software-development/software-development-requesting-code-review) |
 
 ## Reference: full SKILL.md
 

@@ -15,13 +15,13 @@ Delegate coding tasks to Blackbox AI CLI agent. Multi-model agent with built-in 
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/autonomous-ai-agents/blackbox` |
-| Path | `optional-skills/autonomous-ai-agents/blackbox` |
+| Path | `optional-skills/autonomous-ai-agents\blackbox` |
 | Version | `1.0.0` |
 | Author | Atlas Agent (Usama Aslam) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Coding-Agent`, `Blackbox`, `Multi-Agent`, `Judge`, `Multi-Model` |
-| Related skills | [`claude-code`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`claude-code`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code), [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

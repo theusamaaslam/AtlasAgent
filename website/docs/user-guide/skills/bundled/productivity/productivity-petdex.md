@@ -15,7 +15,7 @@ Install and select animated petdex mascots for Atlas.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/productivity/petdex` |
+| Path | `skills/productivity\petdex` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |

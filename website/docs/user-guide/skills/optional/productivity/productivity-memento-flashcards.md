@@ -15,7 +15,7 @@ Spaced-repetition flashcard system. Create cards from facts or text, chat with f
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/productivity/memento-flashcards` |
-| Path | `optional-skills/productivity/memento-flashcards` |
+| Path | `optional-skills/productivity\memento-flashcards` |
 | Version | `1.0.0` |
 | Author | Memento AI |
 | License | MIT |

@@ -15,13 +15,13 @@ Control a running TouchDesigner instance via twozero MCP — create operators, s
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/creative/touchdesigner-mcp` |
+| Path | `skills/creative\touchdesigner-mcp` |
 | Version | `1.1.0` |
 | Author | kshitijk4poor |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `TouchDesigner`, `MCP`, `twozero`, `creative-coding`, `real-time-visuals`, `generative-art`, `audio-reactive`, `VJ`, `installation`, `GLSL` |
-| Related skills | `native-mcp`, [`ascii-video`](/docs/user-guide/skills/bundled/creative/creative-ascii-video), [`manim-video`](/docs/user-guide/skills/bundled/creative/creative-manim-video), `atlas-video` |
+| Related skills | `native-mcp`, [`ascii-video`](/user-guide/skills/bundled/creative/creative-ascii-video), [`manim-video`](/user-guide/skills/bundled/creative/creative-manim-video), `atlas-video` |
 
 ## Reference: full SKILL.md
 

@@ -15,7 +15,7 @@ Serverless GPU cloud platform for running ML workloads. Use when you need on-dem
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/modal` |
-| Path | `optional-skills/mlops/modal` |
+| Path | `optional-skills/mlops\modal` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -351,8 +351,8 @@ if __name__ == "__main__":
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/modal/references/advanced-usage.md)** - Multi-GPU, distributed training, cost optimization
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/modal/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\modal/references/advanced-usage.md)** - Multi-GPU, distributed training, cost optimization
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\modal/references/troubleshooting.md)** - Common issues and solutions
 
 ## Resources
 

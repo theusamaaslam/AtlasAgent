@@ -15,7 +15,7 @@ Parameter-efficient fine-tuning for LLMs using LoRA, QLoRA, and 25+ methods. Use
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/peft` |
-| Path | `optional-skills/mlops/peft` |
+| Path | `optional-skills/mlops\peft` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -440,8 +440,8 @@ TrainingArguments(learning_rate=1e-4)
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/peft/references/advanced-usage.md)** - DoRA, LoftQ, rank stabilization, custom modules
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/peft/references/troubleshooting.md)** - Common errors, debugging, optimization
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\peft/references/advanced-usage.md)** - DoRA, LoftQ, rank stabilization, custom modules
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\peft/references/troubleshooting.md)** - Common errors, debugging, optimization
 
 ## Resources
 

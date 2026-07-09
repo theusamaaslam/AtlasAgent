@@ -15,7 +15,7 @@ Structured decision-making framework for technical proposals and trade-off analy
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/communication/one-three-one-rule` |
-| Path | `optional-skills/communication/one-three-one-rule` |
+| Path | `optional-skills/communication\one-three-one-rule` |
 | Version | `1.0.0` |
 | Author | Willard Moore |
 | License | MIT |

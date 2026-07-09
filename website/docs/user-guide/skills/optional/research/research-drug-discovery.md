@@ -15,7 +15,7 @@ Pharmaceutical research assistant for drug discovery workflows. Search bioactive
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/research/drug-discovery` |
-| Path | `optional-skills/research/drug-discovery` |
+| Path | `optional-skills/research\drug-discovery` |
 | Version | `1.0.0` |
 | Author | bennytimz |
 | License | MIT |

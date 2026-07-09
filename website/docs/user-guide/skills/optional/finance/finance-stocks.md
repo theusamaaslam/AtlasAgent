@@ -15,13 +15,13 @@ Stock quotes, history, search, compare, crypto via Yahoo.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/finance/stocks` |
-| Path | `optional-skills/finance/stocks` |
+| Path | `optional-skills/finance\stocks` |
 | Version | `0.1.0` |
 | Author | Mibay (Mibayy), Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Stocks`, `Finance`, `Market`, `Crypto`, `Investing` |
-| Related skills | [`dcf-model`](/docs/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/docs/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/docs/user-guide/skills/optional/finance/finance-lbo-model) |
+| Related skills | [`dcf-model`](/user-guide/skills/optional/finance/finance-dcf-model), [`comps-analysis`](/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/user-guide/skills/optional/finance/finance-lbo-model) |
 
 ## Reference: full SKILL.md
 

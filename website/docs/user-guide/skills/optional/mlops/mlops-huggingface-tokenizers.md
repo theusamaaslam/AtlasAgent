@@ -15,7 +15,7 @@ Fast tokenizers optimized for research and production. Rust-based implementation
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/huggingface-tokenizers` |
-| Path | `optional-skills/mlops/huggingface-tokenizers` |
+| Path | `optional-skills/mlops\huggingface-tokenizers` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -521,10 +521,10 @@ Browse all: https://huggingface.co/models?library=tokenizers
 
 ## References
 
-- **[Training Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/huggingface-tokenizers/references/training.md)** - Train custom tokenizers, configure trainers, handle large datasets
-- **[Algorithms Deep Dive](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/huggingface-tokenizers/references/algorithms.md)** - BPE, WordPiece, Unigram explained in detail
-- **[Pipeline Components](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/huggingface-tokenizers/references/pipeline.md)** - Normalizers, pre-tokenizers, post-processors, decoders
-- **[Transformers Integration](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/huggingface-tokenizers/references/integration.md)** - AutoTokenizer, PreTrainedTokenizerFast, special tokens
+- **[Training Guide](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\huggingface-tokenizers/references/training.md)** - Train custom tokenizers, configure trainers, handle large datasets
+- **[Algorithms Deep Dive](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\huggingface-tokenizers/references/algorithms.md)** - BPE, WordPiece, Unigram explained in detail
+- **[Pipeline Components](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\huggingface-tokenizers/references/pipeline.md)** - Normalizers, pre-tokenizers, post-processors, decoders
+- **[Transformers Integration](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\huggingface-tokenizers/references/integration.md)** - AutoTokenizer, PreTrainedTokenizerFast, special tokens
 
 ## Resources
 

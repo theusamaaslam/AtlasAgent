@@ -15,7 +15,7 @@ Managed vector database for production AI applications. Fully managed, auto-scal
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/pinecone` |
-| Path | `optional-skills/mlops/pinecone` |
+| Path | `optional-skills/mlops\pinecone` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |

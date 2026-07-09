@@ -20,7 +20,7 @@ Use when a Atlas Kanban worker wants to run Codex CLI as an isolated implementat
 | Author | Atlas Agent |
 | License | MIT |
 | Tags | `kanban`, `codex`, `worktrees`, `autonomous-agents`, `prediction-market-bot` |
-| Related skills | [`codex`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`codex`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex), [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

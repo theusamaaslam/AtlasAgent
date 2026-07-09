@@ -1,7 +1,7 @@
 ---
 title: "Honcho"
 sidebar_label: "Honcho"
-description: "Configure and use Honcho memory with Atlas -- cross-session user modeling, multi-profile peer isolation, observation config, dialectic reasoning, session su..."
+description: "Configure and use Honcho memory with Atlas -- cross-session user modeling, multi-profile peer isolation, observation config, dialectic reasoning, session sum..."
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
@@ -15,13 +15,13 @@ Configure and use Honcho memory with Atlas -- cross-session user modeling, multi
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/autonomous-ai-agents/honcho` |
-| Path | `optional-skills/autonomous-ai-agents/honcho` |
+| Path | `optional-skills/autonomous-ai-agents\honcho` |
 | Version | `2.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Honcho`, `Memory`, `Profiles`, `Observation`, `Dialectic`, `User-Modeling`, `Session-Summary` |
-| Related skills | [`atlas-agent`](/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
+| Related skills | [`atlas-agent`](/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-atlas-agent) |
 
 ## Reference: full SKILL.md
 

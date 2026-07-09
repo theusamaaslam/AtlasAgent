@@ -15,7 +15,7 @@ High-performance vector similarity search engine for RAG and semantic search. Us
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/qdrant` |
-| Path | `optional-skills/mlops/qdrant` |
+| Path | `optional-skills/mlops\qdrant` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -501,8 +501,8 @@ client = QdrantClient(
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/qdrant/references/advanced-usage.md)** - Distributed mode, hybrid search, recommendations
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/qdrant/references/troubleshooting.md)** - Common issues, debugging, performance tuning
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\qdrant/references/advanced-usage.md)** - Distributed mode, hybrid search, recommendations
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\qdrant/references/troubleshooting.md)** - Common issues, debugging, performance tuning
 
 ## Resources
 

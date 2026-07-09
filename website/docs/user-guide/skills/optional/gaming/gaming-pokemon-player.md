@@ -15,7 +15,7 @@ Play Pokemon via headless emulator + RAM reads.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/gaming/pokemon-player` |
-| Path | `optional-skills/gaming/pokemon-player` |
+| Path | `optional-skills/gaming\pokemon-player` |
 | Platforms | linux, macos, windows |
 
 ## Reference: full SKILL.md

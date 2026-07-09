@@ -15,7 +15,7 @@ HuggingFace hf CLI: search/download/upload models, datasets.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/mlops/huggingface-hub` |
+| Path | `skills/mlops\huggingface-hub` |
 | Version | `1.0.0` |
 | Author | Hugging Face |
 | License | MIT |

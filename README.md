@@ -4,10 +4,11 @@
 
 # Atlas Agent ☤
 <p align="center">
-  <a href="#quick-install">Atlas Agent</a> | <a href="website/docs/getting-started/installation.md">Documentation</a>
+  <a href="https://theusamaaslam.github.io/AtlasAgent/">Website</a> | <a href="#quick-install">Quick Install</a> | <a href="website/docs/getting-started/installation.md">Documentation</a>
 </p>
 <p align="center">
-  <a href="website/docs/getting-started/installation.md"><img src="https://img.shields.io/badge/Docs-local-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://theusamaaslam.github.io/AtlasAgent/"><img src="https://img.shields.io/badge/Website-GitHub%20Pages-8d94df?style=for-the-badge" alt="Website"></a>
+  <a href="website/docs/getting-started/installation.md"><img src="https://img.shields.io/badge/Docs-local-62e6bd?style=for-the-badge" alt="Documentation"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Created%20by-Usama%20Aslam-blueviolet?style=for-the-badge" alt="Created by Usama Aslam">
 </p>

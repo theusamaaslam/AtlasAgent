@@ -15,13 +15,13 @@ Search personal knowledge bases, notes, docs, and meeting transcripts locally us
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/research/qmd` |
-| Path | `optional-skills/research/qmd` |
+| Path | `optional-skills/research\qmd` |
 | Version | `1.0.0` |
 | Author | Atlas Agent + Teknium |
 | License | MIT |
 | Platforms | macos, linux |
 | Tags | `Search`, `Knowledge-Base`, `RAG`, `Notes`, `MCP`, `Local-AI` |
-| Related skills | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian), `native-mcp`, [`arxiv`](/docs/user-guide/skills/bundled/research/research-arxiv) |
+| Related skills | [`obsidian`](/user-guide/skills/bundled/note-taking/note-taking-obsidian), `native-mcp`, [`arxiv`](/user-guide/skills/bundled/research/research-arxiv) |
 
 ## Reference: full SKILL.md
 

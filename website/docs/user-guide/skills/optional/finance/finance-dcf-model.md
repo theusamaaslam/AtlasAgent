@@ -15,13 +15,13 @@ Build institutional-quality DCF valuation models in Excel — revenue projection
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/finance/dcf-model` |
-| Path | `optional-skills/finance/dcf-model` |
+| Path | `optional-skills/finance\dcf-model` |
 | Version | `1.0.0` |
 | Author | Anthropic (adapted by Usama Aslam) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `finance`, `valuation`, `dcf`, `excel`, `openpyxl`, `modeling`, `investment-banking` |
-| Related skills | [`excel-author`](/docs/user-guide/skills/optional/finance/finance-excel-author), [`pptx-author`](/docs/user-guide/skills/optional/finance/finance-pptx-author), [`comps-analysis`](/docs/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/docs/user-guide/skills/optional/finance/finance-lbo-model), [`3-statement-model`](/docs/user-guide/skills/optional/finance/finance-3-statement-model) |
+| Related skills | [`excel-author`](/user-guide/skills/optional/finance/finance-excel-author), [`pptx-author`](/user-guide/skills/optional/finance/finance-pptx-author), [`comps-analysis`](/user-guide/skills/optional/finance/finance-comps-analysis), [`lbo-model`](/user-guide/skills/optional/finance/finance-lbo-model), [`3-statement-model`](/user-guide/skills/optional/finance/finance-3-statement-model) |
 
 ## Reference: full SKILL.md
 
@@ -1196,7 +1196,7 @@ This approach centralizes scenario logic, making the model easier to audit and m
 
 ## Troubleshooting
 
-**If you encounter errors or unreasonable results, read [TROUBLESHOOTING.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/finance/dcf-model/TROUBLESHOOTING.md) for detailed debugging guidance.**
+**If you encounter errors or unreasonable results, read [TROUBLESHOOTING.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/finance\dcf-model/TROUBLESHOOTING.md) for detailed debugging guidance.**
 
 ## Workflow Integration
 
@@ -1234,7 +1234,7 @@ This approach centralizes scenario logic, making the model easier to audit and m
 
 3. **Check output**:
    - If `status` is `"success"` → Continue to step 4
-   - If `status` is `"errors_found"` → Check `error_summary` and read [TROUBLESHOOTING.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/finance/dcf-model/TROUBLESHOOTING.md) for debugging guidance
+   - If `status` is `"errors_found"` → Check `error_summary` and read [TROUBLESHOOTING.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/finance\dcf-model/TROUBLESHOOTING.md) for debugging guidance
 
 4. **Fix errors and re-run recalc.py** until status is "success"
 

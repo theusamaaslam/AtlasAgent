@@ -15,7 +15,7 @@ Control Philips Hue lights, scenes, rooms via OpenHue CLI.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/smart-home/openhue` |
+| Path | `skills/smart-home\openhue` |
 | Version | `1.0.0` |
 | Author | community |
 | License | MIT |

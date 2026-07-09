@@ -15,14 +15,14 @@ OBLITERATUS: abliterate LLM refusals (diff-in-means).
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/obliteratus` |
-| Path | `optional-skills/mlops/obliteratus` |
+| Path | `optional-skills/mlops\obliteratus` |
 | Version | `2.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Dependencies | `obliteratus`, `torch`, `transformers`, `bitsandbytes`, `accelerate`, `safetensors` |
 | Platforms | linux, macos |
 | Tags | `Abliteration`, `Uncensoring`, `Refusal-Removal`, `LLM`, `Weight-Projection`, `SVD`, `Mechanistic-Interpretability`, `HuggingFace`, `Model-Surgery` |
-| Related skills | `vllm`, `gguf`, [`huggingface-tokenizers`](/docs/user-guide/skills/optional/mlops/mlops-huggingface-tokenizers) |
+| Related skills | `vllm`, `gguf`, [`huggingface-tokenizers`](/user-guide/skills/optional/mlops/mlops-huggingface-tokenizers) |
 
 ## Reference: full SKILL.md
 

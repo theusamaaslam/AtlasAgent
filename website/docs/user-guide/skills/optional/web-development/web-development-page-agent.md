@@ -15,7 +15,7 @@ Embed alibaba/page-agent into your own web application — a pure-JavaScript in-
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/web-development/page-agent` |
-| Path | `optional-skills/web-development/page-agent` |
+| Path | `optional-skills/web-development\page-agent` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |

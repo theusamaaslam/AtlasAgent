@@ -15,7 +15,7 @@ Host modded Minecraft servers (CurseForge, Modrinth).
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/gaming/minecraft-modpack-server` |
-| Path | `optional-skills/gaming/minecraft-modpack-server` |
+| Path | `optional-skills/gaming\minecraft-modpack-server` |
 | Platforms | linux, macos |
 
 ## Reference: full SKILL.md

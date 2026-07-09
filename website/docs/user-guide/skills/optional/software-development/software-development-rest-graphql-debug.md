@@ -15,12 +15,12 @@ Debug REST/GraphQL APIs: status codes, auth, schemas, repro.
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/software-development/rest-graphql-debug` |
-| Path | `optional-skills/software-development/rest-graphql-debug` |
+| Path | `optional-skills/software-development\rest-graphql-debug` |
 | Version | `1.2.0` |
 | Author | eren-karakus0 |
 | License | MIT |
 | Tags | `api`, `rest`, `graphql`, `http`, `debugging`, `testing`, `curl`, `integration` |
-| Related skills | [`systematic-debugging`](/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`test-driven-development`](/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
+| Related skills | [`systematic-debugging`](/user-guide/skills/bundled/software-development/software-development-systematic-debugging), [`test-driven-development`](/user-guide/skills/bundled/software-development/software-development-test-driven-development) |
 
 ## Reference: full SKILL.md
 

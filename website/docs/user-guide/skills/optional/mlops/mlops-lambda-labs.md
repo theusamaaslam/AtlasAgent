@@ -15,7 +15,7 @@ Reserved and on-demand GPU cloud instances for ML training and inference. Use wh
 | | |
 |---|---|
 | Source | Optional — install with `atlas skills install official/mlops/lambda-labs` |
-| Path | `optional-skills/mlops/lambda-labs` |
+| Path | `optional-skills/mlops\lambda-labs` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
 | License | MIT |
@@ -556,8 +556,8 @@ python inference.py \
 
 ## References
 
-- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/lambda-labs/references/advanced-usage.md)** - Multi-node training, API automation
-- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops/lambda-labs/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\lambda-labs/references/advanced-usage.md)** - Multi-node training, API automation
+- **[Troubleshooting](https://github.com/theusamaaslam/AtlasAgent/blob/main/optional-skills/mlops\lambda-labs/references/troubleshooting.md)** - Common issues and solutions
 
 ## Resources
 

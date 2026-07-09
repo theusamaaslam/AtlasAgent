@@ -15,7 +15,7 @@ Create, read, edit .pptx decks, slides, notes, templates.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/productivity/powerpoint` |
+| Path | `skills/productivity\powerpoint` |
 | License | Proprietary. LICENSE.txt has complete terms |
 | Platforms | linux, macos, windows |
 
@@ -36,8 +36,8 @@ Use this skill any time a .pptx file is involved in any way — as input, output
 | Task | Guide |
 |------|-------|
 | Read/analyze content | `python -m markitdown presentation.pptx` |
-| Edit or create from template | Read [editing.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity/powerpoint/editing.md) |
-| Create from scratch | Read [pptxgenjs.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity/powerpoint/pptxgenjs.md) |
+| Edit or create from template | Read [editing.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity\powerpoint/editing.md) |
+| Create from scratch | Read [pptxgenjs.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity\powerpoint/pptxgenjs.md) |
 
 ---
 
@@ -58,7 +58,7 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 ## Editing Workflow
 
-**Read [editing.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity/powerpoint/editing.md) for full details.**
+**Read [editing.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity\powerpoint/editing.md) for full details.**
 
 1. Analyze template with `thumbnail.py`
 2. Unpack → manipulate slides → edit content → clean → pack
@@ -67,7 +67,7 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 ## Creating from Scratch
 
-**Read [pptxgenjs.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity/powerpoint/pptxgenjs.md) for full details.**
+**Read [pptxgenjs.md](https://github.com/theusamaaslam/AtlasAgent/blob/main/skills/productivity\powerpoint/pptxgenjs.md) for full details.**
 
 Use when no template or reference presentation is available.
 

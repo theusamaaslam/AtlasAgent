@@ -15,13 +15,13 @@ Manage Apple Notes via memo CLI: create, search, edit.
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
-| Path | `skills/apple/apple-notes` |
+| Path | `skills/apple\apple-notes` |
 | Version | `1.0.0` |
 | Author | Atlas Agent |
 | License | MIT |
 | Platforms | macos |
 | Tags | `Notes`, `Apple`, `macOS`, `note-taking` |
-| Related skills | [`obsidian`](/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
+| Related skills | [`obsidian`](/user-guide/skills/bundled/note-taking/note-taking-obsidian) |
 
 ## Reference: full SKILL.md
 
