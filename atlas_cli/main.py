@@ -12606,17 +12606,29 @@ def cmd_memory(args):
             print("Usage: atlas memory recall <query>")
             return
         res = search_memory_recall(query, limit=limit)
+        curated = res.get("curated") or []
         facts = res.get("facts") or []
+        summaries = res.get("summaries") or []
         raw = res.get("raw_results") or []
-        if not facts and not raw:
+        if not curated and not facts and not summaries and not raw:
             print("No recalled memory.")
             return
-        for idx, fact in enumerate(facts, 1):
-            print(f"{idx}. {fact.get('text')} [{fact.get('kind')}, {fact.get('citation')}]")
-        offset = len(facts)
-        for idx, item in enumerate(raw, offset + 1):
+        cursor = 1
+        for item in curated:
             snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
-            print(f"{idx}. {snippet[:240]} [raw, {item.get('session_id') or 'unknown'}]")
+            print(f"{cursor}. {snippet[:240]} [curated, {item.get('title') or item.get('kind')}]")
+            cursor += 1
+        for fact in facts:
+            print(f"{cursor}. {fact.get('text')} [{fact.get('kind')}, {fact.get('citation')}]")
+            cursor += 1
+        for item in summaries:
+            snippet = str(item.get("text") or "").replace("\n", " ").strip()
+            print(f"{cursor}. {snippet[:240]} [summary, {item.get('citation') or item.get('id')}]")
+            cursor += 1
+        for item in raw:
+            snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
+            print(f"{cursor}. {snippet[:240]} [raw, {item.get('session_id') or 'unknown'}]")
+            cursor += 1
     elif sub == "consolidate":
         from agent.memory_facts import consolidate_session_facts
 
@@ -12628,7 +12640,57 @@ def cmd_memory(args):
             f"created={res.get('created', 0)}, "
             f"approved={res.get('approved', 0)}, "
             f"pending={res.get('pending', 0)}, "
-            f"existing={res.get('existing', 0)}"
+            f"existing={res.get('existing', 0)}, "
+            f"summaries={res.get('summaries', 0)}, "
+            f"archive_messages={res.get('archive_messages', 0)}"
+        )
+    elif sub == "summarize":
+        from agent.memory_facts import summarize_session_memory
+
+        limit = max(1, min(int(getattr(args, "limit", 200) or 200), 5000))
+        res = summarize_session_memory(session_limit=limit)
+        print(
+            "Memory summaries complete: "
+            f"sessions={res.get('sessions', 0)}, "
+            f"summaries={res.get('summaries', 0)}, "
+            f"approved={res.get('approved', 0)}, "
+            f"pending={res.get('pending', 0)}, "
+            f"facts_created={res.get('facts_created', 0)}, "
+            f"archive_messages={res.get('archive_messages', 0)}"
+        )
+    elif sub == "archive":
+        from agent.memory_facts import search_memory_archive
+
+        cmd = getattr(args, "memory_archive_command", None)
+        if cmd != "search":
+            print("Usage: atlas memory archive search <query>")
+            return
+        query = " ".join(getattr(args, "query", []) or []).strip()
+        limit = max(1, min(int(getattr(args, "limit", 10) or 10), 100))
+        if not query:
+            print("Usage: atlas memory archive search <query>")
+            return
+        res = search_memory_archive(query, limit=limit)
+        results = res.get("results") or []
+        if not results:
+            print("No archive matches.")
+            return
+        for idx, item in enumerate(results, 1):
+            snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
+            print(f"{idx}. {snippet[:240]} [raw, {item.get('session_id') or 'unknown'}]")
+    elif sub == "embeddings":
+        from agent.memory_facts import rebuild_memory_embeddings
+
+        cmd = getattr(args, "memory_embeddings_command", None)
+        if cmd != "rebuild":
+            print("Usage: atlas memory embeddings rebuild")
+            return
+        res = rebuild_memory_embeddings()
+        print(
+            "Memory semantic payloads rebuilt: "
+            f"facts={res.get('facts', 0)}, "
+            f"summaries={res.get('summaries', 0)}, "
+            f"backend={res.get('backend', 'hybrid-lightweight')}"
         )
     else:
         from atlas_cli.memory_setup import memory_command

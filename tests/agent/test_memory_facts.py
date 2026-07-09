@@ -5,12 +5,17 @@ from agent.memory_facts import (
     PENDING,
     STALE,
     approve_memory_fact,
+    build_memory_summary,
     consolidate_session_facts,
     extract_fact_candidates,
     format_recall_block,
     list_memory_facts,
+    list_memory_summaries,
     mark_conflicting_facts_for_query,
+    rebuild_memory_embeddings,
+    search_memory_archive,
     search_memory_recall,
+    summarize_session_memory,
     should_auto_recall,
     store_memory_facts,
 )
@@ -101,7 +106,8 @@ def test_consolidate_sessions_tracks_pending_and_approved(tmp_path):
     res = consolidate_session_facts(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10)
 
     assert res["sessions"] == 1
-    assert res["created"] >= 2
+    assert res["summaries"] >= 1
+    assert res["created"] >= 1
     facts = list_memory_facts(atlas_home=tmp_path, limit=20)["facts"]
     assert any(fact["status"] == APPROVED for fact in facts)
     assert any(fact["status"] in {APPROVED, PENDING} for fact in facts)
@@ -169,3 +175,59 @@ def test_fresh_install_recall_has_empty_results(tmp_path):
 
     assert recall["ok"] is True
     assert recall["facts"] == []
+
+
+def test_summary_excludes_system_tool_and_recalled_memory(tmp_path):
+    summary = build_memory_summary(
+        [
+            {"id": 1, "role": "system", "content": "SYSTEM PROMPT SHOULD NOT APPEAR"},
+            {
+                "id": 2,
+                "role": "user",
+                "content": "I told Atlas that Mina is the launch designer for the graph memory project.",
+            },
+            {
+                "id": 3,
+                "role": "assistant",
+                "content": "<recalled_memory>secret old context</recalled_memory> We tracked that as project context.",
+            },
+            {"id": 4, "role": "tool", "content": "tool output should not appear"},
+        ],
+        session_id="s1",
+    )
+
+    assert summary is not None
+    assert len(summary.text.split()) <= 200
+    assert "SYSTEM PROMPT" not in summary.text
+    assert "secret old context" not in summary.text
+    assert "tool output" not in summary.text
+    assert "Mina" in summary.text
+
+
+def test_summarize_session_memory_and_semantic_recall(tmp_path):
+    res = summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1)
+
+    assert res["summaries"] >= 1
+    summaries = list_memory_summaries(atlas_home=tmp_path)["summaries"]
+    assert summaries
+
+    recall = search_memory_recall(
+        "find the interface network memory decision",
+        atlas_home=tmp_path,
+        db=FakeSessionDB(),
+    )
+    assert recall["summaries"]
+    assert recall["facts"]
+    assert "raw_results" in recall
+
+
+def test_archive_search_and_embedding_rebuild_are_graceful(tmp_path):
+    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1)
+
+    archive = search_memory_archive("Obsidian graph", atlas_home=tmp_path)
+    assert archive["ok"] is True
+    assert archive["results"]
+
+    rebuilt = rebuild_memory_embeddings(atlas_home=tmp_path)
+    assert rebuilt["ok"] is True
+    assert rebuilt["backend"] == "hybrid-lightweight"

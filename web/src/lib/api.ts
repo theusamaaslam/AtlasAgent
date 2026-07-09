@@ -1068,6 +1068,24 @@ export const api = {
       `/api/memory/consolidate?limit=${limit}`,
       { method: "POST" },
     ),
+  summarizeMemory: (limit = 200) =>
+    fetchJSON<MemorySummarizeResponse>(
+      `/api/memory/summarize?limit=${limit}`,
+      { method: "POST" },
+    ),
+  getMemorySummaries: (query = "", status = "", limit = 50) =>
+    fetchJSON<MemorySummariesResponse>(
+      `/api/memory/summaries?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}&limit=${limit}`,
+    ),
+  searchMemoryArchive: (query: string, limit = 10) =>
+    fetchJSON<MemoryArchiveSearchResponse>(
+      `/api/memory/archive/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    ),
+  rebuildMemoryEmbeddings: () =>
+    fetchJSON<MemoryEmbeddingsResponse>(
+      "/api/memory/embeddings/rebuild",
+      { method: "POST" },
+    ),
   getPendingMemoryFacts: (limit = 50) =>
     fetchJSON<MemoryFactsResponse>(`/api/memory/facts/pending?limit=${limit}`),
   searchMemoryFacts: (query: string, status = "", limit = 50) =>
@@ -1092,6 +1110,21 @@ export const api = {
   deleteMemoryFact: (id: string) =>
     fetchJSON<MemoryFactActionResponse>(
       `/api/memory/facts/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    ),
+  approveMemorySummary: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/summaries/${encodeURIComponent(id)}/approve`,
+      { method: "POST" },
+    ),
+  rejectMemorySummary: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/summaries/${encodeURIComponent(id)}/reject`,
+      { method: "POST" },
+    ),
+  deleteMemorySummary: (id: string) =>
+    fetchJSON<MemoryFactActionResponse>(
+      `/api/memory/summaries/${encodeURIComponent(id)}`,
       { method: "DELETE" },
     ),
   syncMemoryVault: () =>
@@ -1618,6 +1651,25 @@ export interface MemorySearchResponse {
   results: MemorySearchResult[];
 }
 
+export interface MemorySummary {
+  id: string;
+  text: string;
+  status: string;
+  importance: number;
+  confidence: number;
+  topics: string[];
+  source_session_id?: string;
+  start_message_id?: string;
+  end_message_id?: string;
+  start_timestamp?: number | null;
+  end_timestamp?: number | null;
+  created_at?: number;
+  updated_at?: number;
+  metadata?: Record<string, unknown>;
+  score?: number;
+  citation?: string;
+}
+
 export interface MemoryFact {
   id: string;
   kind: string;
@@ -1653,7 +1705,10 @@ export interface MemoryRecallRawResult {
 export interface MemoryRecallResponse {
   ok: boolean;
   query: string;
+  curated?: MemorySearchResult[];
   facts: MemoryFact[];
+  summaries?: MemorySummary[];
+  raw?: MemoryRecallRawResult[];
   raw_results: MemoryRecallRawResult[];
 }
 
@@ -1670,6 +1725,38 @@ export interface MemoryConsolidateResponse {
   existing: number;
   approved: number;
   pending: number;
+  summaries?: number;
+  archive_messages?: number;
+}
+
+export interface MemorySummariesResponse {
+  ok: boolean;
+  summaries: MemorySummary[];
+  count: number;
+}
+
+export interface MemorySummarizeResponse {
+  ok: boolean;
+  sessions: number;
+  summaries: number;
+  approved: number;
+  pending: number;
+  existing: number;
+  facts_created: number;
+  archive_messages: number;
+}
+
+export interface MemoryArchiveSearchResponse {
+  ok: boolean;
+  query: string;
+  results: MemoryRecallRawResult[];
+}
+
+export interface MemoryEmbeddingsResponse {
+  ok: boolean;
+  facts: number;
+  summaries: number;
+  backend: string;
 }
 
 export interface MemoryFactActionResponse {

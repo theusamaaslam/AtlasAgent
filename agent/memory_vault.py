@@ -3,7 +3,7 @@
 The vault is a read-only projection over existing Atlas state:
 
 * built-in curated memory files (MEMORY.md and USER.md)
-* the SQLite session database (customer/user interactions and assistant replies)
+* compact memory summaries, promoted facts, and source session evidence
 * the checked-in creator profile
 
 It deliberately does not become a second source of truth. Rebuilding the vault
@@ -252,36 +252,6 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
                     )
                 )
 
-                try:
-                    messages = db.get_messages(session_id)
-                except Exception:
-                    logger.debug("Could not load messages for %s", session_id, exc_info=True)
-                    continue
-                for msg in messages:
-                    role = str(msg.get("role") or "")
-                    if role not in {"user", "assistant"}:
-                        continue
-                    content = _text_content(msg.get("content")).strip()
-                    if not content:
-                        continue
-                    msg_id = msg.get("id")
-                    interaction_id = f"interaction-{_slug(session_id)}-{msg_id}"
-                    interaction_title = f"{role.title()} {session_id[:8]} #{msg_id}"
-                    nodes.append(
-                        VaultNode(
-                            id=interaction_id,
-                            kind="interaction",
-                            title=interaction_title,
-                            path=f"Interactions/{_note_name(interaction_title, interaction_id)}",
-                            text=content,
-                            source=str(session.get("source") or ""),
-                            timestamp=msg.get("timestamp"),
-                            session_id=session_id,
-                            role=role,
-                            topics=_extract_topics(content),
-                            links=[session_node_id],
-                        )
-                    )
         finally:
             if close_db:
                 try:
@@ -290,7 +260,38 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
                     pass
 
     try:
-        from agent.memory_facts import list_memory_facts
+        from agent.memory_facts import list_memory_facts, list_memory_summaries
+
+        summary_res = list_memory_summaries(atlas_home=atlas_home, limit=1000)
+        for idx, summary in enumerate(summary_res.get("summaries") or [], 1):
+            status = str(summary.get("status") or "")
+            if status in {"rejected"}:
+                continue
+            summary_id = str(summary.get("id") or _stable_id("summary", str(summary.get("text") or "")))
+            title = f"Summary {idx}"
+            session_id = str(summary.get("source_session_id") or "")
+            links = []
+            if session_id:
+                links.append(f"session-{_slug(session_id)}")
+            nodes.append(
+                VaultNode(
+                    id=summary_id,
+                    kind="summary",
+                    title=title,
+                    path=f"Summaries/{_note_name(title, summary_id)}",
+                    text=str(summary.get("text") or ""),
+                    source="compact-summary",
+                    timestamp=summary.get("updated_at") or summary.get("created_at"),
+                    session_id=session_id or None,
+                    source_message_id=str(summary.get("end_message_id") or "") or None,
+                    role="summary",
+                    status=status,
+                    importance=summary.get("importance"),
+                    confidence=summary.get("confidence"),
+                    topics=list(summary.get("topics") or []),
+                    links=links,
+                )
+            )
 
         fact_res = list_memory_facts(atlas_home=atlas_home, limit=1000)
         for idx, fact in enumerate(fact_res.get("facts") or [], 1):
@@ -305,8 +306,9 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
             links = []
             if session_id:
                 links.append(f"session-{_slug(session_id)}")
-            if session_id and source_message_id:
-                links.append(f"interaction-{_slug(session_id)}-{source_message_id}")
+            summary_id = (fact.get("metadata") or {}).get("source_summary_id")
+            if summary_id:
+                links.append(str(summary_id))
             nodes.append(
                 VaultNode(
                     id=fact_id,
@@ -346,7 +348,7 @@ def _connect_nodes(nodes: List[VaultNode]) -> None:
             node.links.append(f"topic-{topic}")
             peers = [p for p in by_topic.get(topic, []) if p.id != node.id]
             for peer in peers[:3]:
-                if peer.kind in {"memory", "user", "creator"} or node.kind in {"memory", "user"}:
+                if peer.kind in {"memory", "user", "creator", "fact", "summary"} or node.kind in {"memory", "user", "fact", "summary"}:
                     node.links.append(peer.id)
         node.links = sorted(set(node.links))
 
@@ -441,7 +443,7 @@ def _write_index(vault: Path, nodes: List[VaultNode]) -> None:
     for kind in sorted(counts):
         lines.append(f"- {kind}: {counts[kind]}")
     lines.extend(["", "## Main Areas", "", "- [[Usama Aslam]]"])
-    for title in ("Curated Memory", "User Profile", "Sessions", "Interactions", "Facts", "Topics"):
+    for title in ("Curated Memory", "User Profile", "Sessions", "Summaries", "Facts", "Topics"):
         lines.append(f"- {title}")
     (vault / "Atlas Memory.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -457,7 +459,7 @@ def sync_memory_vault(
     vault = get_memory_vault_dir(home)
     vault.mkdir(parents=True, exist_ok=True)
 
-    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Interactions", "Facts", "Topics"):
+    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Summaries", "Facts", "Topics"):
         shutil.rmtree(vault / name, ignore_errors=True)
 
     nodes = _source_nodes(home, db=db, session_limit=session_limit)
@@ -481,6 +483,7 @@ def sync_memory_vault(
         "fact": "facts",
         "memory": "memories",
         "session": "sessions",
+        "summary": "summaries",
         "topic": "topics",
         "user": "user_profile",
     }

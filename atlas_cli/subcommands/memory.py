@@ -71,6 +71,35 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
         default=200,
         help="Maximum number of sessions to process",
     )
+    summarize_parser = memory_sub.add_parser(
+        "summarize",
+        help="Create compact semantic memory summaries from sessions",
+    )
+    summarize_parser.add_argument(
+        "--limit",
+        type=int,
+        default=200,
+        help="Maximum number of sessions to process",
+    )
+    archive_parser = memory_sub.add_parser(
+        "archive",
+        help="Search the raw full-memory archive fallback",
+    )
+    archive_sub = archive_parser.add_subparsers(dest="memory_archive_command")
+    archive_search = archive_sub.add_parser("search", help="Search raw archived session memory")
+    archive_search.add_argument("query", nargs="+", help="Archive search query")
+    archive_search.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Maximum number of raw results to print",
+    )
+    embeddings_parser = memory_sub.add_parser(
+        "embeddings",
+        help="Manage lightweight semantic memory payloads",
+    )
+    embeddings_sub = embeddings_parser.add_subparsers(dest="memory_embeddings_command")
+    embeddings_sub.add_parser("rebuild", help="Rebuild semantic payloads for facts and summaries")
     vault_parser = memory_sub.add_parser(
         "vault",
         help="Manage the generated Obsidian memory vault",

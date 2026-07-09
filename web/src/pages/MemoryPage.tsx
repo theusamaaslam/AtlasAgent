@@ -26,6 +26,7 @@ import type {
   MemoryGraphResponse,
   MemoryRecallRawResult,
   MemorySearchResult,
+  MemorySummary,
   MemoryVaultStatus,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const KIND_STYLES: Record<string, { fill: string; stroke: string }> = {
   session: { fill: "#ffd36f", stroke: "#e4a82b" },
   interaction: { fill: "#ffffff", stroke: "#c7c9e8" },
   fact: { fill: "#b8a6ff", stroke: "#8f83e6" },
+  summary: { fill: "#7ddfc1", stroke: "#43b692" },
   topic: { fill: "#ff8a70", stroke: "#df654f" },
 };
 
@@ -227,6 +229,41 @@ function FactRow({
   );
 }
 
+function SummaryRow({
+  summary,
+  actions,
+}: {
+  summary: MemorySummary;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl border border-border bg-white/80 px-4 py-3 shadow-sm">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Badge tone="success">summary</Badge>
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {summary.status}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-foreground">{summary.text}</p>
+        </div>
+        {actions && <div className="flex shrink-0 gap-1">{actions}</div>}
+      </div>
+      <div className="mt-2 flex min-w-0 flex-wrap gap-2 text-[11px] text-muted-foreground">
+        <span>confidence {summary.confidence.toFixed(2)}</span>
+        {summary.citation && <span className="font-mono">{summary.citation}</span>}
+        {summary.source_session_id && !summary.citation && (
+          <span className="font-mono">{summary.source_session_id.slice(0, 12)}</span>
+        )}
+        {summary.topics.slice(0, 5).map((topic) => (
+          <span key={topic}>#{topic}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RawRecallRow({ item }: { item: MemoryRecallRawResult }) {
   return (
     <div className="rounded-xl border border-border bg-white/60 px-4 py-3 text-sm">
@@ -248,22 +285,30 @@ export default function MemoryPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MemorySearchResult[]>([]);
   const [recallQuery, setRecallQuery] = useState("");
+  const [recallCurated, setRecallCurated] = useState<MemorySearchResult[]>([]);
   const [recallFacts, setRecallFacts] = useState<MemoryFact[]>([]);
+  const [recallSummaries, setRecallSummaries] = useState<MemorySummary[]>([]);
   const [recallRaw, setRecallRaw] = useState<MemoryRecallRawResult[]>([]);
   const [pendingFacts, setPendingFacts] = useState<MemoryFact[]>([]);
+  const [pendingSummaries, setPendingSummaries] = useState<MemorySummary[]>([]);
   const [selectedNode, setSelectedNode] = useState<MemoryGraphNode | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [consolidating, setConsolidating] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
   const [searching, setSearching] = useState(false);
   const [recalling, setRecalling] = useState(false);
 
   const loadPendingFacts = useCallback(async () => {
     try {
-      const res = await api.getPendingMemoryFacts(50);
-      setPendingFacts(res.facts);
+      const [factsRes, summariesRes] = await Promise.all([
+        api.getPendingMemoryFacts(50),
+        api.getMemorySummaries("", "pending", 50),
+      ]);
+      setPendingFacts(factsRes.facts);
+      setPendingSummaries(summariesRes.summaries);
     } catch (error) {
-      showToast(`Pending facts failed: ${error}`, "error");
+      showToast(`Pending memory failed: ${error}`, "error");
     }
   }, [showToast]);
 
@@ -337,19 +382,58 @@ export default function MemoryPage() {
   const runRecall = async () => {
     const clean = recallQuery.trim();
     if (!clean) {
+      setRecallCurated([]);
       setRecallFacts([]);
+      setRecallSummaries([]);
       setRecallRaw([]);
       return;
     }
     setRecalling(true);
     try {
       const res = await api.recallMemory(clean, 8);
+      setRecallCurated(res.curated ?? []);
       setRecallFacts(res.facts);
+      setRecallSummaries(res.summaries ?? []);
       setRecallRaw(res.raw_results);
     } catch (error) {
       showToast(`Recall failed: ${error}`, "error");
     } finally {
       setRecalling(false);
+    }
+  };
+
+  const summarize = async () => {
+    setSummarizing(true);
+    try {
+      const res = await api.summarizeMemory(500);
+      showToast(
+        `Summarized ${res.sessions} sessions: ${res.summaries} summaries, ${res.facts_created} facts`,
+        "success",
+      );
+      await loadPendingFacts();
+      const graphRes = await api.getMemoryGraph();
+      setGraph(graphRes);
+      setStatus({
+        ok: graphRes.ok,
+        vault_path: graphRes.vault_path,
+        exists: graphRes.exists,
+        dirty: graphRes.dirty,
+        last_sync: graphRes.last_sync,
+        stats: graphRes.stats,
+      });
+    } catch (error) {
+      showToast(`Summarize failed: ${error}`, "error");
+    } finally {
+      setSummarizing(false);
+    }
+  };
+
+  const rebuildEmbeddings = async () => {
+    try {
+      const res = await api.rebuildMemoryEmbeddings();
+      showToast(`Semantic payloads rebuilt: ${res.facts} facts, ${res.summaries} summaries`, "success");
+    } catch (error) {
+      showToast(`Semantic rebuild failed: ${error}`, "error");
     }
   };
 
@@ -390,6 +474,19 @@ export default function MemoryPage() {
       showToast(action === "approve" ? "Fact approved" : "Fact removed", "success");
     } catch (error) {
       showToast(`Fact update failed: ${error}`, "error");
+    }
+  };
+
+  const actOnSummary = async (summary: MemorySummary, action: "approve" | "reject" | "delete") => {
+    try {
+      if (action === "approve") await api.approveMemorySummary(summary.id);
+      if (action === "reject") await api.rejectMemorySummary(summary.id);
+      if (action === "delete") await api.deleteMemorySummary(summary.id);
+      setPendingSummaries((items) => items.filter((item) => item.id !== summary.id));
+      setRecallSummaries((items) => items.filter((item) => item.id !== summary.id || action === "approve"));
+      showToast(action === "approve" ? "Summary approved" : "Summary removed", "success");
+    } catch (error) {
+      showToast(`Summary update failed: ${error}`, "error");
     }
   };
 
@@ -453,6 +550,23 @@ export default function MemoryPage() {
                 disabled={consolidating}
               >
                 Consolidate
+              </Button>
+              <Button
+                size="sm"
+                ghost
+                prefix={summarizing ? <Spinner className="h-3.5 w-3.5" /> : <Brain className="h-3.5 w-3.5" />}
+                onClick={() => void summarize()}
+                disabled={summarizing}
+              >
+                Summarize
+              </Button>
+              <Button
+                size="sm"
+                ghost
+                prefix={<Search className="h-3.5 w-3.5" />}
+                onClick={() => void rebuildEmbeddings()}
+              >
+                Semantic
               </Button>
               <Button
                 size="sm"
@@ -609,13 +723,16 @@ export default function MemoryPage() {
               </Button>
             </div>
             <div className="rounded-xl border border-border bg-white/70 p-3 text-xs leading-5 text-muted-foreground">
-              Recall ranks promoted facts first, then falls back to matching raw interactions.
+              Recall checks curated files first, then semantic facts and summaries, then raw archive fallback.
             </div>
           </CardContent>
         </Card>
 
         <Card className="min-w-0">
           <CardContent className="grid gap-3 py-4">
+            {recallCurated.map((item, index) => (
+              <ResultRow key={`${item.path}-${index}`} result={item} />
+            ))}
             {recallFacts.map((fact) => (
               <FactRow
                 key={fact.id}
@@ -642,12 +759,30 @@ export default function MemoryPage() {
                 }
               />
             ))}
+            {recallSummaries.map((summary) => (
+              <SummaryRow
+                key={summary.id}
+                summary={summary}
+                actions={
+                  <>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Delete summary"
+                      onClick={() => void actOnSummary(summary, "delete")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                }
+              />
+            ))}
             {recallRaw.map((item, index) => (
               <RawRecallRow key={`${item.session_id}-${item.message_id}-${index}`} item={item} />
             ))}
-            {!recallFacts.length && !recallRaw.length && (
+            {!recallCurated.length && !recallFacts.length && !recallSummaries.length && !recallRaw.length && (
               <div className="py-8 text-center text-sm text-muted-foreground">
-                No recalled facts yet.
+                No recalled memory yet.
               </div>
             )}
           </CardContent>
@@ -657,7 +792,7 @@ export default function MemoryPage() {
       <section>
         <Card className="min-w-0">
           <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <CardTitle>Pending facts</CardTitle>
+            <CardTitle>Pending memory</CardTitle>
             <Button
               size="sm"
               ghost
@@ -702,9 +837,43 @@ export default function MemoryPage() {
                 }
               />
             ))}
-            {!pendingFacts.length && (
+            {pendingSummaries.map((summary) => (
+              <SummaryRow
+                key={summary.id}
+                summary={summary}
+                actions={
+                  <>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Approve summary"
+                      onClick={() => void actOnSummary(summary, "approve")}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Reject summary"
+                      onClick={() => void actOnSummary(summary, "reject")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      ghost
+                      aria-label="Delete summary"
+                      onClick={() => void actOnSummary(summary, "delete")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                }
+              />
+            ))}
+            {!pendingFacts.length && !pendingSummaries.length && (
               <div className="py-8 text-center text-sm text-muted-foreground">
-                No pending facts.
+                No pending memory.
               </div>
             )}
           </CardContent>

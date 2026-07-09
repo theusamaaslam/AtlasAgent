@@ -10,7 +10,7 @@ from agent.memory_vault import (
     search_memory_vault,
     sync_memory_vault,
 )
-from agent.memory_facts import extract_fact_candidates, store_memory_facts
+from agent.memory_facts import extract_fact_candidates, summarize_session_memory, store_memory_facts
 from agent.prompt_builder import load_creator_profile_prompt
 
 
@@ -73,7 +73,7 @@ def test_memory_vault_sync_includes_creator_memory_and_sessions(tmp_path):
     assert payload["ok"] is True
     assert payload["stats"]["creators"] == 1
     assert payload["stats"]["sessions"] == 1
-    assert payload["stats"]["interactions"] == 2
+    assert "interactions" not in payload["stats"]
     assert (tmp_path / "memory-vault" / "Creator" / "Usama Aslam.md").exists()
 
     graph_path = tmp_path / "memory-vault" / GRAPH_JSON
@@ -94,13 +94,19 @@ def test_memory_vault_sync_includes_fact_nodes_and_source_links(tmp_path):
     )
     store_memory_facts(facts, atlas_home=tmp_path)
 
+    summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), chunk_turns=1)
     payload = sync_memory_vault(atlas_home=tmp_path, db=FakeSessionDB())
 
     fact_nodes = [node for node in payload["nodes"] if node["kind"] == "fact"]
+    summary_nodes = [node for node in payload["nodes"] if node["kind"] == "summary"]
     assert fact_nodes
+    assert summary_nodes
     assert payload["stats"]["facts"] == len(fact_nodes)
+    assert payload["stats"]["summaries"] == len(summary_nodes)
     assert any(
-        edge["source"] == fact_nodes[0]["id"] and edge["target"].startswith("interaction-")
+        edge["source"] == fact_nodes[0]["id"] and (
+            edge["target"].startswith("session-") or edge["target"].startswith("summary-")
+        )
         for edge in payload["edges"]
     )
 
