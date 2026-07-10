@@ -1,204 +1,220 @@
-import React from 'react';
+import React, {useState} from 'react';
 import clsx from 'clsx';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './index.module.css';
 
-const capabilities = [
-  {
-    title: 'Summary-first memory',
-    detail:
-      'Atlas preserves raw sessions, distills clean 200-word summaries, promotes durable facts, and recalls only the most relevant evidence before answering.',
+const memoryLayers = {
+  curated: {
+    index: '01',
+    title: 'Curated truth',
+    detail: 'USER.md and MEMORY.md hold identity, durable preferences, and the facts Atlas should trust first.',
+    result: 'Usama prefers production-ready changes that are tested on the sandbox.',
   },
-  {
-    title: 'Visual knowledge graph',
-    detail:
-      'Facts, summaries, topics, entities, projects, and creator profile nodes form a searchable graph that grows as the agent works.',
+  summaries: {
+    index: '02',
+    title: 'Facts + summaries',
+    detail: 'Compact LLM summaries and promoted facts are searched with semantic and lexical ranking.',
+    result: 'Dashboard work should preserve the Atlas palette and avoid clipped background panels.',
   },
-  {
-    title: 'CLI, TUI, and dashboard',
-    detail:
-      'Use the same agent core from the terminal, embedded TUI dashboard, or always-on server interface without splitting conversations.',
+  archive: {
+    index: '03',
+    title: 'Raw archive',
+    detail: 'Full sessions stay searchable as evidence when curated memory cannot answer the current question.',
+    result: 'Source: session 86f82d, message 42. Confidence 0.88.',
   },
-  {
-    title: 'Tools and real execution',
-    detail:
-      'File edits, terminal commands, web actions, scheduled jobs, browsers, model routing, and MCP connectors are available through one operator surface.',
-  },
-  {
-    title: 'Skills that compound',
-    detail:
-      'Atlas turns repeated workflows into reusable skills and keeps procedural knowledge close to the agent instead of hidden in a chat log.',
-  },
-  {
-    title: 'Runs where you need it',
-    detail:
-      'Local machine, VPS, Docker, SSH, Modal, Daytona, and messaging gateway deployments are all first-class ways to keep the agent online.',
-  },
+} as const;
+
+type MemoryLayer = keyof typeof memoryLayers;
+
+const surfaces = [
+  ['CLI', 'The fast path for direct work, scripts, and remote machines.'],
+  ['TUI', 'A rich terminal interface with the same sessions and tools.'],
+  ['Dashboard', 'Chat, memory, models, files, logs, skills, and operations on port 9119.'],
+  ['Gateway', 'Keep Atlas available through Telegram, Discord, Slack, and more.'],
 ];
 
-const memoryFlow = [
-  'USER.md and MEMORY.md anchor durable identity and operating preferences.',
-  'Approved facts and compact summaries answer most recall needs.',
-  'Raw session archive stays searchable as fallback evidence.',
-  'Conflicts are surfaced for correction instead of silently overwriting truth.',
-];
-
-const deploySteps = [
-  ['Clone', 'git clone https://github.com/theusamaaslam/AtlasAgent.git'],
-  ['Install', 'bash scripts/install.sh'],
-  ['Configure', 'atlas setup'],
-  ['Dashboard', 'atlas dashboard --host 0.0.0.0 --port 9119 --no-open'],
-];
-
-function TerminalPanel() {
+function MemoryScene() {
   return (
-    <div className={styles.terminalPanel} aria-label="Atlas terminal preview">
-      <div className={styles.terminalTopline}>
-        <span>atlas</span>
-        <span>memory online</span>
+    <div className={styles.scene} aria-label="Atlas memory graph illustration">
+      <div className={styles.sceneHeader}>
+        <span>live memory</span>
+        <span className={styles.liveIndicator}>growing</span>
       </div>
-      <pre>
-        {`$ atlas
+      <div className={styles.sceneCanvas} aria-hidden="true">
+        <span className={clsx(styles.edge, styles.edgeOne)} />
+        <span className={clsx(styles.edge, styles.edgeTwo)} />
+        <span className={clsx(styles.edge, styles.edgeThree)} />
+        <span className={clsx(styles.edge, styles.edgeFour)} />
+        <span className={clsx(styles.edge, styles.edgeFive)} />
+        <span className={clsx(styles.edge, styles.edgeSix)} />
+        <span className={clsx(styles.graphNode, styles.nodeAtlas)}>Atlas</span>
+        <span className={clsx(styles.graphNode, styles.nodeUser)}>User</span>
+        <span className={clsx(styles.graphNode, styles.nodeFact)}>Fact</span>
+        <span className={clsx(styles.graphNode, styles.nodeSummary)}>Summary</span>
+        <span className={clsx(styles.graphNode, styles.nodeProject)}>Project</span>
+        <span className={clsx(styles.graphNode, styles.nodeDecision)}>Decision</span>
+        <span className={styles.graphPulse} />
+      </div>
+      <div className={styles.sceneConsole}>
+        <div>
+          <span className={styles.prompt}>$</span> atlas memory recall{' '}
+          <span className={styles.query}>&quot;what matters here?&quot;</span>
+        </div>
+        <div className={styles.consoleResult}>
+          <span>6 memories ranked</span>
+          <span>38ms</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-ATLAS AGENT
-Created by Usama Aslam
+function RecallLab() {
+  const [active, setActive] = useState<MemoryLayer>('summaries');
+  const current = memoryLayers[active];
 
-> memory recall "dashboard design"
-facts       4 ranked results
-summaries   3 compact notes
-archive     ready as fallback
-
-> atlas dashboard --port 9119
-Dashboard ready on http://0.0.0.0:9119`}
-      </pre>
-      <div className={styles.graphPreview}>
-        <span className={styles.nodeCreator}>Creator</span>
-        <span className={styles.nodeFact}>Fact</span>
-        <span className={styles.nodeSummary}>Summary</span>
-        <span className={styles.nodeTopic}>Topic</span>
-        <span className={styles.nodeProject}>Project</span>
+  return (
+    <div className={styles.recallLab}>
+      <div className={styles.layerTabs} aria-label="Memory recall layers" role="tablist">
+        {(Object.keys(memoryLayers) as MemoryLayer[]).map((key) => (
+          <button
+            aria-selected={active === key}
+            className={clsx(styles.layerTab, active === key && styles.layerTabActive)}
+            key={key}
+            onClick={() => setActive(key)}
+            role="tab"
+            type="button"
+          >
+            <span>{memoryLayers[key].index}</span>
+            {memoryLayers[key].title}
+          </button>
+        ))}
+      </div>
+      <div className={styles.recallResult} role="tabpanel">
+        <div className={styles.resultMeta}>
+          <span>recall layer {current.index}</span>
+          <span>source cited</span>
+        </div>
+        <h3>{current.title}</h3>
+        <p>{current.detail}</p>
+        <blockquote>{current.result}</blockquote>
       </div>
     </div>
   );
 }
 
 export default function Home(): React.ReactNode {
-  const banner = useBaseUrl('/img/atlas-agent-banner.png');
+  const mark = useBaseUrl('/img/favicon.svg');
 
   return (
     <Layout
       title="Atlas Agent"
-      description="Atlas Agent is a self-improving AI agent created by Usama Aslam with memory, skills, tools, dashboard, and production deployment support."
+      description="Atlas Agent is a self-improving AI agent created by Usama Aslam with evolving memory, skills, tools, and a production dashboard."
     >
       <main className={styles.page}>
         <section className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>Created by Usama Aslam</p>
-            <h1>Atlas Agent</h1>
-            <p className={styles.lede}>
-              A self-improving AI agent for operators who want memory that compounds, skills that
-              evolve, and a dashboard that makes the agent understandable while it works.
-            </p>
-            <div className={styles.actions}>
-              <Link className={clsx(styles.button, styles.primary)} to="/getting-started/installation">
-                Install Atlas
-              </Link>
-              <Link className={clsx(styles.button, styles.secondary)} to="/getting-started/quickstart">
-                Read the docs
-              </Link>
-              <a className={clsx(styles.button, styles.ghost)} href="https://github.com/theusamaaslam/AtlasAgent">
-                GitHub
-              </a>
+          <div className={styles.heroGrid} aria-hidden="true" />
+          <div className={styles.heroInner}>
+            <div className={styles.heroCopy}>
+              <div className={styles.brandLine}>
+                <img alt="" src={mark} />
+                <span>Created by Usama Aslam</span>
+              </div>
+              <h1>Atlas Agent</h1>
+              <p className={styles.heroKicker}>An AI agent that gets better at being yours.</p>
+              <p className={styles.lede}>
+                It remembers the useful parts, turns repeated work into skills, and carries one
+                evolving mind across your terminal, dashboard, and messaging apps.
+              </p>
+              <div className={styles.actions}>
+                <Link className={clsx(styles.button, styles.primary)} to="/getting-started/installation">
+                  Install Atlas <span aria-hidden="true">-&gt;</span>
+                </Link>
+                <Link className={clsx(styles.button, styles.secondary)} to="/getting-started/quickstart">
+                  Take the quick tour
+                </Link>
+                <a className={styles.githubLink} href="https://github.com/theusamaaslam/AtlasAgent">
+                  View on GitHub
+                </a>
+              </div>
+            </div>
+            <MemoryScene />
+          </div>
+          <div className={styles.scrollCue} aria-hidden="true">
+            <span /> keep scrolling
+          </div>
+        </section>
+
+        <section className={styles.marquee} aria-label="Atlas capabilities">
+          <div>
+            <span>Persistent memory</span><i /><span>Semantic recall</span><i />
+            <span>Agent-made skills</span><i /><span>Real tool execution</span><i />
+            <span>Always-on gateway</span>
+          </div>
+        </section>
+
+        <section className={styles.memoryBand}>
+          <div className={styles.bandInner}>
+            <div className={styles.sectionIntro}>
+              <p className={styles.eyebrow}>Memory that earns its keep</p>
+              <h2>Atlas knows where to look before it says it does not know.</h2>
+              <p>
+                Recall follows a deliberate order. Current instructions win, curated truth comes
+                first, compact memory comes next, and the full archive remains available as fallback evidence.
+              </p>
+            </div>
+            <RecallLab />
+          </div>
+        </section>
+
+        <section className={styles.capabilityBand}>
+          <div className={styles.bandInner}>
+            <div className={styles.sectionIntro}>
+              <p className={styles.eyebrow}>One agent, many doors</p>
+              <h2>Start in the terminal. Continue wherever work finds you.</h2>
+            </div>
+            <div className={styles.surfaceList}>
+              {surfaces.map(([title, detail], index) => (
+                <article className={styles.surfaceRow} key={title}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <h3>{title}</h3>
+                  <p>{detail}</p>
+                  <b aria-hidden="true">+</b>
+                </article>
+              ))}
             </div>
           </div>
-          <div className={styles.heroVisual}>
-            <img src={banner} alt="Atlas Agent banner" />
-            <TerminalPanel />
-          </div>
         </section>
 
-        <section className={styles.strip} aria-label="Atlas highlights">
-          <div>
-            <strong>Memory V2.5</strong>
-            <span>summary-first recall</span>
-          </div>
-          <div>
-            <strong>Production dashboard</strong>
-            <span>port 9119 ready</span>
-          </div>
-          <div>
-            <strong>Local-first</strong>
-            <span>SQLite, FTS, optional embeddings</span>
-          </div>
-          <div>
-            <strong>White-label</strong>
-            <span>Atlas by Usama Aslam</span>
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <p className={styles.eyebrow}>Why Atlas</p>
-            <h2>Built around useful memory, not bigger prompts.</h2>
-            <p>
-              Atlas logs interactions, summarizes them, extracts high-value facts, and retrieves the
-              smallest useful context when the current request needs history.
-            </p>
-          </div>
-          <div className={styles.capabilityGrid}>
-            {capabilities.map((item) => (
-              <article className={styles.card} key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className={clsx(styles.section, styles.memorySection)}>
-          <div className={styles.memoryCopy}>
-            <p className={styles.eyebrow}>Agent-useful memory</p>
-            <h2>The graph is the visible layer. Retrieval is the useful layer.</h2>
-            <p>
-              USER.md and MEMORY.md stay the first source of truth. Approved facts and compact
-              summaries come next. Raw sessions remain preserved, searchable, and available only when
-              curated memory cannot answer the question.
-            </p>
-            <Link className={clsx(styles.button, styles.secondary)} to="/user-guide/features/memory">
-              Memory documentation
-            </Link>
-          </div>
-          <div className={styles.memoryStack}>
-            {memoryFlow.map((step, index) => (
-              <div className={styles.memoryStep} key={step}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <p>{step}</p>
+        <section className={styles.launchBand}>
+          <div className={styles.launchInner}>
+            <div>
+              <p className={styles.eyebrow}>Ready when you are</p>
+              <h2>Give Atlas a machine.<br />It will bring the memory.</h2>
+              <p>
+                Local, VPS, Docker, SSH, or your own infrastructure. Your data and your model choices stay yours.
+              </p>
+            </div>
+            <div className={styles.installPanel}>
+              <div className={styles.installTopline}>
+                <span>production path</span><span>4 steps</span>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <p className={styles.eyebrow}>Production path</p>
-            <h2>Clone, configure, and run the dashboard.</h2>
-            <p>
-              The public repo includes the installer and deployment scripts. GitHub Pages publishes
-              this documentation from the same source tree.
-            </p>
-          </div>
-          <div className={styles.deployGrid}>
-            {deploySteps.map(([label, command]) => (
-              <div className={styles.deployStep} key={label}>
-                <span>{label}</span>
-                <code>{command}</code>
-              </div>
-            ))}
+              <ol>
+                <li><span>01</span><code>git clone https://github.com/theusamaaslam/AtlasAgent.git</code></li>
+                <li><span>02</span><code>cd AtlasAgent &amp;&amp; bash scripts/install.sh</code></li>
+                <li><span>03</span><code>atlas setup</code></li>
+                <li><span>04</span><code>atlas dashboard --host 0.0.0.0 --port 9119</code></li>
+              </ol>
+              <Link className={clsx(styles.button, styles.launchButton)} to="/getting-started/installation">
+                Open installation guide <span aria-hidden="true">-&gt;</span>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
     </Layout>
   );
 }
+
