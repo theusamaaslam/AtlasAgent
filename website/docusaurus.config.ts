@@ -97,7 +97,6 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/atlas-agent-banner.png',
     colorMode: {
       defaultMode: 'dark',
       respectPrefersColorScheme: true,
@@ -187,3 +186,4 @@ const config: Config = {
 };
 
 export default config;
+
