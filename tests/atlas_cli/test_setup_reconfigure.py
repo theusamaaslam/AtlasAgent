@@ -75,6 +75,7 @@ def _enter_existing_install_patches(stack, **extra):
 
 
 def _enter_fresh_install_patches(stack, **extra):
+    named = {}
     for target, kwargs in [
         ("atlas_cli.setup.ensure_atlas_home", {}),
         ("atlas_cli.setup.is_interactive_stdin", {"return_value": True}),
@@ -84,10 +85,19 @@ def _enter_fresh_install_patches(stack, **extra):
         ("atlas_cli.auth.get_active_provider", {"return_value": None}),
         ("atlas_cli.setup.get_env_value", {"return_value": None}),
         ("atlas_cli.setup._offer_openclaw_migration", {"return_value": False}),
+        ("atlas_cli.setup._print_setup_summary", {}),
     ]:
         stack.enter_context(patch(target, **kwargs))
 
-    named = {}
+    for name, target in [
+        ("model", "atlas_cli.setup.setup_model_provider"),
+        ("terminal", "atlas_cli.setup.setup_terminal_backend"),
+        ("defaults", "atlas_cli.setup._apply_default_agent_settings"),
+        ("gateway", "atlas_cli.setup.setup_gateway"),
+        ("tools", "atlas_cli.setup.setup_tools"),
+    ]:
+        named[name] = stack.enter_context(patch(target))
+
     for name, target_spec in extra.items():
         if isinstance(target_spec, tuple):
             target, kwargs = target_spec
@@ -198,8 +208,13 @@ class TestFreshInstall:
             from atlas_cli.setup import run_setup_wizard
             run_setup_wizard(args)
 
-        m["prompt"].assert_called_once()  # quick-vs-full prompt
-        m["first"].assert_called_once()
+        m["prompt"].assert_called_once()
+        m["first"].assert_not_called()
+        m["model"].assert_called_once()
+        m["terminal"].assert_called_once()
+        m["defaults"].assert_called_once()
+        m["gateway"].assert_called_once()
+        m["tools"].assert_called_once_with({}, first_install=True)
 
     def test_reconfigure_on_fresh_install_falls_through(self, fresh_install):
         args = _make_setup_args(reconfigure=True)
@@ -214,7 +229,12 @@ class TestFreshInstall:
             run_setup_wizard(args)
 
         m["prompt"].assert_called_once()
-        m["first"].assert_called_once()
+        m["first"].assert_not_called()
+        m["model"].assert_called_once()
+        m["terminal"].assert_called_once()
+        m["defaults"].assert_called_once()
+        m["gateway"].assert_called_once()
+        m["tools"].assert_called_once_with({}, first_install=True)
 
     def test_quick_on_fresh_install_falls_through(self, fresh_install):
         args = _make_setup_args(quick=True)
@@ -229,7 +249,12 @@ class TestFreshInstall:
             run_setup_wizard(args)
 
         m["prompt"].assert_called_once()
-        m["first"].assert_called_once()
+        m["first"].assert_not_called()
+        m["model"].assert_called_once()
+        m["terminal"].assert_called_once()
+        m["defaults"].assert_called_once()
+        m["gateway"].assert_called_once()
+        m["tools"].assert_called_once_with({}, first_install=True)
 
 
 class TestArgparse:

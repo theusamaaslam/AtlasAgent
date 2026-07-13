@@ -88,7 +88,9 @@ class TestCmdUpdatePip:
         hm._cmd_update_pip(mock_args)
 
         assert mock_run.call_count == 1
-        assert mock_run.call_args.args[0] == ["/usr/bin/uv", "pip", "install", "--upgrade", "atlas-agent"]
+        assert mock_run.call_args.args[0] == [
+            "/usr/bin/uv", "pip", "install", "-e", str(hm.PROJECT_ROOT)
+        ]
         assert mock_run.call_args.kwargs["env"]["VIRTUAL_ENV"] == "/tmp/atlas-launcher-venv"
 
     @patch("shutil.which", return_value="/usr/bin/uv")
@@ -246,18 +248,21 @@ class TestCmdUpdateBranchFallback:
         ), patch.object(hm, "_sync_with_upstream_if_needed") as sync_mock:
             cmd_update(mock_args)
 
-        sync_mock.assert_called_once_with(["git"], PROJECT_ROOT)
+        git_cmd = ["git", "-c", "windows.appendAtomically=false"] if hm._is_windows() else ["git"]
+        sync_mock.assert_called_once_with(git_cmd, PROJECT_ROOT)
         captured = capsys.readouterr()
         assert "Already up to date!" in captured.out
 
+    @patch("atlas_constants.find_node_executable")
     @patch("shutil.which")
     @patch("subprocess.run")
     def test_update_refreshes_repo_and_tui_node_dependencies(
-        self, mock_run, mock_which, mock_args
+        self, mock_run, mock_which, mock_find_node, mock_args
     ):
         from atlas_cli import main as hm
 
         mock_which.side_effect = {"uv": "/usr/bin/uv", "npm": "/usr/bin/npm"}.get
+        mock_find_node.side_effect = {"npm": "/usr/bin/npm"}.get
         mock_run.side_effect = _make_run_side_effect(
             branch="main", verify_ok=True, commit_count="1"
         )
@@ -267,6 +272,7 @@ class TestCmdUpdateBranchFallback:
         import subprocess as _subprocess
         build_ok = _subprocess.CompletedProcess([], 0, stdout="", stderr="")
         with patch.object(hm, "_is_termux_env", return_value=False), \
+             patch.object(hm, "_web_ui_build_needed", return_value=True), \
              patch.object(hm, "_run_with_idle_timeout", return_value=build_ok) as mock_idle:
             cmd_update(mock_args)
 
@@ -294,7 +300,7 @@ class TestCmdUpdateBranchFallback:
         # otherwise long downloads look like a hang (#18840).
         root_flags = [
             "/usr/bin/npm",
-            "ci",
+            "install",
             "--no-fund",
             "--no-audit",
             "--progress=false",
@@ -302,7 +308,7 @@ class TestCmdUpdateBranchFallback:
         ]
         ws_flags = [
             "/usr/bin/npm",
-            "ci",
+            "install",
             "--no-fund",
             "--no-audit",
             "--progress=false",
@@ -319,7 +325,7 @@ class TestCmdUpdateBranchFallback:
             # The web/ install runs from the workspace root when the root
             # lockfile exists (npm workspaces hoist node_modules upward).
             assert npm_calls[2:] == [
-                (["/usr/bin/npm", "ci", "--workspace", "web", "--silent"], PROJECT_ROOT),
+                (["/usr/bin/npm", "install", "--silent"], PROJECT_ROOT / "web"),
             ]
 
         # The web UI build itself went through the streaming helper.
@@ -337,7 +343,7 @@ class TestCmdUpdateBranchFallback:
             for call in mock_run.call_args_list
             if call.args
             and call.args[0][0] == "/usr/bin/npm"
-            and call.args[0][1] == "ci"
+            and call.args[0][1] == "install"
             and call.kwargs.get("cwd") == PROJECT_ROOT
             and "--silent" not in call.args[0]
         ]
@@ -811,7 +817,7 @@ class TestCmdUpdateCheckBranchFlag:
         cmd_update(args)
 
         out = capsys.readouterr().out
-        assert "--branch is ignored for PyPI installs" in out
+        assert "--branch is ignored for local source installs" in out
         assert "bb/gui" in out
 
 

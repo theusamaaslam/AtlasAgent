@@ -666,7 +666,7 @@ def test_visible_providers_include_nous_subscription_when_logged_in(monkeypatch)
 
     # The managed Nous row is listed (not necessarily first — "Local Browser"
     # sorts first so a fresh-install Enter lands on the free local backend).
-    assert any(p["name"].startswith("Nous Subscription") for p in providers)
+    assert not any(p["name"].startswith("Nous Subscription") for p in providers)
     # "Local Browser" must be the index-0 default so pressing Enter never
     # walks a user into a paid Atlas Gateway login.
     assert providers[0]["name"] == "Local Browser"
@@ -692,7 +692,7 @@ def test_visible_providers_show_nous_subscription_when_logged_out(monkeypatch):
 
     providers = _visible_providers(TOOL_CATEGORIES["browser"], config)
 
-    assert any(p["name"].startswith("Nous Subscription") for p in providers)
+    assert not any(p["name"].startswith("Nous Subscription") for p in providers)
 
 
 def test_visible_providers_show_nous_subscription_when_paid_access_is_false(monkeypatch):
@@ -715,7 +715,7 @@ def test_visible_providers_show_nous_subscription_when_paid_access_is_false(monk
 
     providers = _visible_providers(TOOL_CATEGORIES["browser"], config)
 
-    assert any(p["name"].startswith("Nous Subscription") for p in providers)
+    assert not any(p["name"].startswith("Nous Subscription") for p in providers)
 
 
 def test_visible_providers_force_fresh_shows_nous_subscription_after_upgrade(monkeypatch):
@@ -747,7 +747,7 @@ def test_visible_providers_force_fresh_shows_nous_subscription_after_upgrade(mon
 
     # The managed Nous row reappears after the entitlement upgrade. It is no
     # longer asserted to be first — "Local Browser" sorts first by design.
-    assert any(p["name"].startswith("Nous Subscription") for p in providers)
+    assert not any(p["name"].startswith("Nous Subscription") for p in providers)
     assert ("features", True) in calls
 
 
@@ -1450,8 +1450,8 @@ def test_configure_managed_provider_blocks_when_not_entitled(monkeypatch):
     assert "web" not in config
 
 
-def test_configure_managed_provider_enables_when_entitled(monkeypatch):
-    """Once entitled, selecting the managed backend sets use_gateway=True."""
+def test_configure_managed_provider_stays_disabled_when_entitled(monkeypatch):
+    """Stale entitlement state cannot re-enable the removed hosted gateway."""
     monkeypatch.setattr(
         "atlas_cli.nous_subscription.ensure_nous_portal_access",
         lambda **kwargs: True,
@@ -1466,8 +1466,7 @@ def test_configure_managed_provider_enables_when_entitled(monkeypatch):
 
     _configure_provider(provider, config)
 
-    assert config["web"]["backend"] == "firecrawl"
-    assert config["web"]["use_gateway"] is True
+    assert "web" not in config
 
 
 def test_configure_non_managed_provider_skips_portal_gate(monkeypatch):

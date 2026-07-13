@@ -615,9 +615,9 @@ def open_memory_vault(*, atlas_home: Optional[Path] = None) -> Dict[str, Any]:
         if sys.platform.startswith("win"):
             os.startfile(str(vault))  # type: ignore[attr-defined]
         elif sys.platform == "darwin":
-            subprocess.Popen(["open", str(vault)])
+            subprocess.Popen(["open", str(vault)], stdin=subprocess.DEVNULL)
         else:
-            subprocess.Popen(["xdg-open", str(vault)])
+            subprocess.Popen(["xdg-open", str(vault)], stdin=subprocess.DEVNULL)
         return {"ok": True, "vault_path": str(vault)}
     except Exception as exc:
         return {"ok": False, "vault_path": str(vault), "error": str(exc)}
