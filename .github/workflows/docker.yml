@@ -17,7 +17,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  IMAGE_NAME: theusamaaslam/AtlasAgent
+  # OCI/Docker repository names must be lowercase.
+  IMAGE_NAME: theusamaaslam/atlasagent
 
 jobs:
   # Build, test, and optionally push the image for each architecture.
