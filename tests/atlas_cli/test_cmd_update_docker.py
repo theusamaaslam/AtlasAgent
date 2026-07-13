@@ -1,7 +1,7 @@
 """Tests for ``atlas update`` / ``--check`` inside the Docker container.
 
 Background: ``.dockerignore`` excludes ``.git``, so the existing git-pull
-update path can never succeed inside the published image.  Before this
+update path can never succeed inside the built image.  Before this
 fix, ``atlas update`` would fall through to ``"✗ Not a git repository.
 Please reinstall: curl ... install.sh"`` — that script installs a *new*
 host-side Atlas, not an update to the running container, so the message
@@ -10,7 +10,7 @@ was actively misleading.
 These tests pin the new behaviour: when ``detect_install_method`` reports
 ``"docker"`` (stamped by ``docker/stage2-hook.sh``), both the apply path
 (``cmd_update``) and the check path (``_cmd_update_check``) print the
-``docker pull`` guidance from ``format_docker_update_message`` and exit
+local rebuild guidance from ``format_docker_update_message`` and exit
 with status 1, without running ``git fetch`` / ``subprocess.run``.
 """
 
@@ -42,7 +42,7 @@ def test_cmd_update_in_docker_prints_guidance_and_exits(
     # Spot-check the key guidance — exhaustive wording is locked in by the
     # config-module test below to keep these CLI tests resilient to copy edits.
     assert "doesn't apply inside the Docker container" in out
-    assert "docker pull theusamaaslam/atlasagent:latest" in out
+    assert "docker compose build --pull" in out
 
     # No git invocations — the early-return must beat every git command.
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
@@ -62,7 +62,7 @@ def test_cmd_update_check_in_docker_prints_guidance_and_exits(
     assert excinfo.value.code == 1
     out = capsys.readouterr().out
     assert "doesn't apply inside the Docker container" in out
-    assert "docker pull theusamaaslam/atlasagent:latest" in out
+    assert "docker compose build --pull" in out
 
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
     assert git_calls == [], f"expected no git calls, got: {git_calls}"
@@ -78,12 +78,12 @@ def test_cmd_update_in_docker_ignores_yes_and_force(
 
     The point of the bail-out is "git pull will never work here", so even
     a user trying to barge through with ``--yes --force`` should see the
-    docker-pull guidance.
+    local rebuild guidance.
     """
     with pytest.raises(SystemExit):
         cmd_update(SimpleNamespace(check=False, yes=True, force=True))
 
-    assert "docker pull" in capsys.readouterr().out
+    assert "docker compose build --pull" in capsys.readouterr().out
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
     assert git_calls == []
 
@@ -99,7 +99,7 @@ def test_cmd_update_check_direct_in_docker(mock_run, _mock_method, capsys):
         _cmd_update_check()
 
     assert excinfo.value.code == 1
-    assert "docker pull" in capsys.readouterr().out
+    assert "docker compose build --pull" in capsys.readouterr().out
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
     assert git_calls == []
 
@@ -119,7 +119,7 @@ def test_cmd_update_on_git_install_does_not_print_docker_message(
     """Source/git installs MUST NOT hit the Docker branch.
 
     Regression guard: an over-eager detection refactor could accidentally
-    route git users through the docker-pull message.  We swallow
+    route git users through the Docker rebuild message.  We swallow
     SystemExit / unrelated errors from the rest of the update flow —
     those don't matter for this assertion; what matters is that the
     docker text is absent.
@@ -171,13 +171,14 @@ def test_format_docker_update_message_contents():
 
     msg = format_docker_update_message()
 
-    # Primary command — the entire reason this message exists.
-    assert "docker pull theusamaaslam/atlasagent:latest" in msg
+    # Primary commands — the entire reason this message exists.
+    assert "git pull --ff-only" in msg
+    assert "docker compose build --pull" in msg
 
     # The four key concepts the message must cover:
     assert "restart" in msg.lower(), "must explain that a restart is required"
     assert "--version" in msg, "must show how to verify the new version"
-    assert ":latest" in msg, "must mention tag pinning caveat"
+    assert "atlas-agent:local" in msg, "must show how to verify the local image"
     assert "ATLAS_HOME" in msg or "/opt/data" in msg, (
         "must address config persistence across upgrades"
     )

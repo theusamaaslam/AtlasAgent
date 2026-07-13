@@ -11,7 +11,7 @@ There are two distinct ways Docker intersects with Atlas Agent:
 1. **Running Atlas IN Docker** — the agent itself runs inside a container (this page's primary focus)
 2. **Docker as a terminal backend** — the agent runs on your host but executes every command inside a single, persistent Docker sandbox container that survives across tool calls, `/new`, and subagents for the life of the Atlas process (see [Configuration → Docker Backend](./configuration.md#docker-backend))
 
-This page covers option 1. The container stores all user data (config, API keys, sessions, skills, memories) in a single directory mounted from the host at `/opt/data`. The image itself is stateless and can be upgraded by pulling a new version without losing any configuration.
+This page covers option 1. The container stores all user data (config, API keys, sessions, skills, memories) in a single directory mounted from the host at `/opt/data`. The image itself is stateless and can be rebuilt from a newer checkout without losing any configuration.
 
 ## Quick start
 
@@ -31,17 +31,16 @@ result before hitting Enter.
 :::
 
 ```sh
+git clone https://github.com/theusamaaslam/AtlasAgent.git
+cd AtlasAgent
+docker build -t atlas-agent:local .
 mkdir -p ~/.atlas
 docker run -it --rm \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent setup
+  atlas-agent:local setup
 ```
 
 This drops you into the setup wizard, which will prompt you for your API keys and write them to `~/.atlas/.env`. You only need to do this once. It is highly recommended to set up a chat system for the gateway to work with at this point.
-
-:::tip
-Inside the container, run `atlas setup --portal` once — the refresh token persists in the mounted `~/.atlas` volume. See [Atlas Gateway](/integrations/nous-portal).
-:::
 
 ## Running in gateway mode
 
@@ -53,7 +52,7 @@ docker run -d \
   --restart unless-stopped \
   -v ~/.atlas:/opt/data \
   -p 8642:8642 \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 Port 8642 exposes the gateway's [OpenAI-compatible API server](./features/api-server.md) and health endpoint. It's optional if you only use chat platforms (Telegram, Discord, etc.), but required if you want the dashboard or external tools to reach the gateway.
@@ -94,7 +93,7 @@ docker run -d \
   -e API_SERVER_HOST=0.0.0.0 \
   -e API_SERVER_KEY="$(openssl rand -hex 32)" \
   -e API_SERVER_CORS_ORIGINS='*' \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 Opening any port on an internet facing machine is a security risk. You should not do it unless you understand the risks.
@@ -111,7 +110,7 @@ docker run -d \
   -p 8642:8642 \
   -p 9119:9119 \
   -e ATLAS_DASHBOARD=1 \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 The dashboard is supervised by s6 — if it crashes, `s6-supervise` restarts it automatically after a short backoff. Dashboard stdout/stderr is forwarded to `docker logs <container>` (no prefix; the gateway's own output now lives in a per-profile s6-log file — see [Where the logs go](#where-the-logs-go) below — so the two streams don't clash).
@@ -153,7 +152,7 @@ To open an interactive chat session against a running data directory:
 ```sh
 docker run -it --rm \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent
+  atlas-agent:local
 ```
 
 Or if you have already opened a terminal in your running container (via Docker Desktop for instance), just run:
@@ -279,7 +278,7 @@ In those cases, declare one service per profile with distinct `container_name`, 
 ```yaml
 services:
   atlas-work:
-    image: theusamaaslam/AtlasAgent:latest
+    image: atlas-agent:local
     container_name: atlas-work
     restart: unless-stopped
     command: gateway run
@@ -289,7 +288,7 @@ services:
       - ~/.atlas-work:/opt/data
 
   atlas-personal:
-    image: theusamaaslam/AtlasAgent:latest
+    image: atlas-agent:local
     container_name: atlas-personal
     restart: unless-stopped
     command: gateway run
@@ -326,7 +325,7 @@ docker run -it --rm \
   -v ~/.atlas:/opt/data \
   -e ANTHROPIC_API_KEY="sk-ant-..." \
   -e OPENAI_API_KEY="sk-..." \
-  theusamaaslam/AtlasAgent
+  atlas-agent:local
 ```
 
 Direct `-e` flags override values from `.env`. This is useful for CI/CD or secrets-manager integrations where you don't want keys on disk.
@@ -342,7 +341,7 @@ For persistent deployment with both the gateway and dashboard, a `docker-compose
 ```yaml
 services:
   atlas:
-    image: theusamaaslam/AtlasAgent:latest
+    image: atlas-agent:local
     container_name: atlas
     restart: unless-stopped
     command: gateway run
@@ -397,7 +396,7 @@ ctl.!default {
 Then build a small derived image with the ALSA PulseAudio plugin installed:
 
 ```dockerfile title="Dockerfile.audio"
-FROM theusamaaslam/AtlasAgent:latest
+FROM atlas-agent:local
 
 USER root
 RUN apt-get update \
@@ -464,7 +463,7 @@ docker run -d \
   --restart unless-stopped \
   --memory=4g --cpus=2 \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 ## What the Dockerfile does
@@ -527,27 +526,28 @@ Each profile created with `atlas profile create <name>` automatically gets an s6
 
 ## Upgrading
 
-Pull the latest image and recreate the container. Your data directory is
+Pull the latest source changes, rebuild the local image, and recreate the container. Your data directory is
 preserved, and the container runs non-interactive config-schema migrations
 against the mounted `$ATLAS_HOME/config.yaml` before starting the gateway.
 When a migration is needed, Atlas writes timestamped backups next to
 `config.yaml` and `.env` first.
 
 ```sh
-docker pull theusamaaslam/AtlasAgent:latest
+git pull --ff-only
+docker build --pull -t atlas-agent:local .
 docker rm -f atlas
 docker run -d \
   --name atlas \
   --restart unless-stopped \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 Or with Docker Compose:
 
 ```sh
-docker compose pull
-docker compose up -d
+git pull --ff-only
+docker compose up -d --build --force-recreate
 ```
 
 Set `ATLAS_SKIP_CONFIG_MIGRATION=1` only if you need to inspect or migrate the
@@ -577,10 +577,10 @@ This is a good fit for tools that are quick to install and used occasionally. Fo
 
 ### Durable installs — build a derived image
 
-When a tool must be available immediately on every container start with no re-install delay, build a new image that inherits from `theusamaaslam/AtlasAgent` and installs the tool in a layer:
+When a tool must be available immediately on every container start with no re-install delay, first build `atlas-agent:local` from this repository, then build a derived image that installs the tool in a layer:
 
 ```dockerfile
-FROM theusamaaslam/AtlasAgent:latest
+FROM atlas-agent:local
 
 USER root
 RUN apt-get update \
@@ -589,7 +589,7 @@ RUN apt-get update \
 USER atlas
 ```
 
-Build it and use it in place of the official image:
+Build it and use it in place of the base local image:
 
 ```sh
 docker build -t my-atlas:latest .
@@ -601,7 +601,7 @@ docker run -d \
   my-atlas:latest gateway run
 ```
 
-The entrypoint script and `/opt/data` semantics are inherited unchanged, so the rest of this page still applies. Remember to rebuild the image when pulling a newer upstream `theusamaaslam/AtlasAgent`.
+The entrypoint script and `/opt/data` semantics are inherited unchanged, so the rest of this page still applies. Rebuild `atlas-agent:local` after pulling newer repository changes, then rebuild your derived image.
 
 ### Complex tools or multi-service stacks — run a sidecar container
 
@@ -610,7 +610,7 @@ For tools that bring their own service (a database, a web server, a queue, a hea
 ```yaml
 services:
   atlas:
-    image: theusamaaslam/AtlasAgent:latest
+    image: atlas-agent:local
     container_name: atlas
     restart: unless-stopped
     command: gateway run
@@ -668,7 +668,7 @@ services:
             - capabilities: [gpu]
 
   atlas:
-    image: theusamaaslam/AtlasAgent:latest
+    image: atlas-agent:local
     container_name: atlas
     restart: unless-stopped
     command: gateway run
@@ -712,7 +712,7 @@ docker run -d \
   --name atlas \
   -v ~/.atlas:/opt/data \
   -p 8642:8642 \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 ```yaml
@@ -731,7 +731,7 @@ docker run -d \
   --name atlas \
   --network host \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 ```yaml
@@ -795,7 +795,7 @@ docker run -d \
   --name atlas \
   -e PUID=1000 -e PGID=10 \
   -v /volume1/docker/atlas:/opt/data \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 `docker exec atlas <cmd>` automatically drops to UID 10000 too — see [`docker exec` automatically drops to the `atlas` user](#docker-exec-automatically-drops-to-the-atlas-user) for details and the per-invocation opt-out.
@@ -809,7 +809,7 @@ docker run -d \
   --name atlas \
   --shm-size=1g \
   -v ~/.atlas:/opt/data \
-  theusamaaslam/AtlasAgent gateway run
+  atlas-agent:local gateway run
 ```
 
 ### Gateway not reconnecting after network issues
@@ -824,6 +824,6 @@ docker restart atlas
 
 ```sh
 docker logs --tail 50 atlas          # Recent logs
-docker run -it --rm theusamaaslam/AtlasAgent:latest version     # Verify version
+docker run -it --rm atlas-agent:local version     # Verify version
 docker stats atlas                    # Resource usage
 ```

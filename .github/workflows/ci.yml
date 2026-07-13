@@ -20,7 +20,6 @@ permissions:
   pull-requests: write # needed by lint (PR comment) + supply-chain (PR comment)
   actions: read # needed by osv-scanner (SARIF upload)
   security-events: write # needed by osv-scanner (SARIF upload)
-  packages: write # needed by docker build
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -105,13 +104,6 @@ jobs:
     if: needs.detect.outputs.docker_meta == 'true'
     uses: ./.github/workflows/docker-lint.yml
 
-  docker:
-    name: Build&Test Docker image
-    needs: detect
-    if: needs.detect.outputs.python == 'true' || needs.detect.outputs.frontend == 'true' || needs.detect.outputs.docker_meta == 'true'
-    uses: ./.github/workflows/docker.yml
-    secrets: inherit
-
   supply-chain:
     name: Supply-chain scan
     needs: detect
@@ -147,8 +139,6 @@ jobs:
       - docker-lint
       - supply-chain
       - osv-scanner
-      # we don't require docker to pass rn because it's so slow lol
-      # - docker
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -174,7 +164,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────
   ci-timings:
     name: CI timing report
-    needs: [all-checks-pass, docker]
+    needs: [all-checks-pass]
     if: always()
     runs-on: ubuntu-latest
     steps:
