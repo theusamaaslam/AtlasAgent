@@ -161,6 +161,27 @@ def _warm_gateway_module() -> None:
         pass
 
 
+def _start_living_memory_ticker(stop_event: "threading.Event", interval: int = 1800) -> None:
+    """Continuously catch up derived memory without delaying dashboard boot."""
+    if stop_event.wait(10):
+        return
+    while not stop_event.is_set():
+        try:
+            from agent.living_memory import enqueue_unprocessed_summaries, process_memory_jobs
+            from agent.memory_facts import summarize_session_memory
+
+            memory_cfg = load_config().get("memory") or {}
+            if isinstance(memory_cfg, dict) and memory_cfg.get("memory_enabled") is False:
+                stop_event.wait(interval)
+                continue
+            summarize_session_memory(session_limit=200, include_tail=True)
+            enqueue_unprocessed_summaries(limit=5000)
+            process_memory_jobs(limit=10)
+        except Exception:
+            _log.debug("Living memory background catch-up failed", exc_info=True)
+        stop_event.wait(interval)
+
+
 def _resolve_restart_drain_timeout() -> float:
     try:
         from atlas_cli.gateway import _get_restart_drain_timeout
@@ -189,6 +210,15 @@ async def _lifespan(app: "FastAPI"):
     # the server socket is already open and accepting probes.
     asyncio.get_event_loop().run_in_executor(None, _warm_gateway_module)
 
+    memory_stop = threading.Event()
+    memory_thread = threading.Thread(
+        target=_start_living_memory_ticker,
+        args=(memory_stop,),
+        daemon=True,
+        name="living-memory-ticker",
+    )
+    memory_thread.start()
+
     # Desktop-spawned backends (ATLAS_DESKTOP=1) fire cron jobs themselves,
     # since the app has no gateway running the scheduler. Server `atlas
     # dashboard` is unaffected — it relies on its own gateway.
@@ -207,6 +237,7 @@ async def _lifespan(app: "FastAPI"):
     try:
         yield
     finally:
+        memory_stop.set()
         if cron_stop is not None:
             cron_stop.set()
 
@@ -9895,6 +9926,36 @@ async def get_memory_graph(profile: Optional[str] = None):
 
     with _profile_scope(profile):
         return memory_vault_graph()
+
+
+@app.get("/api/memory/living/status")
+async def get_living_memory_status(profile: Optional[str] = None):
+    from agent.living_memory import living_memory_status
+
+    with _profile_scope(profile):
+        return living_memory_status()
+
+
+@app.post("/api/memory/living/catch-up")
+async def catch_up_living_memory(profile: Optional[str] = None, limit: int = 50):
+    from agent.living_memory import enqueue_unprocessed_summaries, process_memory_jobs
+    from agent.memory_facts import summarize_session_memory
+
+    safe_limit = max(1, min(int(limit or 50), 100))
+    with _profile_scope(profile):
+        summarize_session_memory(session_limit=500, include_tail=True)
+        queued = enqueue_unprocessed_summaries(limit=5000)
+        result = process_memory_jobs(limit=safe_limit)
+    return {"ok": True, "queued": queued, **result}
+
+
+@app.get("/api/memory/history")
+async def get_living_memory_history(q: str = "", limit: int = 100, profile: Optional[str] = None):
+    from agent.living_memory import list_claim_history
+
+    safe_limit = max(1, min(int(limit or 100), 500))
+    with _profile_scope(profile):
+        return list_claim_history(q, limit=safe_limit)
 
 
 @app.get("/api/memory/search")

@@ -63,6 +63,7 @@ class VaultNode:
     confidence: Optional[float] = None
     topics: List[str] = field(default_factory=list)
     links: List[str] = field(default_factory=list)
+    relations: Dict[str, str] = field(default_factory=dict)
 
 
 def get_memory_vault_dir(atlas_home: Optional[Path] = None) -> Path:
@@ -272,6 +273,47 @@ def _source_nodes(atlas_home: Path, db: Any = None, session_limit: int = 5000) -
     except Exception:
         logger.debug("Could not load memory facts for vault", exc_info=True)
 
+    try:
+        from agent.living_memory import living_graph_data
+
+        living = living_graph_data(atlas_home=atlas_home)
+        by_node_id = {str(node.get("id")): node for node in living.get("nodes") or []}
+        relations: Dict[str, Dict[str, str]] = {}
+        for edge in living.get("edges") or []:
+            source = str(edge.get("source") or "")
+            target = str(edge.get("target") or "")
+            if source and target:
+                relations.setdefault(source, {})[target] = str(edge.get("type") or "related")
+        folders = {
+            "person": "Entities", "project": "Entities", "organization": "Entities",
+            "place": "Entities", "other": "Entities", "claim": "Claims", "dossier": "Dossiers",
+        }
+        for node_id, item in by_node_id.items():
+            kind = str(item.get("kind") or "other")
+            title = str(item.get("title") or node_id)
+            folder = folders.get(kind, "Entities")
+            nodes.append(
+                VaultNode(
+                    id=node_id,
+                    kind=kind,
+                    title=title,
+                    path=f"{folder}/{_note_name(title, node_id)}",
+                    text=str(item.get("text") or ""),
+                    source="living-memory-v3",
+                    timestamp=item.get("timestamp"),
+                    session_id=item.get("session_id"),
+                    source_message_id=item.get("source_message_id"),
+                    status=item.get("status"),
+                    importance=item.get("importance"),
+                    confidence=item.get("confidence"),
+                    topics=list(item.get("topics") or []),
+                    links=list(relations.get(node_id, {}).keys()),
+                    relations=relations.get(node_id, {}),
+                )
+            )
+    except Exception:
+        logger.debug("Could not load living memory graph for vault", exc_info=True)
+
     return nodes
 
 
@@ -287,10 +329,12 @@ def _connect_nodes(nodes: List[VaultNode]) -> None:
             node.links.append(creator.id)
         for topic in node.topics[:6]:
             node.links.append(f"topic-{topic}")
+            node.relations.setdefault(f"topic-{topic}", "tagged_with")
             peers = [p for p in by_topic.get(topic, []) if p.id != node.id]
             for peer in peers[:3]:
                 if peer.kind in {"memory", "user", "creator", "fact", "summary"} or node.kind in {"memory", "user", "fact", "summary"}:
                     node.links.append(peer.id)
+                    node.relations.setdefault(peer.id, "related")
         node.links = sorted(set(node.links))
 
 
@@ -400,7 +444,7 @@ def sync_memory_vault(
     vault = get_memory_vault_dir(home)
     vault.mkdir(parents=True, exist_ok=True)
 
-    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Summaries", "Facts", "Topics"):
+    for name in ("Creator", "Curated Memory", "User Profile", "Sessions", "Summaries", "Facts", "Topics", "Entities", "Claims", "Dossiers"):
         shutil.rmtree(vault / name, ignore_errors=True)
 
     nodes = _source_nodes(home, db=db, session_limit=session_limit)
@@ -416,7 +460,11 @@ def sync_memory_vault(
     for node in nodes:
         for target in node.links:
             if target in by_id:
-                edges.append({"source": node.id, "target": target})
+                edges.append({
+                    "source": node.id,
+                    "target": target,
+                    "type": node.relations.get(target, "related"),
+                })
 
     plural = {
         "creator": "creators",

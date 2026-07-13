@@ -137,6 +137,23 @@ def test_recall_block_is_bounded_and_skips_trivial_prompts(tmp_path):
     assert len(block) <= 260
 
 
+def test_curated_recall_requires_the_requested_concept(tmp_path):
+    memories = tmp_path / "memories"
+    memories.mkdir()
+    (memories / "MEMORY.md").write_text(
+        "Usama asked Laiba to study nginx.\n\n§\n\n"
+        "Usama works as an AI systems engineer building production LLM infrastructure.",
+        encoding="utf-8",
+    )
+
+    recall = search_memory_recall("What does Usama work on?", atlas_home=tmp_path)
+
+    snippets = [item["snippet"] for item in recall["curated"]]
+    assert snippets == [
+        "Usama works as an AI systems engineer building production LLM infrastructure."
+    ]
+
+
 def test_conflict_marks_old_fact_stale(tmp_path):
     fact = extract_fact_candidates(
         "I prefer purple dashboards for the memory graph.",
@@ -239,6 +256,27 @@ def test_summarize_session_memory_and_semantic_recall(tmp_path):
     assert "raw_results" in recall
 
 
+def test_short_session_remains_available_for_periodic_tail_catchup(tmp_path):
+    first = summarize_session_memory(
+        atlas_home=tmp_path,
+        db=FakeSessionDB(),
+        session_limit=10,
+        chunk_turns=4,
+        use_llm=False,
+    )
+    assert first["summaries"] == 0
+
+    catch_up = summarize_session_memory(
+        atlas_home=tmp_path,
+        db=FakeSessionDB(),
+        session_limit=10,
+        chunk_turns=4,
+        include_tail=True,
+        use_llm=False,
+    )
+    assert catch_up["summaries"] == 1
+
+
 def test_archive_search_and_embedding_rebuild_are_graceful(tmp_path):
     summarize_session_memory(atlas_home=tmp_path, db=FakeSessionDB(), session_limit=10, chunk_turns=1, use_llm=False)
 
@@ -246,6 +284,6 @@ def test_archive_search_and_embedding_rebuild_are_graceful(tmp_path):
     assert archive["ok"] is True
     assert archive["results"]
 
-    rebuilt = rebuild_memory_embeddings(atlas_home=tmp_path)
+    rebuilt = rebuild_memory_embeddings(atlas_home=tmp_path, install_local=False)
     assert rebuilt["ok"] is True
-    assert rebuilt["backend"] == "hybrid-lightweight"
+    assert rebuilt["backend"] in {"fts5", "fastembed"}

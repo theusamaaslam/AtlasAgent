@@ -12490,7 +12490,45 @@ def _try_termux_fast_tui_launch() -> bool:
 
 def cmd_memory(args):
     sub = getattr(args, "memory_command", None)
-    if sub == "off":
+    if sub == "living-status":
+        from agent.living_memory import living_memory_status
+
+        status = living_memory_status()
+        print("Living memory status:")
+        print(
+            f"  entities={status.get('entities', 0)}, claims={status.get('claims', 0)}, "
+            f"dossiers={status.get('dossiers', 0)}, embeddings={status.get('embeddings', 0)}"
+        )
+        print(f"  retrieval={status.get('backend', 'fts5')}, jobs={status.get('jobs', {})}")
+    elif sub == "catch-up":
+        from agent.living_memory import enqueue_unprocessed_summaries, process_memory_jobs
+        from agent.memory_facts import summarize_session_memory
+
+        limit = max(1, min(int(getattr(args, "limit", 50) or 50), 100))
+        summarize_session_memory(session_limit=500, include_tail=True)
+        queued = enqueue_unprocessed_summaries(limit=5000)
+        result = process_memory_jobs(limit=limit)
+        print(
+            "Living memory catch-up complete: "
+            f"queued={queued}, processed={result.get('processed', 0)}, "
+            f"claims={result.get('claims', 0)}, dossiers={result.get('dossiers', 0)}, "
+            f"superseded={result.get('superseded', 0)}, failed={result.get('failed', 0)}"
+        )
+    elif sub == "history":
+        from agent.living_memory import list_claim_history
+
+        query = " ".join(getattr(args, "query", []) or []).strip()
+        limit = max(1, min(int(getattr(args, "limit", 100) or 100), 500))
+        result = list_claim_history(query, limit=limit)
+        claims = result.get("claims") or []
+        if not claims:
+            print("No claim history found.")
+            return
+        for idx, claim in enumerate(claims, 1):
+            state = claim.get("status") or "unknown"
+            interval = f"{claim.get('valid_from') or '?'} -> {claim.get('valid_to') or 'current'}"
+            print(f"{idx}. {claim.get('text')} [{state}; {interval}]")
+    elif sub == "off":
         from atlas_cli.config import load_config, save_config
 
         config = load_config()
@@ -12607,10 +12645,9 @@ def cmd_memory(args):
             return
         res = search_memory_recall(query, limit=limit)
         curated = res.get("curated") or []
-        facts = res.get("facts") or []
-        summaries = res.get("summaries") or []
+        ranked = res.get("ranked") or []
         raw = res.get("raw_results") or []
-        if not curated and not facts and not summaries and not raw:
+        if not curated and not ranked and not raw:
             print("No recalled memory.")
             return
         cursor = 1
@@ -12618,12 +12655,10 @@ def cmd_memory(args):
             snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
             print(f"{cursor}. {snippet[:240]} [curated, {item.get('title') or item.get('kind')}]")
             cursor += 1
-        for fact in facts:
-            print(f"{cursor}. {fact.get('text')} [{fact.get('kind')}, {fact.get('citation')}]")
-            cursor += 1
-        for item in summaries:
+        for item in ranked:
             snippet = str(item.get("text") or "").replace("\n", " ").strip()
-            print(f"{cursor}. {snippet[:240]} [summary, {item.get('citation') or item.get('id')}]")
+            recall_type = str(item.get("recall_type") or item.get("kind") or "fact")
+            print(f"{cursor}. {snippet[:240]} [{recall_type}, {item.get('citation') or item.get('id')}]")
             cursor += 1
         for item in raw:
             snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
@@ -12687,10 +12722,12 @@ def cmd_memory(args):
             return
         res = rebuild_memory_embeddings()
         print(
-            "Memory semantic payloads rebuilt: "
+            "Memory semantic index rebuilt: "
             f"facts={res.get('facts', 0)}, "
             f"summaries={res.get('summaries', 0)}, "
-            f"backend={res.get('backend', 'hybrid-lightweight')}"
+            f"embedded={res.get('embedded', 0)}, "
+            f"backend={res.get('backend', 'fts5')}, "
+            f"model={res.get('model') or 'not installed'}"
         )
     else:
         from atlas_cli.memory_setup import memory_command

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
   Brain,
   Check,
@@ -7,6 +7,7 @@ import {
   Database,
   ExternalLink,
   FolderOpen,
+  Maximize2,
   Pause,
   Play,
   RefreshCw,
@@ -14,6 +15,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import ForceGraph2D from "react-force-graph-2d";
+import type { ForceGraphMethods, NodeObject } from "react-force-graph-2d";
 import { Badge } from "@atlas/ui/ui/components/badge";
 import { Button } from "@atlas/ui/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@atlas/ui/ui/components/card";
@@ -24,11 +27,14 @@ import { useToast } from "@atlas/ui/hooks/use-toast";
 import { api } from "@/lib/api";
 import type {
   MemoryFact,
+  MemoryClaim,
+  MemoryDossier,
   MemoryGraphNode,
   MemoryGraphResponse,
   MemoryRecallRawResult,
   MemorySearchResult,
   MemorySummary,
+  MemoryLivingStatus,
   MemoryVaultStatus,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -40,6 +46,13 @@ const KIND_STYLES: Record<string, { fill: string; stroke: string }> = {
   session: { fill: "#ffd36f", stroke: "#e4a82b" },
   interaction: { fill: "#ffffff", stroke: "#c7c9e8" },
   fact: { fill: "#b8a6ff", stroke: "#8f83e6" },
+  claim: { fill: "#7f86df", stroke: "#5e65c5" },
+  dossier: { fill: "#52d3aa", stroke: "#269b79" },
+  person: { fill: "#ffb45f", stroke: "#dc8428" },
+  project: { fill: "#73c7f1", stroke: "#3a9bc9" },
+  organization: { fill: "#f68b9f", stroke: "#cd526b" },
+  place: { fill: "#a7d36f", stroke: "#71a536" },
+  other: { fill: "#c8cbe7", stroke: "#9096c3" },
   summary: { fill: "#7ddfc1", stroke: "#43b692" },
   topic: { fill: "#ff8a70", stroke: "#df654f" },
 };
@@ -53,15 +66,21 @@ function statEntries(status: MemoryVaultStatus | null): Array<[string, number]> 
   return Object.entries(status?.stats ?? {}).sort(([a], [b]) => a.localeCompare(b));
 }
 
-interface GraphParticle {
-  node: MemoryGraphNode;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+const GRAPH_NODE_KINDS = new Set([
+  "creator", "summary", "fact", "topic", "claim", "dossier",
+  "person", "project", "organization", "place", "other",
+]);
+
+interface GraphNodeDatum extends MemoryGraphNode {
+  x?: number;
+  y?: number;
 }
 
-const GRAPH_NODE_KINDS = new Set(["creator", "summary", "fact", "topic"]);
+interface GraphLinkDatum {
+  source: string | GraphNodeDatum;
+  target: string | GraphNodeDatum;
+  type?: string;
+}
 
 function GraphPreview({
   graph,
@@ -72,185 +91,125 @@ function GraphPreview({
   selected: string | null;
   onSelect: (node: MemoryGraphNode) => void;
 }) {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const frameRef = useRef<number | null>(null);
-  const dragIdRef = useRef<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const graphRef = useRef<ForceGraphMethods<GraphNodeDatum, GraphLinkDatum> | undefined>(undefined);
   const [playing, setPlaying] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 840, height: 500 });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      const width = Math.max(320, Math.floor(entry.contentRect.width));
+      setDimensions({ width, height: Math.max(420, Math.min(620, Math.floor(width * 0.58))) });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   const visibleNodes = useMemo(() => {
     const graphNodes = graph?.nodes ?? [];
-    const memoryNodes = graphNodes.filter((node) => GRAPH_NODE_KINDS.has(node.kind));
-    return (memoryNodes.length ? memoryNodes : graphNodes).slice(0, 180);
-  }, [graph]);
-  const byId = useMemo(() => new Map(visibleNodes.map((node) => [node.id, node])), [visibleNodes]);
-  const edges = useMemo(
-    () =>
-      (graph?.edges ?? [])
-        .filter((edge) => byId.has(edge.source) && byId.has(edge.target))
-        .slice(0, 360),
-    [byId, graph],
-  );
-  const [particles, setParticles] = useState<GraphParticle[]>([]);
-
-  useEffect(() => {
-    const centerX = 420;
-    const centerY = 250;
-    setParticles(
-      visibleNodes.map((node, index) => {
-        const angle = (Math.PI * 2 * index) / Math.max(visibleNodes.length, 1);
-        const ring = node.kind === "topic" ? 210 : node.kind === "creator" ? 32 : 132;
-        return { node, x: centerX + Math.cos(angle) * ring, y: centerY + Math.sin(angle) * ring, vx: 0, vy: 0 };
-      }),
+    const memoryNodes = graphNodes.filter(
+      (node) => GRAPH_NODE_KINDS.has(node.kind) && (showHistory || node.status !== "stale"),
     );
-  }, [visibleNodes]);
+    return (memoryNodes.length ? memoryNodes : graphNodes).slice(0, 400);
+  }, [graph, showHistory]);
+  const byId = useMemo(() => new Map(visibleNodes.map((node) => [node.id, node])), [visibleNodes]);
+  const graphData = useMemo(() => ({
+    nodes: visibleNodes.map((node) => ({ ...node } as GraphNodeDatum)),
+    links: (graph?.edges ?? [])
+      .filter((edge) => byId.has(edge.source) && byId.has(edge.target))
+      .slice(0, 900)
+      .map((edge) => ({ ...edge } as GraphLinkDatum)),
+  }), [byId, graph, visibleNodes]);
 
   useEffect(() => {
-    if (!playing || !particles.length) return undefined;
-    const tick = () => {
-      setParticles((current) => {
-        const next = current.map((item) => ({ ...item }));
-        const lookup = new Map(next.map((item) => [item.node.id, item]));
-        for (const edge of edges) {
-          const a = lookup.get(edge.source);
-          const b = lookup.get(edge.target);
-          if (!a || !b) continue;
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const distance = Math.max(24, Math.hypot(dx, dy));
-          const target = a.node.kind === "summary" || b.node.kind === "summary" ? 96 : 132;
-          const force = (distance - target) * 0.0022;
-          const fx = (dx / distance) * force;
-          const fy = (dy / distance) * force;
-          if (dragIdRef.current !== a.node.id) {
-            a.vx += fx;
-            a.vy += fy;
-          }
-          if (dragIdRef.current !== b.node.id) {
-            b.vx -= fx;
-            b.vy -= fy;
-          }
-        }
-        for (let i = 0; i < next.length; i += 1) {
-          for (let j = i + 1; j < next.length; j += 1) {
-            const a = next[i];
-            const b = next[j];
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const distance = Math.max(18, Math.hypot(dx, dy));
-            const repel = 34 / (distance * distance);
-            const fx = (dx / distance) * repel;
-            const fy = (dy / distance) * repel;
-            if (dragIdRef.current !== a.node.id) {
-              a.vx -= fx;
-              a.vy -= fy;
-            }
-            if (dragIdRef.current !== b.node.id) {
-              b.vx += fx;
-              b.vy += fy;
-            }
-          }
-        }
-        for (const item of next) {
-          if (dragIdRef.current === item.node.id) continue;
-          item.vx += (420 - item.x) * 0.0009;
-          item.vy += (250 - item.y) * 0.0009;
-          item.vx *= 0.88;
-          item.vy *= 0.88;
-          item.x = Math.min(805, Math.max(35, item.x + item.vx));
-          item.y = Math.min(465, Math.max(35, item.y + item.vy));
-        }
-        return next;
-      });
-      frameRef.current = window.requestAnimationFrame(tick);
-    };
-    frameRef.current = window.requestAnimationFrame(tick);
-    return () => {
-      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-    };
-  }, [edges, particles.length, playing]);
-
-  const pointForEvent = (event: PointerEvent<SVGSVGElement>) => {
-    const svg = svgRef.current;
-    if (!svg) return { x: 420, y: 250 };
-    const rect = svg.getBoundingClientRect();
-    return { x: ((event.clientX - rect.left) / rect.width) * 840, y: ((event.clientY - rect.top) / rect.height) * 500 };
-  };
-
-  const position = useMemo(() => new Map(particles.map((item) => [item.node.id, item])), [particles]);
+    if (playing) graphRef.current?.resumeAnimation();
+    else graphRef.current?.pauseAnimation();
+  }, [playing]);
 
   if (!visibleNodes.length) {
-    return <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">Sync the vault to draw the graph.</div>;
+    return <div className="flex h-[420px] items-center justify-center text-sm text-muted-foreground">Memory will appear here as Atlas learns.</div>;
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-white/70">
-      <div className="absolute right-3 top-3 z-10 flex gap-2">
-        <Button size="sm" ghost prefix={playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />} onClick={() => setPlaying((value) => !value)}>
-          {playing ? "Pause" : "Play"}
+    <div ref={containerRef} className="relative min-h-[420px] overflow-hidden rounded-lg border border-border bg-[#f8f9ff]">
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-2 rounded-lg border border-border bg-white/90 p-1 shadow-sm backdrop-blur">
+        <Button
+          size="sm"
+          ghost
+          onClick={() => setShowHistory((value) => !value)}
+        >
+          {showHistory ? "History" : "Current"}
+        </Button>
+        <Button
+          size="icon"
+          ghost
+          aria-label="Fit memory graph"
+          title="Fit graph"
+          onClick={() => graphRef.current?.zoomToFit(500, 44)}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          ghost
+          aria-label={playing ? "Pause graph" : "Resume graph"}
+          title={playing ? "Pause graph" : "Resume graph"}
+          onClick={() => setPlaying((value) => !value)}
+        >
+          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </Button>
       </div>
-      <svg
-        ref={svgRef}
-        role="img"
-        aria-label="Memory graph"
-        viewBox="0 0 840 500"
-        className="h-[420px] w-full max-w-full touch-none"
-        onPointerMove={(event) => {
-          const dragId = dragIdRef.current;
-          if (!dragId) return;
-          const point = pointForEvent(event);
-          setParticles((current) => current.map((item) => (item.node.id === dragId ? { ...item, x: point.x, y: point.y, vx: 0, vy: 0 } : item)));
+      <ForceGraph2D<GraphNodeDatum, GraphLinkDatum>
+        ref={graphRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        graphData={graphData}
+        backgroundColor="#f8f9ff"
+        nodeId="id"
+        nodeVal={(node) => node.kind === "creator" || node.kind === "dossier" ? 10 : node.kind === "person" || node.kind === "project" ? 7 : 4}
+        nodeColor={(node) => (KIND_STYLES[node.kind] ?? KIND_STYLES.summary).fill}
+        nodeLabel={(node) => `${node.title}${node.status ? ` · ${node.status}` : ""}`}
+        linkColor={() => "rgba(111, 119, 205, 0.34)"}
+        linkWidth={(link) => link.type === "superseded_by" ? 2.2 : 1.1}
+        linkLineDash={(link) => link.type === "superseded_by" ? [4, 3] : null}
+        linkDirectionalArrowLength={3.5}
+        linkDirectionalArrowRelPos={0.92}
+        linkLabel={(link) => link.type ?? "related"}
+        d3AlphaDecay={0.018}
+        d3VelocityDecay={0.28}
+        cooldownTime={15000}
+        minZoom={0.3}
+        maxZoom={8}
+        enableNodeDrag
+        enablePanInteraction
+        enableZoomInteraction
+        onNodeClick={(node) => {
+          onSelect(node);
+          if (typeof node.x === "number" && typeof node.y === "number") {
+            graphRef.current?.centerAt(node.x, node.y, 420);
+            graphRef.current?.zoom(2.2, 420);
+          }
         }}
-        onPointerUp={() => {
-          dragIdRef.current = null;
-        }}
-        onPointerLeave={() => {
-          dragIdRef.current = null;
-        }}
-      >
-        <defs>
-          <radialGradient id="memoryGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#eef0fb" stopOpacity="0.35" />
-          </radialGradient>
-        </defs>
-        <rect width="840" height="500" rx="22" fill="url(#memoryGlow)" />
-        {edges.map((edge, index) => {
-          const a = position.get(edge.source);
-          const b = position.get(edge.target);
-          if (!a || !b) return null;
-          return <line key={`${edge.source}-${edge.target}-${index}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#9fa5e3" strokeOpacity="0.42" strokeWidth="1.15" />;
-        })}
-        {particles.map(({ node, x, y }) => {
-          const style = KIND_STYLES[node.kind] ?? KIND_STYLES.summary;
+        nodeCanvasObjectMode={() => "after"}
+        nodeCanvasObject={(node: NodeObject<GraphNodeDatum>, context, globalScale) => {
           const active = selected === node.id;
-          const size = node.kind === "creator" ? 15 : node.kind === "topic" ? 9 : node.kind === "summary" ? 11 : 8;
-          return (
-            <g
-              key={node.id}
-              className="cursor-grab active:cursor-grabbing"
-              onPointerDown={(event) => {
-                dragIdRef.current = node.id;
-                onSelect(node);
-                event.currentTarget.setPointerCapture(event.pointerId);
-              }}
-              onClick={() => onSelect(node)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") onSelect(node);
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={node.title}
-            >
-              <circle cx={x} cy={y} r={active ? size + 5 : size} fill={style.fill} stroke={style.stroke} strokeWidth={active ? 4 : 2} opacity={0.96} />
-              {(active || node.kind === "creator" || node.kind === "summary") && (
-                <text x={x + 14} y={y + 5} fill="#252238" fontSize="12" fontFamily="ui-sans-serif, system-ui">
-                  {node.title.slice(0, 38)}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
+          const alwaysLabel = active || ["creator", "person", "project", "dossier"].includes(node.kind);
+          if (!alwaysLabel || typeof node.x !== "number" || typeof node.y !== "number") return;
+          const label = node.title.slice(0, 42);
+          const fontSize = Math.max(3.5, 12 / globalScale);
+          context.font = `600 ${fontSize}px ui-sans-serif, system-ui`;
+          context.textAlign = "left";
+          context.textBaseline = "middle";
+          context.fillStyle = "rgba(248, 249, 255, 0.9)";
+          const width = context.measureText(label).width + fontSize;
+          context.fillRect(node.x + 5, node.y - fontSize * 0.75, width, fontSize * 1.5);
+          context.fillStyle = "#252238";
+          context.fillText(label, node.x + 9, node.y);
+        }}
+      />
     </div>
   );
 }
@@ -348,6 +307,39 @@ function SummaryRow({
   );
 }
 
+function DossierRow({ dossier }: { dossier: MemoryDossier }) {
+  return (
+    <div className="min-w-0 border border-border bg-white px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-2">
+        <Badge tone="success">current dossier</Badge>
+        <span className="truncate text-sm font-semibold text-foreground">{dossier.title}</span>
+      </div>
+      <p className="mt-2 text-sm leading-6 text-foreground">{dossier.text}</p>
+      <div className="mt-2 text-[11px] text-muted-foreground">
+        confidence {dossier.confidence.toFixed(2)} · {dossier.claim_ids.length} supporting claims
+      </div>
+    </div>
+  );
+}
+
+function ClaimRow({ claim }: { claim: MemoryClaim }) {
+  return (
+    <div className="min-w-0 border border-border bg-white px-4 py-3 shadow-sm">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <Badge tone="secondary">claim</Badge>
+        <span className="text-xs font-semibold text-primary">{claim.subject}</span>
+        <span className="text-[11px] text-muted-foreground">{claim.predicate.replaceAll("_", " ")}</span>
+      </div>
+      <p className="mt-2 text-sm leading-6 text-foreground">{claim.text}</p>
+      <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-muted-foreground">
+        <span>{claim.stateful ? "evolving state" : "durable"}</span>
+        <span>confidence {claim.confidence.toFixed(2)}</span>
+        {claim.citation && <span className="font-mono">{claim.citation}</span>}
+      </div>
+    </div>
+  );
+}
+
 function RawRecallRow({ item }: { item: MemoryRecallRawResult }) {
   return (
     <div className="rounded-xl border border-border bg-white/60 px-4 py-3 text-sm">
@@ -365,11 +357,14 @@ function RawRecallRow({ item }: { item: MemoryRecallRawResult }) {
 export default function MemoryPage() {
   const { toast, showToast } = useToast();
   const [status, setStatus] = useState<MemoryVaultStatus | null>(null);
+  const [livingStatus, setLivingStatus] = useState<MemoryLivingStatus | null>(null);
   const [graph, setGraph] = useState<MemoryGraphResponse | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MemorySearchResult[]>([]);
   const [recallQuery, setRecallQuery] = useState("");
   const [recallCurated, setRecallCurated] = useState<MemorySearchResult[]>([]);
+  const [recallDossiers, setRecallDossiers] = useState<MemoryDossier[]>([]);
+  const [recallClaims, setRecallClaims] = useState<MemoryClaim[]>([]);
   const [recallFacts, setRecallFacts] = useState<MemoryFact[]>([]);
   const [recallSummaries, setRecallSummaries] = useState<MemorySummary[]>([]);
   const [recallRaw, setRecallRaw] = useState<MemoryRecallRawResult[]>([]);
@@ -399,10 +394,12 @@ export default function MemoryPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [statusRes, graphRes] = await Promise.all([
+      const [statusRes, graphRes, livingRes] = await Promise.all([
         api.getMemoryVault(),
         api.getMemoryGraph(),
+        api.getLivingMemoryStatus(),
       ]);
+      setLivingStatus(livingRes);
       setGraph(graphRes);
       setStatus({
         ...statusRes,
@@ -423,6 +420,24 @@ export default function MemoryPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      void Promise.all([api.getMemoryGraph(), api.getLivingMemoryStatus()])
+        .then(([graphRes, livingRes]) => {
+          setGraph(graphRes);
+          setLivingStatus(livingRes);
+          setStatus((current) => current ? {
+            ...current,
+            dirty: graphRes.dirty,
+            last_sync: graphRes.last_sync,
+            stats: graphRes.stats,
+          } : current);
+        })
+        .catch(() => undefined);
+    }, 15000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const sync = async () => {
     setSyncing(true);
@@ -467,6 +482,8 @@ export default function MemoryPage() {
     const clean = recallQuery.trim();
     if (!clean) {
       setRecallCurated([]);
+      setRecallDossiers([]);
+      setRecallClaims([]);
       setRecallFacts([]);
       setRecallSummaries([]);
       setRecallRaw([]);
@@ -476,6 +493,8 @@ export default function MemoryPage() {
     try {
       const res = await api.recallMemory(clean, 8);
       setRecallCurated(res.curated ?? []);
+      setRecallDossiers(res.dossiers ?? []);
+      setRecallClaims(res.claims ?? []);
       setRecallFacts(res.facts);
       setRecallSummaries(res.summaries ?? []);
       setRecallRaw(res.raw_results);
@@ -497,6 +516,7 @@ export default function MemoryPage() {
       await loadPendingFacts();
       const graphRes = await api.getMemoryGraph();
       setGraph(graphRes);
+      setLivingStatus(await api.getLivingMemoryStatus());
       setStatus({
         ok: graphRes.ok,
         vault_path: graphRes.vault_path,
@@ -515,7 +535,13 @@ export default function MemoryPage() {
   const rebuildEmbeddings = async () => {
     try {
       const res = await api.rebuildMemoryEmbeddings();
-      showToast(`Semantic payloads rebuilt: ${res.facts} facts, ${res.summaries} summaries`, "success");
+      showToast(
+        res.backend === "fastembed"
+          ? `Local semantic index ready: ${res.embedded ?? 0} memories`
+          : "Local model unavailable; Atlas is using FTS search",
+        "success",
+      );
+      setLivingStatus(await api.getLivingMemoryStatus());
     } catch (error) {
       showToast(`Semantic rebuild failed: ${error}`, "error");
     }
@@ -532,6 +558,7 @@ export default function MemoryPage() {
       await loadPendingFacts();
       const graphRes = await api.getMemoryGraph();
       setGraph(graphRes);
+      setLivingStatus(await api.getLivingMemoryStatus());
       setStatus({
         ok: graphRes.ok,
         vault_path: graphRes.vault_path,
@@ -633,7 +660,7 @@ export default function MemoryPage() {
                 onClick={() => void consolidate()}
                 disabled={consolidating}
               >
-                Consolidate
+                Evolve
               </Button>
               <Button
                 size="sm"
@@ -693,6 +720,26 @@ export default function MemoryPage() {
                   </div>
                 </div>
               ))}
+              {livingStatus && (
+                <>
+                  <div className="border border-border bg-white p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">entities</div>
+                    <div className="mt-1 text-2xl font-semibold text-primary">{livingStatus.entities}</div>
+                  </div>
+                  <div className="border border-border bg-white p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">active claims</div>
+                    <div className="mt-1 text-2xl font-semibold text-primary">{livingStatus.claims}</div>
+                  </div>
+                  <div className="border border-border bg-white p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">dossiers</div>
+                    <div className="mt-1 text-2xl font-semibold text-primary">{livingStatus.dossiers}</div>
+                  </div>
+                  <div className="border border-border bg-white p-3">
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">retrieval</div>
+                    <div className="mt-2 text-sm font-semibold text-primary">{livingStatus.backend}</div>
+                  </div>
+                </>
+              )}
               {!statEntries(status).length && (
                 <div className="col-span-2 text-sm text-muted-foreground">
                   No vault statistics yet.
@@ -807,7 +854,7 @@ export default function MemoryPage() {
               </Button>
             </div>
             <div className="rounded-xl border border-border bg-white/70 p-3 text-xs leading-5 text-muted-foreground">
-              Recall checks curated files first, then semantic facts and summaries, then raw archive fallback.
+              Recall checks curated files, current dossiers and claims, episodic summaries, then the raw archive only when needed.
             </div>
           </CardContent>
         </Card>
@@ -816,6 +863,12 @@ export default function MemoryPage() {
           <CardContent className="grid gap-3 py-4">
             {recallCurated.map((item, index) => (
               <ResultRow key={`${item.path}-${index}`} result={item} />
+            ))}
+            {recallDossiers.map((dossier) => (
+              <DossierRow key={dossier.id} dossier={dossier} />
+            ))}
+            {recallClaims.map((claim) => (
+              <ClaimRow key={claim.id} claim={claim} />
             ))}
             {recallFacts.map((fact) => (
               <FactRow
@@ -864,7 +917,7 @@ export default function MemoryPage() {
             {recallRaw.map((item, index) => (
               <RawRecallRow key={`${item.session_id}-${item.message_id}-${index}`} item={item} />
             ))}
-            {!recallCurated.length && !recallFacts.length && !recallSummaries.length && !recallRaw.length && (
+            {!recallCurated.length && !recallDossiers.length && !recallClaims.length && !recallFacts.length && !recallSummaries.length && !recallRaw.length && (
               <div className="py-8 text-center text-sm text-muted-foreground">
                 No recalled memory yet.
               </div>

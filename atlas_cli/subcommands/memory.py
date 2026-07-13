@@ -33,6 +33,18 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
         help="Provider to configure directly (e.g. honcho), skipping the picker",
     )
     memory_sub.add_parser("status", help="Show current memory provider config")
+    memory_sub.add_parser("living-status", help="Show the evolving built-in memory index and worker status")
+    catch_up_parser = memory_sub.add_parser(
+        "catch-up",
+        help="Process queued summaries into entities, claims, and dossiers",
+    )
+    catch_up_parser.add_argument("--limit", type=int, default=50, help="Maximum queued summaries to process")
+    history_parser = memory_sub.add_parser(
+        "history",
+        help="Show current and superseded claims for an entity or topic",
+    )
+    history_parser.add_argument("query", nargs="+", help="Entity, predicate, or text to inspect")
+    history_parser.add_argument("--limit", type=int, default=100, help="Maximum claims to print")
     memory_sub.add_parser("off", help="Disable external provider (built-in only)")
     _reset_parser = memory_sub.add_parser(
         "reset",
@@ -96,10 +108,10 @@ def build_memory_parser(subparsers, *, cmd_memory: Callable) -> None:
     )
     embeddings_parser = memory_sub.add_parser(
         "embeddings",
-        help="Manage lightweight semantic memory payloads",
+        help="Manage local semantic memory embeddings",
     )
     embeddings_sub = embeddings_parser.add_subparsers(dest="memory_embeddings_command")
-    embeddings_sub.add_parser("rebuild", help="Rebuild semantic payloads for facts and summaries")
+    embeddings_sub.add_parser("rebuild", help="Build local embeddings for facts, summaries, claims, and dossiers")
     vault_parser = memory_sub.add_parser(
         "vault",
         help="Manage the generated Obsidian memory vault",

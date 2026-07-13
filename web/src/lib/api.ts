@@ -1055,6 +1055,12 @@ export const api = {
   getMemory: () => fetchJSON<MemoryStatus>("/api/memory"),
   getMemoryVault: () => fetchJSON<MemoryVaultStatus>("/api/memory/vault"),
   getMemoryGraph: () => fetchJSON<MemoryGraphResponse>("/api/memory/graph"),
+  getLivingMemoryStatus: () => fetchJSON<MemoryLivingStatus>("/api/memory/living/status"),
+  catchUpLivingMemory: (limit = 50) =>
+    fetchJSON<MemoryCatchUpResponse>(
+      `/api/memory/living/catch-up?limit=${limit}`,
+      { method: "POST" },
+    ),
   searchMemory: (query: string, limit = 20) =>
     fetchJSON<MemorySearchResponse>(
       `/api/memory/search?q=${encodeURIComponent(query)}&limit=${limit}`,
@@ -1626,6 +1632,7 @@ export interface MemoryGraphNode {
 export interface MemoryGraphEdge {
   source: string;
   target: string;
+  type?: string;
 }
 
 export interface MemoryGraphResponse extends MemoryVaultStatus {
@@ -1691,6 +1698,42 @@ export interface MemoryFact {
   citation?: string;
 }
 
+export interface MemoryClaim {
+  id: string;
+  subject_id: string;
+  subject: string;
+  predicate: string;
+  object_text: string;
+  text: string;
+  status: string;
+  stateful: boolean;
+  importance: number;
+  confidence: number;
+  valid_from?: number | null;
+  valid_to?: number | null;
+  observed_at?: number;
+  superseded_by?: string;
+  source_summary_id?: string;
+  source_session_id?: string;
+  source_message_id?: string;
+  topics?: string[];
+  score?: number;
+  citation?: string;
+}
+
+export interface MemoryDossier {
+  id: string;
+  entity_id: string;
+  title: string;
+  text: string;
+  status: string;
+  confidence: number;
+  claim_ids: string[];
+  updated_at: number;
+  score?: number;
+  citation?: string;
+}
+
 export interface MemoryRecallRawResult {
   kind: string;
   title: string;
@@ -1706,10 +1749,35 @@ export interface MemoryRecallResponse {
   ok: boolean;
   query: string;
   curated?: MemorySearchResult[];
+  dossiers?: MemoryDossier[];
+  claims?: MemoryClaim[];
   facts: MemoryFact[];
   summaries?: MemorySummary[];
   raw?: MemoryRecallRawResult[];
   raw_results: MemoryRecallRawResult[];
+  semantic_backend?: string;
+  embedding_model?: string | null;
+}
+
+export interface MemoryLivingStatus {
+  ok: boolean;
+  entities: number;
+  claims: number;
+  dossiers: number;
+  embeddings: number;
+  jobs: Record<string, number>;
+  backend: string;
+  model: string;
+}
+
+export interface MemoryCatchUpResponse {
+  ok: boolean;
+  queued: number;
+  processed: number;
+  failed: number;
+  claims: number;
+  dossiers: number;
+  superseded: number;
 }
 
 export interface MemoryFactsResponse {
@@ -1757,6 +1825,9 @@ export interface MemoryEmbeddingsResponse {
   facts: number;
   summaries: number;
   backend: string;
+  model?: string | null;
+  embedded?: number;
+  items?: Record<string, number>;
 }
 
 export interface MemoryFactActionResponse {

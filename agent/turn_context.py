@@ -500,7 +500,17 @@ def build_turn_context(
         from agent.memory_facts import format_recall_block
 
         _query = original_user_message if isinstance(original_user_message, str) else ""
-        local_recall_context = format_recall_block(_query) or ""
+        _recent_user_context = []
+        for _message in messages[:-1]:
+            if _message.get("role") != "user":
+                continue
+            _content = _message.get("content")
+            if isinstance(_content, str) and _content.strip():
+                _recent_user_context.append(_content.strip()[:600])
+        local_recall_context = format_recall_block(
+            _query,
+            context="\n".join(_recent_user_context[-2:]),
+        ) or ""
     except Exception:
         logger.debug("Local memory recall skipped", exc_info=True)
 

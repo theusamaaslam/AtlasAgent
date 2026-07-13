@@ -191,6 +191,9 @@ honcho = ["honcho-ai==2.0.1"]
 # can't break fresh installs.
 supermemory = ["supermemory==3.50.0"]
 mem0 = ["mem0ai==2.0.10"]
+# Local semantic retrieval for built-in living memory. Kept lazy so the ONNX
+# runtime and model download are paid only by users who enable semantic recall.
+memory-semantic = ["fastembed==0.8.0"]
 # Image resize recovery for the vision tools. Pillow is now a CORE dependency
 # (see the main `dependencies` list) since the byte/pixel shrink paths are on
 # the default vision-embed path and the mid-session lazy install deadlocked the
