@@ -858,8 +858,8 @@ def test_cmd_proxy_status_runs(capsys, tmp_path, monkeypatch):
     rc = cmd_proxy_status(args)
     assert rc == 0
     out = capsys.readouterr().out
-    assert "nous" in out
-    assert "Atlas Gateway" in out
+    assert "xai" in out
+    assert "xAI Grok OAuth" in out
     assert "not logged in" in out
 
 
@@ -870,8 +870,8 @@ def test_cmd_proxy_providers_runs(capsys):
     rc = cmd_proxy_list_providers(args)
     assert rc == 0
     out = capsys.readouterr().out
-    assert "nous" in out
-    assert "Atlas Gateway" in out
+    assert "xai" in out
+    assert "xAI Grok OAuth" in out
 
 
 def test_cmd_proxy_start_refuses_unknown_provider(capsys):
@@ -898,4 +898,4 @@ def test_cmd_proxy_start_refuses_when_unauthenticated(capsys, tmp_path, monkeypa
     rc = cmd_proxy_start(args)
     assert rc == 2
     err = capsys.readouterr().err
-    assert "atlas auth add nous" in err
+    assert "Hosted gateway proxying has been removed" in err

@@ -42,7 +42,7 @@ def test_cmd_update_in_docker_prints_guidance_and_exits(
     # Spot-check the key guidance — exhaustive wording is locked in by the
     # config-module test below to keep these CLI tests resilient to copy edits.
     assert "doesn't apply inside the Docker container" in out
-    assert "docker pull nousresearch/atlas-agent:latest" in out
+    assert "docker pull theusamaaslam/atlasagent:latest" in out
 
     # No git invocations — the early-return must beat every git command.
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
@@ -62,7 +62,7 @@ def test_cmd_update_check_in_docker_prints_guidance_and_exits(
     assert excinfo.value.code == 1
     out = capsys.readouterr().out
     assert "doesn't apply inside the Docker container" in out
-    assert "docker pull nousresearch/atlas-agent:latest" in out
+    assert "docker pull theusamaaslam/atlasagent:latest" in out
 
     git_calls = [c for c in mock_run.call_args_list if c.args and c.args[0] and "git" in str(c.args[0][0])]
     assert git_calls == [], f"expected no git calls, got: {git_calls}"
@@ -145,15 +145,16 @@ def test_cmd_update_on_git_install_does_not_print_docker_message(
 
 @patch("atlas_cli.config.detect_install_method", return_value="pip")
 @patch("atlas_cli.banner.check_via_pypi", return_value=0)
-def test_cmd_update_check_on_pip_install_still_uses_pypi(
+def test_cmd_update_check_on_source_install_avoids_public_package_index(
     _mock_pypi, _mock_method, capsys
 ):
-    """PyPI installs route to PyPI check, not the Docker bail-out."""
+    """Source installs report their refresh command without querying PyPI."""
     _cmd_update_check()
 
     out = capsys.readouterr().out
-    assert "Already up to date" in out
+    assert "Local source install detected" in out
     assert "doesn't apply inside the Docker container" not in out
+    _mock_pypi.assert_not_called()
 
 
 # ---------- format_docker_update_message — content lock ----------
@@ -171,7 +172,7 @@ def test_format_docker_update_message_contents():
     msg = format_docker_update_message()
 
     # Primary command — the entire reason this message exists.
-    assert "docker pull nousresearch/atlas-agent:latest" in msg
+    assert "docker pull theusamaaslam/atlasagent:latest" in msg
 
     # The four key concepts the message must cover:
     assert "restart" in msg.lower(), "must explain that a restart is required"

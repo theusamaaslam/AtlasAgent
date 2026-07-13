@@ -37,13 +37,8 @@ def test_check_for_updates_uses_cache(tmp_path, monkeypatch):
     mock_run.assert_not_called()
 
 
-def test_check_for_updates_invalidates_on_version_change(tmp_path, monkeypatch):
-    """A fresh cache from a different installed version must be re-checked, not reused.
-
-    Regression for #34491: after `pip install --upgrade`, VERSION changes but the
-    cache's 6h TTL hadn't expired and rev was unchanged (both None), so the stale
-    'behind' count survived the upgrade. The version guard forces a recheck.
-    """
+def test_source_install_skips_public_package_update_cache(tmp_path, monkeypatch):
+    """A local source install never reuses package-index update state."""
     import atlas_cli.banner as banner
 
     # No local git checkout -> the PyPI path is exercised (pip-install class).
@@ -64,14 +59,9 @@ def test_check_for_updates_invalidates_on_version_change(tmp_path, monkeypatch):
          patch("atlas_cli.banner.check_via_pypi", return_value=0) as mock_pypi:
         result = banner.check_for_updates()
 
-    # Stale-version cache rejected -> fresh check ran -> up-to-date result.
-    assert result == 0
-    mock_pypi.assert_called_once()
+    assert result is None
+    mock_pypi.assert_not_called()
     mock_run.assert_not_called()
-
-    # Cache rewritten with the current installed version.
-    written = json.loads(cache_file.read_text())
-    assert written["ver"] == banner.VERSION
 
 
 def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
@@ -222,8 +212,8 @@ def test_check_via_local_git_full_clone_keeps_exact_count(tmp_path):
     assert result == 7
 
 
-def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
-    """Falls back to PyPI check when .git directory doesn't exist anywhere."""
+def test_check_for_updates_no_git_dir_skips_public_package_index(tmp_path, monkeypatch):
+    """No checkout means there is no trustworthy public-package update source."""
     import atlas_cli.banner as banner
 
     # Create a fake banner.py so the fallback path also has no .git
@@ -234,9 +224,10 @@ def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(banner, "__file__", str(fake_banner))
     monkeypatch.setenv("ATLAS_HOME", str(tmp_path))
     with patch("atlas_cli.banner.subprocess.run") as mock_run:
-        with patch("atlas_cli.banner.check_via_pypi", return_value=0):
+        with patch("atlas_cli.banner.check_via_pypi", return_value=0) as mock_pypi:
             result = banner.check_for_updates()
-    assert result == 0
+    assert result is None
+    mock_pypi.assert_not_called()
     mock_run.assert_not_called()
 
 
@@ -287,7 +278,7 @@ def test_check_for_updates_docker_returns_none(tmp_path, monkeypatch):
     assert not cache_file.exists()
 
 
-def test_check_for_updates_non_docker_still_checks(tmp_path, monkeypatch):
+def test_check_for_updates_source_install_does_not_query_public_package(tmp_path, monkeypatch):
     """The docker guard must NOT over-broaden: a pip install still version-checks.
 
     Invariant guarding against the guard firing for non-docker methods — pip
@@ -308,8 +299,8 @@ def test_check_for_updates_non_docker_still_checks(tmp_path, monkeypatch):
          patch("atlas_cli.banner.check_via_pypi", return_value=1) as mock_pypi:
         result = banner.check_for_updates()
 
-    assert result == 1
-    mock_pypi.assert_called_once()
+    assert result is None
+    mock_pypi.assert_not_called()
     mock_run.assert_not_called()
 
 

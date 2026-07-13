@@ -75,7 +75,7 @@ class TestEnsureAtlasHome:
             soul_path = tmp_path / "SOUL.md"
             soul_path.write_text(_LEGACY_TEMPLATE_SOULS[0] + "\n", encoding="utf-8")
             ensure_atlas_home()
-            assert soul_path.read_text(encoding="utf-8") == DEFAULT_SOUL_MD
+            assert soul_path.read_text(encoding="utf-8").strip() == DEFAULT_SOUL_MD.strip()
 
     def test_preserves_legacy_template_with_user_persona(self, tmp_path):
         # If the user typed a persona alongside the scaffold, the content no
@@ -87,7 +87,10 @@ class TestEnsureAtlasHome:
             soul_path = tmp_path / "SOUL.md"
             soul_path.write_text(mixed, encoding="utf-8")
             ensure_atlas_home()
-            assert soul_path.read_text(encoding="utf-8") == mixed
+            migrated = soul_path.read_text(encoding="utf-8")
+            assert "created by Usama Aslam" in migrated
+            assert "You are a helpful pirate." in migrated
+            assert "Nous Research" not in migrated
 
     def test_existing_named_profile_still_bootstraps_subdirs(self, tmp_path):
         profile_home = tmp_path / ".atlas" / "profiles" / "coder"

@@ -29,7 +29,6 @@ class TestGatewayLifecyclePattern:
         "atlas gateway restart",
         "atlas gateway stop",
         "atlas  gateway  restart",         # double spaces
-        "Hermez Gateway Restart".lower().replace("z", "s"),  # case handled
         "ATLAS GATEWAY RESTART",           # uppercase
     ])
     def test_atlas_gateway_commands(self, text):

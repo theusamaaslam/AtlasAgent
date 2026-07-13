@@ -142,7 +142,7 @@ _UPDATE_CHECK_CACHE_SECONDS = 6 * 3600
 UPDATE_AVAILABLE_NO_COUNT = -1
 
 _UPSTREAM_REPO_URL = "https://github.com/theusamaaslam/AtlasAgent.git"
-_OFFICIAL_REPO_CANONICAL = "github.com/usamaaslam/atlas-agent"
+_OFFICIAL_REPO_CANONICAL = "github.com/theusamaaslam/atlasagent"
 
 
 def _canonical_github_remote(url: str | None) -> str:
@@ -527,7 +527,7 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
-    base = f"Atlas v{VERSION} ({RELEASE_DATE})"
+    base = f"Atlas Agent v{VERSION} ({RELEASE_DATE})"
     state = get_git_banner_state()
     if not state:
         return base

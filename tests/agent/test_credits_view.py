@@ -193,15 +193,12 @@ def test_gateway_credits_fetch_exception_is_not_logged_in(monkeypatch):
 # ── command registry ────────────────────────────────────────────────────────
 
 
-def test_credits_command_registered():
+def test_credits_command_is_not_registered():
     from atlas_cli.commands import resolve_command, COMMAND_REGISTRY
 
     cmd = resolve_command("credits")
-    assert cmd is not None and cmd.name == "credits"
-    # Available on every surface (not cli_only / gateway_only).
-    entry = next(c for c in COMMAND_REGISTRY if c.name == "credits")
-    assert entry.cli_only is False
-    assert entry.gateway_only is False
+    assert cmd is None
+    assert all(entry.name != "credits" for entry in COMMAND_REGISTRY)
 
 
 # ── CLI _show_credits non-interactive (TUI slash-worker) path ───────────────
