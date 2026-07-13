@@ -183,9 +183,9 @@ The `/opt/data` volume is the single source of truth for all Atlas state. It map
 
 In hosted and published Docker images, `/opt/atlas` is the installed application tree. It is root-owned and read-only to the runtime `atlas` user, so agent turns, gateway sessions, dashboard actions, and normal `docker exec atlas atlas ...` commands cannot edit the core source, bundled `.venv`, `node_modules`, or TUI bundle in place.
 
-All mutable Atlas state belongs under `/opt/data`: config, `.env`, profiles, skills, memories, sessions, logs, dashboard uploads, plugins, and other user-managed files. The image also disables runtime `.pyc` writes and Atlas lazy dependency installs into `/opt/atlas`; optional platform dependencies needed by the published image should be baked into the image or installed through a new image build.
+All mutable Atlas state belongs under `/opt/data`: config, `.env`, profiles, skills, memories, sessions, logs, dashboard uploads, plugins, and other user-managed files. The image also disables runtime `.pyc` writes and Atlas lazy dependency installs into `/opt/atlas`; optional platform dependencies needed by the source-built image should be baked into the image or installed through a new image build.
 
-On hosted/published images, agent self-improvement is scoped to skills, memory, plugins, and config under `/opt/data`. The installed core source under `/opt/atlas` is immutable; core changes are made via PRs to the repo and shipped by updating the image, not by live-editing the running install.
+In container deployments, agent self-improvement is scoped to skills, memory, plugins, and config under `/opt/data`. The installed core source under `/opt/atlas` is immutable; core changes are made via PRs to the repo and shipped by rebuilding the image, not by live-editing the running install.
 
 If an operator needs to repair or inspect files outside `/opt/data`, use a root shell intentionally. The `atlas` shim normally drops `docker exec atlas atlas ...` back to the runtime user; set `ATLAS_DOCKER_EXEC_AS_ROOT=1` for a one-off root invocation when you explicitly need root semantics.
 
@@ -468,7 +468,7 @@ docker run -d \
 
 ## What the Dockerfile does
 
-The official image is based on `debian:13.4` and includes:
+The source-built image is based on `debian:13.4` and includes:
 
 - Python 3.13 with dependencies synced from the lockfile via `uv sync --frozen --no-install-project` for the baked extras (`all`, `messaging`, Anthropic/Bedrock/Azure identity, Hindsight, Matrix), followed by a no-dependency editable install of Atlas itself.
 - Node.js 22 + npm (for browser automation, WhatsApp bridge, TUI/Desktop bundles, and workspace build tooling)
@@ -496,7 +496,7 @@ The container ENTRYPOINT is now `/init` (s6-overlay), not `/usr/bin/tini`. All f
 :::
 
 :::warning Privilege model
-Do not override the image entrypoint unless you keep `/init` (or, equivalently, the legacy `docker/entrypoint.sh` shim that forwards to the stage2 hook) in the command chain. s6-overlay's `/init` runs as root so it can chown the volume on first boot, then drops to the `atlas` user via `s6-setuidgid` for every supervised service AND for the main program. Starting `atlas gateway run` as root inside the official image is refused by default because it can leave root-owned files in `/opt/data` and break later dashboard or gateway starts. Set `ATLAS_ALLOW_ROOT_GATEWAY=1` only when you intentionally accept that risk.
+Do not override the image entrypoint unless you keep `/init` (or, equivalently, the legacy `docker/entrypoint.sh` shim that forwards to the stage2 hook) in the command chain. s6-overlay's `/init` runs as root so it can chown the volume on first boot, then drops to the `atlas` user via `s6-setuidgid` for every supervised service AND for the main program. Starting `atlas gateway run` as root inside the source-built image is refused by default because it can leave root-owned files in `/opt/data` and break later dashboard or gateway starts. Set `ATLAS_ALLOW_ROOT_GATEWAY=1` only when you intentionally accept that risk.
 :::
 
 ### `docker exec` automatically drops to the `atlas` user
@@ -561,7 +561,7 @@ The same syncing happens for SSH and Modal backends — skills and credential fi
 
 ## Installing more tools in the container
 
-The official image ships with a curated set of utilities (see [What the Dockerfile does](#what-the-dockerfile-does)), but not every tool an agent might want is preinstalled. There are five recommended approaches, in increasing order of effort and durability.
+The source-built image includes a curated set of utilities (see [What the Dockerfile does](#what-the-dockerfile-does)), but not every tool an agent might want is preinstalled. There are five recommended approaches, in increasing order of effort and durability.
 
 ### npm or Python tools — use `npx` or `uvx`
 
@@ -637,7 +637,7 @@ From inside the Atlas container, the sidecar is reachable at `http://my-tool:<po
 
 ### Broadly useful tools — open an issue or pull request
 
-If a tool is likely to be useful to most Atlas Agent users, consider contributing it upstream rather than carrying it in a private derived image. Open an issue or pull request on the [atlas-agent repository](https://github.com/theusamaaslam/AtlasAgent) describing the tool and its use case. Tools that get bundled into the official image benefit every user and avoid the maintenance overhead of a downstream fork.
+If a tool is likely to be useful to most Atlas Agent users, consider contributing it upstream rather than carrying it in a private derived image. Open an issue or pull request on the [atlas-agent repository](https://github.com/theusamaaslam/AtlasAgent) describing the tool and its use case. Tools bundled through the repository Dockerfile benefit every source-build user and avoid the maintenance overhead of a downstream fork.
 
 ## Connecting to local inference servers (vLLM, Ollama, etc.)
 

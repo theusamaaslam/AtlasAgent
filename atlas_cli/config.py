@@ -376,7 +376,7 @@ def _install_method_project_root(project_root: Optional[Path] = None) -> Path:
     """Resolve the directory that holds the *running code* (the install tree).
 
     This is the parent of ``atlas_cli/`` — i.e. the git checkout for source
-    installs, ``/opt/atlas`` inside the published image, the venv's
+    installs, ``/opt/atlas`` inside a source-built image, the venv's
     site-packages root for pip installs. It is a property of the running
     interpreter, NOT of ``$ATLAS_HOME``, which is why a code-scoped stamp
     here is immune to two installs sharing one data directory.
@@ -482,7 +482,7 @@ def stamp_install_method(method: str, project_root: Optional[Path] = None) -> No
     the full rationale.
 
     Best-effort: if the install tree is read-only (e.g. the immutable
-    ``/opt/atlas`` in the published image, which instead bakes the stamp at
+    ``/opt/atlas`` in a source-built image, which instead bakes the stamp at
     build time) the write silently no-ops and detection falls back to its
     other signals.
     """
