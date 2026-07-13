@@ -529,7 +529,7 @@ def recommended_update_command_for_method(method: str) -> str:
     if method == "homebrew":
         return "brew upgrade atlas-agent"
     if method == "docker":
-        return "rebuild or pull your Atlas Docker image"
+        return "git pull && docker compose build --pull && docker compose up -d"
     if method == "pip":
         return source_reinstall_command()
     return "atlas update"

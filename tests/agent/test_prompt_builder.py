@@ -649,9 +649,7 @@ class TestBuildNousSubscriptionPrompt:
 
         prompt = build_nous_subscription_prompt({"web_search", "browser_navigate"})
 
-        assert "Browser Use" in prompt
-        assert "Modal execution is optional" in prompt
-        assert "do not ask the user for Firecrawl, FAL, OpenAI TTS, OpenAI Whisper, or Browser-Use API keys" in prompt
+        assert prompt == ""
 
     def test_non_subscriber_prompt_includes_relevant_upgrade_guidance(self, monkeypatch):
         monkeypatch.setattr("tools.tool_backend_helpers.managed_nous_tools_enabled", lambda: True)
@@ -675,8 +673,7 @@ class TestBuildNousSubscriptionPrompt:
 
         prompt = build_nous_subscription_prompt({"image_generate"})
 
-        assert "suggest Atlas Gateway subscription as one option" in prompt
-        assert "Do not mention subscription unless" in prompt
+        assert prompt == ""
 
     def test_feature_flag_off_returns_empty_prompt(self, monkeypatch):
         monkeypatch.setattr("tools.tool_backend_helpers.managed_nous_tools_enabled", lambda: False)

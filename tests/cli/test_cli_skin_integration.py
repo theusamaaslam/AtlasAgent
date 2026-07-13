@@ -34,7 +34,7 @@ class TestCliSkinPromptIntegration:
         cli = _make_cli_stub()
 
         set_active_skin("default")
-        assert cli._get_tui_prompt_fragments() == [("class:prompt", "❯ ")]
+        assert cli._get_tui_prompt_fragments() == [("class:prompt", "> ")]
 
     def test_ares_prompt_fragments_use_skin_symbol(self):
         cli = _make_cli_stub()

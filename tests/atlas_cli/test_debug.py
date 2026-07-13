@@ -1541,7 +1541,7 @@ class TestRunDebugShareNous:
             run_debug_share(self._args())
 
         out = capsys.readouterr().out
-        assert "Nous-INTERNAL" in out
+        assert "private Atlas diagnostics storage" in out
         assert "https://support.example.com/diagnostics/id-1" in out
         assert "2026-06-20T00:00:00Z" in out
         # The blob passed to share_to_nous must be gzip bytes.
@@ -1559,7 +1559,7 @@ class TestRunDebugShareNous:
                 run_debug_share(self._args())
         assert exc.value.code == 1
         err = capsys.readouterr().err
-        assert "Nous upload failed" in err
+        assert "Private diagnostics upload failed" in err
         assert "--local" in err
 
     def test_nous_does_not_touch_pastebin(self, atlas_home):

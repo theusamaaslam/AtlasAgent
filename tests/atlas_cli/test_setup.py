@@ -408,50 +408,7 @@ def test_codex_setup_uses_runtime_access_token_for_live_model_list(tmp_path, mon
     assert reloaded["model"]["provider"] == "openai-codex"
 
 
-def test_modal_setup_can_use_nous_subscription_without_modal_creds(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr("atlas_cli.setup.managed_nous_tools_enabled", lambda: True)
-    monkeypatch.setenv("ATLAS_HOME", str(tmp_path))
-    config = load_config()
-
-    def fake_prompt_choice(question, choices, default=0):
-        if question == "Select terminal backend:":
-            return 2
-        if question == "Select how Modal execution should be billed:":
-            return 0
-        raise AssertionError(f"Unexpected prompt_choice call: {question}")
-
-    def fake_prompt(message, *args, **kwargs):
-        assert "Modal Token" not in message
-        raise AssertionError(f"Unexpected prompt call: {message}")
-
-    monkeypatch.setattr("atlas_cli.setup.prompt_choice", fake_prompt_choice)
-    monkeypatch.setattr("atlas_cli.setup.prompt", fake_prompt)
-    monkeypatch.setattr("atlas_cli.setup._prompt_container_resources", lambda config: None)
-    monkeypatch.setattr(
-        "atlas_cli.setup.get_nous_subscription_features",
-        lambda config: type("Features", (), {"nous_auth_present": True})(),
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "tools.managed_tool_gateway",
-        types.SimpleNamespace(
-            is_managed_tool_gateway_ready=lambda vendor: vendor == "modal",
-            resolve_managed_tool_gateway=lambda vendor: None,
-        ),
-    )
-
-    from atlas_cli.setup import setup_terminal_backend
-
-    setup_terminal_backend(config)
-
-    out = capsys.readouterr().out
-    assert config["terminal"]["backend"] == "modal"
-    assert config["terminal"]["modal_mode"] == "managed"
-    assert "bill to your subscription" in out
-
-
-def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tmp_path, monkeypatch):
-    monkeypatch.setattr("atlas_cli.setup.managed_nous_tools_enabled", lambda: True)
+def test_modal_setup_persists_direct_credentials(tmp_path, monkeypatch):
     monkeypatch.setenv("ATLAS_HOME", str(tmp_path))
     monkeypatch.delenv("MODAL_TOKEN_ID", raising=False)
     monkeypatch.delenv("MODAL_TOKEN_SECRET", raising=False)
@@ -460,8 +417,6 @@ def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tm
     def fake_prompt_choice(question, choices, default=0):
         if question == "Select terminal backend:":
             return 2
-        if question == "Select how Modal execution should be billed:":
-            return 1
         raise AssertionError(f"Unexpected prompt_choice call: {question}")
 
     prompt_values = iter(["token-id", "token-secret", ""])
@@ -469,18 +424,6 @@ def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tm
     monkeypatch.setattr("atlas_cli.setup.prompt_choice", fake_prompt_choice)
     monkeypatch.setattr("atlas_cli.setup.prompt", lambda *args, **kwargs: next(prompt_values))
     monkeypatch.setattr("atlas_cli.setup._prompt_container_resources", lambda config: None)
-    monkeypatch.setattr(
-        "atlas_cli.setup.get_nous_subscription_features",
-        lambda config: type("Features", (), {"nous_auth_present": True})(),
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "tools.managed_tool_gateway",
-        types.SimpleNamespace(
-            is_managed_tool_gateway_ready=lambda vendor: vendor == "modal",
-            resolve_managed_tool_gateway=lambda vendor: None,
-        ),
-    )
     monkeypatch.setitem(sys.modules, "swe_rex", object())
 
     from atlas_cli.setup import setup_terminal_backend

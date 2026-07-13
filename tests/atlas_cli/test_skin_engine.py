@@ -19,7 +19,7 @@ class TestSkinConfig:
         from atlas_cli.skin_engine import load_skin
         skin = load_skin("default")
         assert skin.name == "default"
-        assert skin.tool_prefix == "┊"
+        assert skin.tool_prefix == "|"
         assert "banner_title" in skin.colors
         assert "banner_border" in skin.colors
         assert "agent_name" in skin.branding
@@ -27,7 +27,7 @@ class TestSkinConfig:
     def test_get_color_with_fallback(self):
         from atlas_cli.skin_engine import load_skin
         skin = load_skin("default")
-        assert skin.get_color("banner_title") == "#FFD700"
+        assert skin.get_color("banner_title") == "#66E6B8"
         assert skin.get_color("nonexistent", "#000") == "#000"
 
     def test_get_branding_with_fallback(self):
@@ -36,10 +36,10 @@ class TestSkinConfig:
         assert skin.get_branding("agent_name") == "Atlas Agent"
         assert skin.get_branding("nonexistent", "fallback") == "fallback"
 
-    def test_get_spinner_wings_empty_for_default(self):
+    def test_get_spinner_wings_for_default(self):
         from atlas_cli.skin_engine import load_skin
         skin = load_skin("default")
-        assert skin.get_spinner_wings() == []
+        assert skin.get_spinner_wings() == [("<", ">"), ("[", "]")]
 
 
 class TestBuiltinSkins:
@@ -82,6 +82,7 @@ class TestBuiltinSkins:
         assert skin.tool_prefix == "│"
         assert skin.get_color("banner_title") == "#0F172A"
         assert skin.get_color("status_bar_bg") == "#E5EDF8"
+        assert skin.get_color("status_bar_text") == "#111827"
         assert skin.get_color("voice_status_bg") == "#E5EDF8"
         assert skin.get_color("completion_menu_bg") == "#F8FAFC"
         assert skin.get_color("completion_menu_current_bg") == "#DBEAFE"
@@ -205,7 +206,7 @@ class TestUserSkins:
         assert skin.get_branding("agent_name") == "Custom Agent"
         assert skin.tool_prefix == "▸"
         # Should inherit defaults for unspecified colors
-        assert skin.get_color("banner_border") == "#CD7F32"  # from default
+        assert skin.get_color("banner_border") == "#2E423D"  # from default
 
     def test_load_user_skin_invalid_section_types_fall_back_to_defaults(self, tmp_path, monkeypatch):
         from atlas_cli.skin_engine import load_skin
@@ -232,9 +233,9 @@ class TestUserSkins:
         skin = load_skin("broken")
 
         assert skin.name == "broken"
-        assert skin.get_color("banner_title") == "#FFD700"
+        assert skin.get_color("banner_title") == "#66E6B8"
         assert skin.get_branding("agent_name") == "Atlas Agent"
-        assert skin.spinner.get("waiting_faces", []) == []
+        assert skin.spinner.get("waiting_faces", []) == ["[::]", "[<>]", "[//]", "[##]"]
         assert skin.tool_emojis == {}
         assert skin.tool_prefix == "!"
 
@@ -259,7 +260,7 @@ class TestUserSkins:
 class TestDisplayIntegration:
     def test_get_skin_tool_prefix_default(self):
         from agent.display import get_skin_tool_prefix
-        assert get_skin_tool_prefix() == "┊"
+        assert get_skin_tool_prefix() == "|"
 
     def test_get_skin_tool_prefix_custom(self):
         from atlas_cli.skin_engine import set_active_skin
@@ -278,14 +279,14 @@ class TestDisplayIntegration:
     def test_tool_message_default_prefix(self):
         from agent.display import get_cute_tool_message
         msg = get_cute_tool_message("terminal", {"command": "ls"}, 0.5)
-        assert msg.startswith("┊")
+        assert msg.startswith("|")
 
 
 class TestCliBrandingHelpers:
     def test_active_prompt_symbol_default(self):
         from atlas_cli.skin_engine import get_active_prompt_symbol
 
-        assert get_active_prompt_symbol() == "❯ "
+        assert get_active_prompt_symbol() == "> "
 
     def test_active_prompt_symbol_ares(self):
         from atlas_cli.skin_engine import set_active_skin, get_active_prompt_symbol

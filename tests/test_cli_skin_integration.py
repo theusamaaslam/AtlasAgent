@@ -34,7 +34,7 @@ class TestCliSkinPromptIntegration:
         cli = _make_cli_stub()
 
         set_active_skin("default")
-        assert cli._get_tui_prompt_fragments() == [("class:prompt", "❯ ")]
+        assert cli._get_tui_prompt_fragments() == [("class:prompt", "> ")]
 
     def test_ares_prompt_fragments_use_skin_symbol(self):
         cli = _make_cli_stub()
@@ -92,14 +92,14 @@ class TestCliSkinPromptIntegration:
 
 
 class TestCompactBannerSkinIntegration:
-    def test_default_compact_banner_keeps_legacy_nous_atlas_branding(self):
+    def test_default_compact_banner_uses_atlas_branding(self):
         set_active_skin("default")
 
         with patch("cli.shutil.get_terminal_size", return_value=SimpleNamespace(columns=90)), \
              patch.dict(_build_compact_banner.__globals__, {"format_banner_version_label": lambda: "Atlas Agent v0.1.0 (test)"}):
             banner = _build_compact_banner()
 
-        assert "NOUS ATLAS" in banner
+        assert "Atlas - AI Assistant" in banner
 
     def test_poseidon_compact_banner_uses_skin_branding_instead_of_nous_atlas(self):
         set_active_skin("poseidon")

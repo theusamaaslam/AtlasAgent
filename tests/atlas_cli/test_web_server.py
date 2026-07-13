@@ -1166,7 +1166,8 @@ class TestWebServerEndpoints:
         assert data["name"] == "atlas-update"
         assert data["pid"] is None
         assert data["error"] == "docker_update_unsupported"
-        assert "docker pull nousresearch/atlas-agent:latest" in data["message"]
+        assert "docker compose build --pull" in data["message"]
+        assert "AtlasAgent repository" in data["message"]
         assert spawned is False
 
         status = self.client.get("/api/actions/atlas-update/status")
@@ -1175,7 +1176,7 @@ class TestWebServerEndpoints:
         assert status_data["running"] is False
         assert status_data["exit_code"] == 1
         assert status_data["pid"] is None
-        assert any("docker pull nousresearch/atlas-agent:latest" in line for line in status_data["lines"])
+        assert any("docker compose build --pull" in line for line in status_data["lines"])
 
     def test_update_atlas_returns_managed_runtime_guidance_without_spawning(self, monkeypatch):
         import atlas_cli.web_server as web_server
@@ -1918,9 +1919,7 @@ class TestWebServerEndpoints:
         assert weixin["name"] == "Weixin / WeChat (Personal)"
         assert "personal WeChat" in weixin["description"]
         assert "Official Account" not in f"{weixin['name']} {weixin['description']}"
-        assert weixin["docs_url"] == (
-            "https://atlas-agent.nousresearch.com/docs/user-guide/messaging/weixin/"
-        )
+        assert weixin["docs_url"] == "https://atlas.local/docs/user-guide/messaging/weixin/"
 
         fields = {field["key"]: field for field in weixin["env_vars"]}
         for key in ("WEIXIN_ACCOUNT_ID", "WEIXIN_TOKEN", "WEIXIN_BASE_URL"):
@@ -1936,9 +1935,7 @@ class TestWebServerEndpoints:
         from atlas_cli.web_server import _build_catalog_entry
 
         teams = _build_catalog_entry("teams")
-        assert teams["docs_url"] == (
-            "https://atlas-agent.nousresearch.com/docs/user-guide/messaging/teams"
-        )
+        assert teams["docs_url"] == "https://atlas.local/docs/user-guide/messaging/teams"
 
     def test_google_chat_messaging_metadata_links_setup_guide(self):
         # Google Chat is a platform plugin, so the catalog entry is built from
@@ -1949,9 +1946,7 @@ class TestWebServerEndpoints:
 
         google_chat = _build_catalog_entry("google_chat")
         assert google_chat["name"] == "Google Chat"
-        assert google_chat["docs_url"] == (
-            "https://atlas-agent.nousresearch.com/docs/user-guide/messaging/google_chat"
-        )
+        assert google_chat["docs_url"] == "https://atlas.local/docs/user-guide/messaging/google_chat"
 
     def test_messaging_catalog_covers_gateway_platforms(self):
         """Catalog is derived from the Platform enum, so every built-in shows up."""

@@ -46,7 +46,7 @@ def test_show_status_termux_gateway_section_skips_systemctl(monkeypatch, capsys,
     assert "systemd (user)" not in output
 
 
-def test_show_status_reports_nous_auth_error(monkeypatch, capsys, tmp_path):
+def test_show_status_hides_removed_gateway_auth_error(monkeypatch, capsys, tmp_path):
     from atlas_cli import status as status_mod
     import atlas_cli.auth as auth_mod
     import atlas_cli.gateway as gateway_mod
@@ -78,13 +78,11 @@ def test_show_status_reports_nous_auth_error(monkeypatch, capsys, tmp_path):
     status_mod.show_status(SimpleNamespace(all=False, deep=False))
 
     output = capsys.readouterr().out
-    assert "Atlas Gateway   ✗ not logged in (run: atlas portal)" in output
-    assert "Error:      Refresh session has been revoked" in output
-    assert "Access exp:" in output
-    assert "Key exp:" in output
+    assert "Atlas Gateway" not in output
+    assert "nousresearch.com" not in output
 
 
-def test_show_status_reports_nous_inference_key_without_portal_login(monkeypatch, capsys, tmp_path):
+def test_show_status_hides_removed_gateway_inference_key(monkeypatch, capsys, tmp_path):
     from atlas_cli import status as status_mod
     from atlas_cli.nous_account import NousPortalAccountInfo
     import atlas_cli.auth as auth_mod
@@ -129,9 +127,8 @@ def test_show_status_reports_nous_inference_key_without_portal_login(monkeypatch
     status_mod.show_status(SimpleNamespace(all=False, deep=False))
 
     output = capsys.readouterr().out
-    assert "Atlas Gateway   ✗ not logged in (Nous inference key configured)" in output
-    assert "Inference:  https://inference.example.com/v1" in output
-    assert "Nous inference credentials are configured" in output
+    assert "Atlas Gateway" not in output
+    assert "inference.example.com" not in output
 
 
 # ---------------------------------------------------------------------------
@@ -312,7 +309,7 @@ class TestShowStatusXaiOAuth:
         assert "◆ Auth Providers" in out
 
     def test_import_failure_does_not_break_other_oauth_providers(self, monkeypatch, capsys, tmp_path):
-        """Nous/Codex/MiniMax rows must still appear when xAI import fails."""
+        """Other OAuth rows must still appear when the xAI import fails."""
         import atlas_cli.auth as auth_mod
         status_mod = _base_xai_mocks(monkeypatch, tmp_path)
         monkeypatch.setattr(auth_mod, "get_nous_auth_status",
@@ -322,7 +319,7 @@ class TestShowStatusXaiOAuth:
         status_mod.show_status(SimpleNamespace(all=False, deep=False))
         out = capsys.readouterr().out
 
-        assert "Atlas Gateway" in out
+        assert "Atlas Gateway" not in out
         assert "MiniMax OAuth" in out
 
     def test_status_function_exception_does_not_crash(self, monkeypatch, capsys, tmp_path):

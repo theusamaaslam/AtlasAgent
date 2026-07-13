@@ -38,7 +38,7 @@ _OAUTH_CAPABLE_PROVIDERS = {"anthropic", "openai-codex", "xai-oauth", "qwen-oaut
 
 
 _HOSTED_GATEWAY_REMOVED = (
-    "The hosted Nous gateway has been removed from this Atlas build. "
+    "This hosted gateway provider has been removed from Atlas. "
     "Use `atlas model` to configure a direct provider or a custom endpoint."
 )
 

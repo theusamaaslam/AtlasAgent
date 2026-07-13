@@ -64,8 +64,8 @@ def test_show_status_displays_legacy_string_model_and_custom_endpoint(monkeypatc
     assert "Provider:     Custom endpoint" in out
 
 
-def test_show_status_reports_managed_nous_features(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: True)
+def test_show_status_hides_removed_managed_gateway_features(monkeypatch, capsys, tmp_path):
+    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: True, raising=False)
     from atlas_cli import status as status_mod
 
     _patch_common_status_deps(monkeypatch, status_mod, tmp_path)
@@ -101,13 +101,12 @@ def test_show_status_reports_managed_nous_features(monkeypatch, capsys, tmp_path
     status_mod.show_status(SimpleNamespace(all=False, deep=False))
 
     out = capsys.readouterr().out
-    assert "Atlas Tool Gateway" in out
-    assert "Browser automation" in out
-    assert "active via Atlas Gateway subscription" in out
+    assert "Atlas Tool Gateway" not in out
+    assert "active via Atlas Gateway subscription" not in out
 
 
-def test_show_status_hides_nous_subscription_section_when_feature_flag_is_off(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: False)
+def test_show_status_hides_removed_gateway_when_feature_flag_is_off(monkeypatch, capsys, tmp_path):
+    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: False, raising=False)
     from atlas_cli import status as status_mod
 
     _patch_common_status_deps(monkeypatch, status_mod, tmp_path)
@@ -127,8 +126,8 @@ def test_show_status_hides_nous_subscription_section_when_feature_flag_is_off(mo
     assert "Atlas Tool Gateway" not in out
 
 
-def test_show_status_reports_exhausted_nous_credits(monkeypatch, capsys, tmp_path):
-    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: False)
+def test_show_status_hides_removed_gateway_credit_state(monkeypatch, capsys, tmp_path):
+    monkeypatch.setattr("atlas_cli.status.managed_nous_tools_enabled", lambda: False, raising=False)
     from atlas_cli import status as status_mod
     import atlas_cli.auth as auth_mod
 
@@ -174,10 +173,9 @@ def test_show_status_reports_exhausted_nous_credits(monkeypatch, capsys, tmp_pat
     status_mod.show_status(SimpleNamespace(all=False, deep=False))
 
     out = capsys.readouterr().out
-    assert "Atlas Tool Gateway" in out
-    assert "credits are exhausted" in out
-    assert "https://portal.example.test/billing" in out
-    assert "free-tier Nous account" not in out
+    assert "Atlas Tool Gateway" not in out
+    assert "credits are exhausted" not in out
+    assert "portal.example.test" not in out
 
 
 def test_show_status_reports_empty_lmstudio_listing_as_reachable(monkeypatch, capsys, tmp_path):

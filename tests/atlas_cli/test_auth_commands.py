@@ -178,32 +178,10 @@ def test_auth_add_qwen_oauth_sets_active_provider(tmp_path, monkeypatch):
     assert entry["access_token"] == "qwen-test-token"
 
 
-def test_auth_add_nous_oauth_persists_pool_entry(tmp_path, monkeypatch):
+@pytest.mark.parametrize("label", [None, "legacy-account"])
+def test_auth_add_removed_gateway_is_blocked(tmp_path, monkeypatch, label):
     monkeypatch.setenv("ATLAS_HOME", str(tmp_path / "atlas"))
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
-    token = _jwt_with_email("nous@example.com")
-    monkeypatch.setattr(
-        "atlas_cli.auth._nous_device_code_login",
-        lambda **kwargs: {
-            "portal_base_url": "https://portal.example.com",
-            "inference_base_url": "https://inference.example.com/v1",
-            "client_id": "atlas-cli",
-            "scope": "inference:invoke",
-            "token_type": "Bearer",
-            "access_token": token,
-            "refresh_token": "refresh-token",
-            "obtained_at": "2026-03-23T10:00:00+00:00",
-            "expires_at": "2026-03-23T11:00:00+00:00",
-            "expires_in": 3600,
-            "agent_key": token,
-            "agent_key_id": None,
-            "agent_key_expires_at": "2026-03-23T10:30:00+00:00",
-            "agent_key_expires_in": 1800,
-            "agent_key_reused": False,
-            "agent_key_obtained_at": "2026-03-23T10:00:10+00:00",
-            "tls": {"insecure": False, "ca_bundle": None},
-        },
-    )
 
     from atlas_cli.auth_commands import auth_add_command
 
@@ -211,7 +189,6 @@ def test_auth_add_nous_oauth_persists_pool_entry(tmp_path, monkeypatch):
         provider = "nous"
         auth_type = "oauth"
         api_key = None
-        label = None
         portal_url = None
         inference_url = None
         client_id = None
@@ -221,34 +198,14 @@ def test_auth_add_nous_oauth_persists_pool_entry(tmp_path, monkeypatch):
         insecure = False
         ca_bundle = None
 
-    auth_add_command(_Args())
+    args = _Args()
+    args.label = label
+
+    with pytest.raises(SystemExit, match="hosted gateway provider has been removed"):
+        auth_add_command(args)
 
     payload = json.loads((tmp_path / "atlas" / "auth.json").read_text())
-
-    # Pool has exactly one canonical `device_code` entry — not a duplicate
-    # pair of `manual:device_code` + `device_code` (the latter would be
-    # materialised by _seed_from_singletons on every load_pool).
-    entries = payload["credential_pool"]["nous"]
-    device_code_entries = [
-        item for item in entries if item["source"] == "device_code"
-    ]
-    assert len(device_code_entries) == 1, entries
-    assert not any(item["source"] == "manual:device_code" for item in entries)
-    entry = device_code_entries[0]
-    assert entry["source"] == "device_code"
-    assert entry["agent_key"] == token
-    assert entry["portal_base_url"] == "https://portal.example.com"
-
-    # `atlas auth add nous` must also populate providers.nous so the
-    # 401-recovery path (resolve_nous_runtime_credentials) can refresh an
-    # invoke JWT when the token expires. If this mirror is missing, recovery
-    # raises "Atlas is not logged into Atlas Gateway" and the agent dies.
-    singleton = payload["providers"]["nous"]
-    assert singleton["access_token"] == token
-    assert singleton["refresh_token"] == "refresh-token"
-    assert singleton["agent_key"] == token
-    assert singleton["portal_base_url"] == "https://portal.example.com"
-    assert singleton["inference_base_url"] == "https://inference.example.com/v1"
+    assert payload == {"version": 1, "providers": {}}
 
 
 def test_auth_add_minimax_oauth_starts_login_and_persists_pool_entry(tmp_path, monkeypatch):
@@ -293,67 +250,6 @@ def test_auth_add_minimax_oauth_starts_login_and_persists_pool_entry(tmp_path, m
     assert entry["access_token"] == token
     assert entry["refresh_token"] == "refresh-token"
     assert entry["base_url"] == "https://api.minimax.io/anthropic"
-
-
-def test_auth_add_nous_oauth_honors_custom_label(tmp_path, monkeypatch):
-    """`atlas auth add nous --type oauth --label <name>` must preserve the
-    custom label end-to-end — it was silently dropped in the first cut of the
-    persist_nous_credentials helper because `--label` wasn't threaded through.
-    """
-    monkeypatch.setenv("ATLAS_HOME", str(tmp_path / "atlas"))
-    _write_auth_store(tmp_path, {"version": 1, "providers": {}})
-    token = _jwt_with_email("nous@example.com")
-    monkeypatch.setattr(
-        "atlas_cli.auth._nous_device_code_login",
-        lambda **kwargs: {
-            "portal_base_url": "https://portal.example.com",
-            "inference_base_url": "https://inference.example.com/v1",
-            "client_id": "atlas-cli",
-            "scope": "inference:invoke",
-            "token_type": "Bearer",
-            "access_token": token,
-            "refresh_token": "refresh-token",
-            "obtained_at": "2026-03-23T10:00:00+00:00",
-            "expires_at": "2026-03-23T11:00:00+00:00",
-            "expires_in": 3600,
-            "agent_key": token,
-            "agent_key_id": None,
-            "agent_key_expires_at": "2026-03-23T10:30:00+00:00",
-            "agent_key_expires_in": 1800,
-            "agent_key_reused": False,
-            "agent_key_obtained_at": "2026-03-23T10:00:10+00:00",
-            "tls": {"insecure": False, "ca_bundle": None},
-        },
-    )
-
-    from atlas_cli.auth_commands import auth_add_command
-
-    class _Args:
-        provider = "nous"
-        auth_type = "oauth"
-        api_key = None
-        label = "my-nous"
-        portal_url = None
-        inference_url = None
-        client_id = None
-        scope = None
-        no_browser = False
-        timeout = None
-        insecure = False
-        ca_bundle = None
-
-    auth_add_command(_Args())
-
-    payload = json.loads((tmp_path / "atlas" / "auth.json").read_text())
-
-    # Custom label reaches the pool entry …
-    pool_entry = payload["credential_pool"]["nous"][0]
-    assert pool_entry["source"] == "device_code"
-    assert pool_entry["label"] == "my-nous"
-
-    # … and survives in providers.nous so a subsequent load_pool() re-seeds
-    # it without reverting to the auto-derived fingerprint.
-    assert payload["providers"]["nous"]["label"] == "my-nous"
 
 
 def test_auth_add_codex_oauth_persists_pool_entry(tmp_path, monkeypatch):

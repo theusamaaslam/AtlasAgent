@@ -393,6 +393,7 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
             "session_label": "#1D4ED8",
             "session_border": "#64748B",
             "status_bar_bg": "#E5EDF8",
+            "status_bar_text": "#111827",
             "voice_status_bg": "#E5EDF8",
             "completion_menu_bg": "#F8FAFC",
             "completion_menu_current_bg": "#DBEAFE",

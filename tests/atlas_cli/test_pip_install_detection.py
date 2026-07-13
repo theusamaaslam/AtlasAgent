@@ -31,12 +31,12 @@ def test_managed_install_takes_precedence(tmp_path):
 
 
 def test_recommended_update_command_pip():
-    """Pip installs recommend pip install --upgrade."""
+    """Source installs recommend reinstalling the active checkout."""
     from atlas_cli.config import recommended_update_command_for_method
     cmd = recommended_update_command_for_method("pip")
     assert "pip install" in cmd or "uv pip install" in cmd
-    assert "--upgrade" in cmd
-    assert "atlas-agent" in cmd
+    assert "pip install -e" in cmd
+    assert "AtlasAgent" in cmd
 
 
 def test_stamp_file_takes_precedence(tmp_path):
@@ -169,7 +169,9 @@ def test_container_pip_install_without_stamp_is_pip(tmp_path):
 
 def test_recommended_update_command_docker():
     from atlas_cli.config import recommended_update_command_for_method
-    assert "docker pull" in recommended_update_command_for_method("docker")
+    command = recommended_update_command_for_method("docker")
+    assert "git pull" in command
+    assert "docker compose build --pull" in command
 
 
 def test_banner_warns_on_pip_install(tmp_path):

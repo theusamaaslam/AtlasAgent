@@ -239,4 +239,4 @@ class TestTodoSkinIntegration:
 
     def test_default_skin_prefix(self):
         msg = get_cute_tool_message("todo", {}, 0.5)
-        assert msg.startswith("┊")
+        assert msg.startswith("|")
